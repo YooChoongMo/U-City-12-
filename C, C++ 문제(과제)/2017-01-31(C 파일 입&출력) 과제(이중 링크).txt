@@ -1,0 +1,197 @@
+#pragma once              //전처리가 중복되도 한번만 인식함 (편리)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int count = 0;
+
+typedef struct list
+{
+	char buf[255];
+	struct list *head;
+	struct list *link;
+	
+}LIST;
+
+void Insert(LIST **pstart, LIST **plast);
+void Modify(LIST **pstart);
+void Delete(LIST **pstart, LIST **plast);
+void Init(LIST **start);
+void Save(LIST **start, FILE **fp);
+
+int main()
+{
+	int num;
+
+	LIST *start = NULL;
+	LIST *last = NULL;
+	LIST *tp = NULL;
+
+
+	FILE *fp = NULL;
+	fp = fopen("../files/homework.txt", "w");
+
+	if (fp == NULL)
+		printf("빈 파일입니다.\n");
+	
+	while (1)
+	{
+		printf("1.맨 뒤 추가   2.수정   3.삭제   4.종료  (실행할 번호를 입력하세요): ");
+		scanf("%d", &num);
+
+		switch (num)
+		{
+		case 1: Insert(&start, &last);
+			break;
+
+		case 2: Modify(&start);
+			break;
+
+		case 3: Delete(&start, &last);
+			break;
+
+		case 4:	Save(&start, &fp);
+				Init(&start);
+				
+				return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+void Insert(LIST **pstart, LIST **pback)
+{
+	LIST *newNode;
+	
+	int i = 0;
+
+	newNode = (LIST*)malloc(sizeof(LIST));           //순방향 저장
+	
+
+	printf("이름을 입력하세요 : ");
+	scanf("%s", newNode->buf);
+	fflush(stdin);
+
+	if (*pstart == NULL)
+	{
+		(*pstart) = newNode;
+		newNode->link = NULL;
+		count++;
+	}
+	else
+	{
+		newNode->head = (*pback);
+		(*pback)->link = newNode;
+		count++;
+	}
+		
+	(*pback) = newNode;
+	(*pback)->link = NULL;
+
+	printf("현재 카운트 %d\n", count);
+}
+
+
+void Modify(LIST **pstart)
+{
+	int n = 0;
+	int i;
+	LIST *temp=NULL;
+
+	temp = (*pstart);
+
+	printf("몇 번째 줄의 내용을 수정하겠습니까? ");
+	scanf("%d", &n);
+
+	for (i = 0; i < (n-1); i++)    //n번째 줄 찾을 시 (n-1)번 링크 이동(수정할 노드로 이동)
+		temp = (*temp).link;
+	
+	printf("수정할 내용을 입력하세요: ");
+	scanf("%s", (*temp).buf);
+	fflush(stdin);
+}
+
+void Delete(LIST **pstart, LIST **plast)
+{
+	int n = 0;
+	int i;
+	LIST *tmp = NULL;
+	//LIST *front_tmp = NULL;         //삭제할 노드의 이전 노드 위치 저장
+
+	tmp = (*pstart);
+	//front_tmp = (*pstart);
+
+	printf("몇 번째 줄의 내용을 삭제하겠습니까? ");
+	scanf("%d", &n);
+	
+	if((*pstart)->link == NULL)    //노드가 한개 일 때
+	{
+		free(*pstart);
+		*pstart = NULL;
+		*plast = NULL;
+		count--;
+	}
+	
+	else if (n == count)                 //맨 마지막 노드 삭제
+	{
+		for (i = 0; i < (n - 1); i++)    //n번째 줄로 가기위해 (n-1)번 링크 이동(삭제할 노드 검색)
+		{
+			tmp = (*tmp).link;
+		}
+		tmp->head->link = NULL;
+		free(tmp);
+		count--;
+	}
+
+	else                           //노드가 두개 이상
+	{
+		
+		for (i = 0; i < (n - 1); i++)    //n번째 줄로 가기위해 (n-1)번 링크 이동(삭제할 노드 검색)
+		{
+			tmp = (*tmp).link;
+		}
+		
+		tmp->head->link = tmp->link->head;
+		tmp->link->head = tmp->head;
+		
+		free(tmp);
+
+		count--;
+	}
+	printf("현재 카운트 %d\n", count);
+}
+
+void Init(LIST **start)
+{
+	LIST *tp;
+
+	while (*start != NULL) 
+	{
+		printf("현재 카운트 %d\n", count);
+		tp = (*start)->link;
+		free(*start);
+		*start = tp;
+		printf("동적메모리 해제 완료\n");
+		count--;
+	}
+}
+
+void Save(LIST **start, FILE **fp)
+{
+	int i;
+	LIST *tp;
+
+	tp = *start;
+
+	if (*start != NULL)
+	{
+		printf("들어오냐?");
+		for (i = 0; i < count; i++)      //노드 개수 만큼
+		{
+			fputs(tp->buf, *fp);
+			fputs("\n", *fp);
+			tp = tp->link;
+		}
+	}
+}

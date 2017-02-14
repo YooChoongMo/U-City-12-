@@ -1,0 +1,173 @@
+// stack.h                     p.706 & 5번문제
+#ifndef STACK_H_
+#define STACK_H_
+#define MAX 10
+
+typedef struct
+{
+	char fullname[35];
+	double payment;
+
+}customer;
+
+typedef customer Item;
+
+class Stack
+{
+private:
+	Item items[MAX];
+	int top;
+	double total;
+
+public:
+	Stack();
+	bool isempty() const;
+	bool isfull() const;
+	// push()는 스택이 가득 차 있으면 false를, 아니면 true를 리턴한다.
+	bool push(const Item & item);
+	// push()는 스택이 비어 있으면 false를, 아니면 true를 리턴한다.
+	bool pop(Item & item);
+	void check_Display();          //스택에 남아있는 목록을 보여준다.
+
+};
+#endif
+
+
+//////////////////////stack.cpp
+
+#include <iostream>
+#include <cstring>
+#include "stack.h"
+using namespace std;
+
+
+Stack::Stack()
+{
+	top = 0;
+	total = 0.0;
+}
+
+bool Stack::isempty() const
+{
+	return top == 0;
+}
+
+bool Stack::isfull() const
+{
+	return top == MAX;
+}
+
+bool Stack::push(const Item & item)
+{
+	if(top < MAX)
+	{
+		items[top++] = item; 
+	
+		return true;
+	}
+	else
+		return false;
+}
+
+bool Stack::pop(Item & item)
+{
+	if(top>0)
+	{
+		item = items[--top];
+
+		total += item.payment;
+		
+		cout << "#" << item.fullname << "주문서를 처리했습니다. \n";
+		cout << "지불한 금액: " << item.payment << endl;
+		cout << "총 수입: " << total << endl;
+
+		return true;
+	}
+	else
+		return false;
+}
+
+
+void Stack::check_Display()
+{
+	int check =0;
+	check = top;
+
+	if(top > 0)
+	{
+		cout << "아직 남아있는 주문서 내역: ";
+		while(check > 0)
+		{
+			cout << items[check-1].fullname << " "; 
+			check--;	
+		}
+	}
+	else
+		cout << "남아있는 주문서 내역이 없습니다. \n";
+}
+
+///////////////////////////////////  stacker.cpp
+
+#include "stack.h"
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+int main()
+{	
+	Stack st;
+	char ch;
+	customer po;
+
+	cout << "주문서를 추가하려면 A, 주문서를 처리하려면 P, \n"
+		<< "종료하려면 Q를 입력하십시오. \n";
+
+	while(cin>> ch && toupper(ch) != 'Q')
+	{
+		while(cin.get() != '\n')
+			continue;
+		if(!isalpha(ch))
+		{
+			cout << '\a';
+			continue;
+		}
+
+		switch(ch){
+			case 'A':
+			case 'a':	cout << "추가할 주문서의 번호를 입력하십시오 : ";
+						cin  >> po.fullname;
+						cout << "지불할 금액을 입력하십시오 : ";
+						cin  >> po.payment;
+
+						if(st.isfull())
+							cout << "스택이 가득 찼습니다. \n";
+						else
+							st.push(po);
+						break;
+											
+			case 'P':
+			case 'p':	if(st.isempty())		
+							cout << "스택이 비어있습니다. \n" ;
+						else{
+							st.pop(po);
+							//cout << "#" << po.fullname << "주문서를 처리했습니다. \n";
+							}
+						
+						break;
+		}
+		cout << endl;
+		st.check_Display();
+
+		cout << "\n\n";
+		cout << "주문서를 추가하려면 A, 주문서를 처리하려면 P, \n"
+		<< "종료하려면 Q를 입력하십시오. \n";
+	}
+
+
+	cout << "프로그램을 종료합니다. \n";
+	return 0;
+}

@@ -1,0 +1,514 @@
+////////////////////////////////////// 멤버변수를 이용하여 *pA값 초기화 시키기! (변수 추가 X) => 동적할당!
+
+#include <iostream>
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class AAA
+{
+	int *pA;
+
+public:
+
+	AAA()
+	{
+		pA = new int;
+		*pA = 8;
+	}
+
+	void ShowData()
+	{
+		cout<< *pA << endl;
+	}
+};
+int main()
+{
+	AAA aaa;
+	aaa.ShowData();
+
+	return 0;
+}
+
+////////////////////////////////////////    포인터 멤버변수 & 생성자 함수에서 배열 복사 & 메인에서 생성자함수(전달인자)
+
+#include <iostream>
+#include <cstring>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class person
+{
+	char *name;
+	char *phone;
+	int age;
+	
+public:
+
+	person(char *p_name, char *p_phone, int p_age);
+	person();
+	person(int n);
+	void ShowData();
+};
+
+person::person()
+{};
+
+person::person(int n)
+{};
+
+
+person::person(char *p_name, char *p_phone, int p_age)
+{
+	name = new char[strlen(p_name)+1];
+	/*
+	int k=0;
+	while(p_name[k] !='\0')
+	{
+		name[k] = p_name[k];
+		k++;
+	}
+	name[k] = '\0';
+	*/
+	strcpy(name, p_name);
+
+	phone = new char[strlen(p_phone)+1];
+	/*
+	int i=0;
+	while(p_phone[i] !='\0')
+	{
+		phone[i] = p_phone[i];
+		i++;
+	}
+	phone[i] = '\0';
+	*/	
+	strcpy(phone, p_phone);
+
+	age = p_age;
+}
+
+void person::ShowData()
+{
+	cout << "name : "<< name << endl;
+	cout << "phone : "<< phone << endl;
+	cout << "age : "<< age << endl;
+}
+
+int main()
+{
+	person p("유충모", "010-8838-9132", 26);
+	//person p();
+	//person p(1);
+
+	p.ShowData();
+	
+	return 0;
+}
+
+///////////////////////////////////////////////////////  p.705  & 문제 2번   (배열 사용)
+
+#include <iostream>
+#include <cstring>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+#define LIMIT 25
+
+using namespace std;
+
+class person
+{
+	char lname[LIMIT];      //성씨
+	char fname[LIMIT];		//이름
+		
+public:
+
+	person() {lname[0] = ' '; fname[0] = '\0'; }
+	person(const char *pl, const char *pf = "HeyYou");
+
+	void Show();			// 이름 성씨 형식
+	void FormalShow();		// 성씨, 이름 형식
+};
+
+person::person(const char *pl, const char *pf)
+{
+	strcpy(lname, pl);
+	strcpy(fname, pf);
+}
+
+void person::Show()
+{
+	cout << "이름 성씨 : " << fname << " " << lname << endl;
+}
+
+void person::FormalShow()
+{
+	cout << "성씨, 이름 : " << lname << ", " << fname << endl;
+}
+
+
+int main()
+{
+	person one;
+	person two("Smythecraft");
+	person three("Dimwiddy", "Sam");
+
+	one.Show();
+	one.FormalShow();
+	cout << endl;
+
+	two.Show();
+	two.FormalShow();
+	cout << endl;
+	
+	three.Show();
+	three.FormalShow();
+	cout << endl;
+	
+	return 0;
+}
+
+//////////////////////////////////////////////////////   배열을 포인터 변수로 사용
+
+#include <iostream>
+#include <cstring>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+#define LIMIT 25
+
+using namespace std;
+
+class person
+{
+	char *lname;      //성씨
+	char *fname;		//이름
+		
+public:
+
+	person() {lname = ""; fname = ""; }
+	person(const char *pl, const char *pf = "HeyYou");
+
+	void Show();			// 이름 성씨 형식
+	void FormalShow();		// 성씨, 이름 형식
+};
+
+person::person(const char *pl, const char *pf)
+{
+	lname = new char[LIMIT];
+	strcpy(lname, pl);
+
+	fname = new char[LIMIT];
+	strcpy(fname, pf);
+}
+
+void person::Show()
+{
+	cout << "이름 성씨 : " << fname << " " << lname << endl;
+}
+
+void person::FormalShow()
+{
+	cout << "성씨, 이름 : " << lname << ", " << fname << endl;
+}
+
+
+int main()
+{
+	person one;
+	person two("Smythecraft");
+	person three("Dimwiddy", "Sam");
+
+	one.Show();
+	one.FormalShow();
+	cout << endl;
+
+	two.Show();
+	two.FormalShow();
+	cout << endl;
+	
+	three.Show();
+	three.FormalShow();
+	cout << endl;
+	
+	return 0;
+}
+
+
+
+
+
+
+
+////////////////////////////////////////////////////    p. 706  & 문제 6번
+
+#include <iostream>
+#include <cstring>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class Move
+{
+	double x;
+	double y;
+			
+public:
+
+	Move(double a = 0, double b = 0);
+
+	void Showmove();
+	void Add(double a, double b);
+	void reset(double a = 0, double b = 0);		// 성씨, 이름 형식
+	int sum();
+};
+
+Move::Move(double a, double b)
+{
+	x = a;
+	y = b;
+}
+
+void Move::Showmove()
+{
+	cout << "현재의 x, y값 : "<< x << ", " << y << endl;
+	cout << endl;
+}
+
+void Move::Add(double a, double b)
+{
+	x += a;
+	y += b;
+}
+
+void Move::reset(double a, double b)
+{
+	x = a;
+	y = b;
+}
+
+int Move::sum()
+{
+	int sum = 0;
+
+	sum = x + y;
+
+	return sum;
+}
+
+
+
+int main()
+{
+	int sum = 0;
+
+	Move m(5, 8);
+	m.Showmove();
+
+	m.Add(10, 10);
+	m.Showmove();
+
+	sum = m.sum();
+	cout << "현재의 x, y값의 합: " << sum << endl;
+	cout << endl;
+
+	m.reset();
+	m.Showmove();
+
+	return 0;
+}
+
+////////////////////////////////////////////////////       p.630 & 4번 문제
+// sales.h
+
+#define QUARTERS 4
+
+class SALES
+{
+	double sales[QUARTERS];
+	double average;
+	double max;
+	double min;
+
+public:
+
+	SALES(const double *ar, int n = QUARTERS);
+
+	void setSales();
+	void showSales();
+};
+
+/////////////////////////////////////////////////////
+//sales.cpp
+
+#include "sales.h"
+#include <iostream>
+#define QUARTERS 4
+
+using namespace std;
+
+SALES::SALES(const double *ar, int n)
+{
+	if(QUARTERS > n)
+	{
+		int i=0;
+		int k=0;
+		double xtemp=0.0;
+		double ntemp=0.0;
+		double total=0.0;
+
+		while(i<n)                         // 복사 & 평균 구하기
+		{
+			sales[i] = ar[i];
+			total += sales[i];
+			average = total / (i+1);
+			i++;
+		}	
+			
+		xtemp = sales[k];  //초기값 설정
+		ntemp = sales[k];  //초기값 설정
+		
+		while( k < (n-1) )                  // max , min 값 찾기
+		{	
+			
+			if(xtemp < sales[k+1])
+				xtemp = sales[k+1];
+			
+			if(ntemp > sales[k+1])
+				ntemp = sales[k+1];
+			
+			max = xtemp;
+			min = ntemp;
+
+			k++;
+		}
+			
+		while(i < QUARTERS)
+		{
+			sales[i] = 0;
+			i++;
+		}
+	}
+	
+	else if(QUARTERS <= n)
+	{	
+		int i=0;
+		int k=0;
+		double xtemp=0.0;
+		double ntemp=0.0;
+		double total=0.0;
+
+		while(i<QUARTERS)                         // 복사 & 평균 구하기
+		{
+			sales[i] = ar[i];
+			total += sales[i];
+			average = total / (i+1);
+			i++;
+		}	
+			
+		xtemp = sales[k];  //초기값 설정
+		ntemp = sales[k];  //초기값 설정
+		
+		while( k < (QUARTERS-1) )                  // max , min 값 찾기
+		{	
+			
+			if(xtemp < sales[k+1])
+				xtemp = sales[k+1];
+			
+			if(ntemp > sales[k+1])
+				ntemp = sales[k+1];
+			
+			max = xtemp;
+			min = ntemp;
+
+			k++;
+		}
+	}
+}
+
+void SALES::setSales(void)
+{
+	int m;
+	for(m=0; m<QUARTERS; m++)
+	{	
+		cout << "sales 배열의 값을 입력해주세요 : ";
+		cin >> sales[m];
+	}
+		int i=0;
+		int k=0;
+		double xtemp=0.0;
+		double ntemp=0.0;
+		double total=0.0;
+
+		while(i<QUARTERS)                         // 복사 & 평균 구하기
+		{
+			total += sales[i];
+			average = total / (i+1);
+			i++;
+		}	
+			
+		xtemp = sales[k];  //초기값 설정
+		ntemp = sales[k];  //초기값 설정
+		
+		while( k < (QUARTERS-1) )                  // max , min 값 찾기
+		{	
+			
+			if(xtemp < sales[k+1])
+				xtemp = sales[k+1];
+			
+			if(ntemp > sales[k+1])
+				ntemp = sales[k+1];
+			
+			max = xtemp;
+			min = ntemp;
+
+			k++;
+		}
+}
+
+
+void SALES::showSales(void)
+{	
+	cout << "sales 배열의 값 : ";
+
+	int k;
+	for(k=0; k<QUARTERS; k++)
+	{
+		cout << sales[k] << " ";
+	}
+	
+	cout << endl;
+
+	cout << "max 값 : " << max << endl;
+	
+	cout << "min 값 : " << min << endl;
+
+	cout << "average 값 : " << average << endl;
+}
+
+//////////////////////////////////////////////////////
+//usesales.cpp
+
+#include "sales.h"
+#include <iostream>
+#define QUARTERS 4
+
+using namespace std;
+
+int main()
+{
+	double arr[4] = {15000, 30000, 20000, 10000};
+	
+	SALES s(arr,4);
+	s.showSales();
+
+	cout << endl;
+	
+	s.setSales();
+	s.showSales();
+
+	return 0;
+}

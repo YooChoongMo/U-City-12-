@@ -1,0 +1,135 @@
+///////////////////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <stdlib.h>
+
+int* insert(void);
+void Display(int* pnew);
+
+int main()
+{
+	int *ptemp;
+		
+	ptemp = insert();
+	Display(ptemp);
+	free(ptemp);
+
+	return 0;
+}
+
+
+int* insert(void)                                    //insert내에서 동적할당을 받아서 반환값을 
+													 //동적할당 주소로 한다.
+{
+	int *pnew = (int*)malloc(sizeof(int)*5);
+	int i;
+
+	for(i=0; i<5; i++)
+	{
+		printf("정수 5개를 입력하세요 : ");
+		scanf("%d", &pnew[i]);
+	}
+	return pnew;
+}
+
+void Display(int* pnew)
+{
+	int i;
+
+	for(i=0; i<5; i++)
+		printf("%d ", pnew[i]);
+
+		printf("\n");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <stdlib.h>
+
+char* insert_name();
+void display_name(char **ptemp, int count);
+
+int main()
+{
+	int count = 0;
+	int i;
+	
+	char *ptemp[5];
+
+	while(1)
+	{
+		int n;
+		int stop = 0;
+
+		printf("1.이름입력 2.이름출력 3.프로그램 종료 (선택할 번호를 입력하세요) : ");
+		scanf("%d", &n);
+		fflush(stdin);
+			
+		switch(n)
+		{
+			case 1: ptemp[count] = insert_name();
+					count++;
+					break;
+
+			case 2: display_name(ptemp, count);
+					break;
+
+			case 3: for(i=0; i<count; i++)
+					free(ptemp[i]);
+					
+					return 0;
+		
+		}
+		
+		
+	}
+	
+
+	
+
+
+	//return 0;
+}
+
+char* insert_name()
+{	
+	int len=0;
+	char Buff[30];
+	int i;
+	char *pnew;               //동적할당 포인터 변수
+	
+	printf("이름을 입력하세요 : ");
+	scanf("%s", Buff);
+	fflush(stdin);
+
+	while( Buff[len] != '\0')
+		len++;
+
+	pnew = (char*)malloc(sizeof(char)*(len+1)); // len+1은 NULL자리까지 만들어줘야하므로
+	
+	for(i=0; i<len; i++)
+		pnew[i] = Buff[i];
+
+	pnew[len] = '\0';
+		
+		
+	return pnew;
+}
+
+
+void display_name(char **ptemp, int count)
+{
+	int i;
+
+	if( (count == 0) || (ptemp[0] == NULL) )
+		printf("출력할 이름이 없습니다. \n");
+
+	
+			
+	else
+	{
+		printf("입력받은 이름 : ");
+		for(i=0; i<count; i++)
+			printf("%s ", ptemp[i]);
+		printf("\n");
+	}
+}

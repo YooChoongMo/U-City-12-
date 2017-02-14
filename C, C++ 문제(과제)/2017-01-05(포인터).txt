@@ -1,0 +1,163 @@
+/////////////////////////////////////////////////// 10개 정수 입력 받아 홀수는 앞에서부터 짝수는 뒤에서부터 채우기
+
+#include <stdio.h>
+
+void even_odd_insert(int *pa, int size);
+
+
+int main()
+{
+	int i;
+	int arr[10];
+
+	even_odd_insert(arr, sizeof(arr)/sizeof(int));
+
+	
+	for(i=0; i < sizeof(arr)/sizeof(int); i++)
+		printf("%d\n", arr[i]);
+
+	//printf("배열크기 %d", sizeof(arr)/sizeof(int));
+
+	return 0;
+}
+
+
+void even_odd_insert(int *pa, int size)
+{
+	int i;
+	int tmp;
+	int srt = 0;
+	int back = size - 1;       //마지막 인덱스 번호
+
+	for(i=0; i < size; i++)
+	{
+		printf("정수를 입력하세요 : ");
+		scanf("%d", &tmp);
+
+			if(tmp%2 != 0)   //홀수
+			{
+				pa[srt] = tmp;
+				srt++;
+			}
+
+			else if(tmp%2 == 0)   //짝수
+			{
+				pa[back] = tmp;
+				back--;
+			}
+	}
+}
+////////////////////////////////////////////////////////// 포인터 배열에서 문자열 중 'L' 개수 카운팅
+
+
+#include <stdio.h>
+
+
+void Display(char **psArr, int size);
+//int Alpha_counting(char **psArr, int size);
+
+int main()
+{	
+
+	char *psArr[4] = { "Good student", "hello world", "Bye!", "apple" };
+	//char new_Arr[30] = {*(psArr[0])};
+
+	int size;
+	int counting;
+
+	size = sizeof(psArr)/sizeof(int);
+	
+		
+	Display(psArr, size);
+	counting = Alpha_counting(psArr, size);
+
+	printf("카운팅 %d", counting);
+
+	 
+	//printf("%c \n ", *(*psArr+5));
+	
+
+
+
+	return 0;
+}
+
+void Display(char **psArr, int size)
+{
+	int i;
+
+	for(i=0; i<size; i++ )
+		printf("문장 : %s \n" , psArr[i]);
+}
+
+int Alpha_counting(char **ppa, int size)
+{
+	int i;
+	int k;
+	int count=0;
+	//char tmp;
+
+	for(i=0; i < size ; i++)  
+	{
+		for(k=0; *(*(ppa+i)+k)!='\0'; k++ )        // == ppa[i][k]
+		{
+			if(*(*(ppa+i)+k) =='l')
+				count++;
+		}
+	}
+
+	return count;
+}
+
+/////////////////////////////////////////////////////// 메뉴를 포인터 배열 -> 함수 사용해서 출력
+#include <stdio.h>
+
+void Display(char **pArr);
+
+int main()
+{
+	char ch;
+	char *pch[5] = {"다음 선택 사항 중에서 하나를 선택하십시오. (끝내려면 q)",
+			     "c) camera", "p) pianist", "t) tree", "g) game" };
+
+
+	Display(pch);
+
+	scanf("%c", &ch);
+	fflush(stdin);
+
+	while(ch != 'q')
+	{
+
+		switch(ch)
+		{
+		case 'c' : printf("난 camera를 구매했습니다. \n");
+					break;
+
+		case 'p' : printf("난 pianist입니다. \n");
+					break;
+
+		case 't' : printf("단풍나무는 잎이 별처럼 생겼습니다. \n");
+					break;
+
+		case 'g' : printf("난 game을 좋아합니다. \n");
+					break;
+
+		default : printf("해당 문자가 없습니다.\n다시 선택하십시오(끝내려면 q) : ");
+		
+		}
+
+		scanf("%c", &ch);
+		fflush(stdin);
+	}
+
+	return 0;
+}
+
+void Display(char **pArr)
+{
+	printf("%s \n", pArr[0]);
+	printf("%s     %s\n", pArr[1], pArr[2]);
+	printf("%s       %s\n", pArr[3], pArr[4]);
+
+}

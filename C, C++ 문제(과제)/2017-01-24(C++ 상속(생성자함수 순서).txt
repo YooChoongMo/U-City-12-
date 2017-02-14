@@ -1,0 +1,119 @@
+//////////////////////////////////////////// 파생 생성자 함수 BBB() {} 괄호와 중괄호 사이 부모 생성자함수의 매개변수x 
+					  // => 어떤 부모의 생성자 함수가 실행되는지 확인
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+class AAA	//Base 클래스
+{
+public:
+	AAA() {
+	cout<<" AAA() call! " <<endl;
+	}
+	
+	AAA(int i) {
+	cout<<" AAA(int i) call! " <<endl;
+	}
+};
+
+class BBB : public AAA //Derived 클래스
+{
+public:
+	BBB() {
+	cout<<" BBB() call! " <<endl;
+	}
+
+	BBB(int j) {
+		cout << " BBB(int j)call! " << endl;
+	}
+};
+
+
+int main()
+{
+	cout << "객체 1생성" << endl;
+	BBB bbb1;
+
+	cout << "객체 2생성" << endl;
+	BBB bbb2(10);
+
+	return 0;
+}
+
+////////////////////////////////////////////////   생성자 함수 콜 순서(부모 -> 자식) 중요*
+////////////////////////////////////////////////   소멸자 함수 콜 순서(자식 -> 부모) 중요*
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+class AAA	//Base 클래스
+{
+public:
+	AAA() {
+	cout<<" AAA() call! " <<endl;
+	}
+	
+	~AAA() {
+	cout<<" ~AAA call! " <<endl;
+	}
+};
+
+class BBB : public AAA //Derived 클래스
+{
+public:
+	BBB() {
+	cout<<" BBB() call! " <<endl;
+	}
+
+	~BBB() {
+		cout << " ~BBB()call! " << endl;
+	}
+};
+
+int main()
+{
+	cout << "객체 1생성" << endl;
+	BBB bbb1;
+
+	return 0;
+}
+
+///////////////////////////////////////////////// 가상 함수 사용 예제
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class AAA		
+{
+public:
+   virtual void fct(){
+   cout<<"AAA"<<endl;
+   }
+};
+
+class BBB : public AAA
+{
+public:
+
+	 void fct(){
+		 cout<<"BBB"<<endl;
+	}
+};
+
+int main()
+{
+	
+	AAA *p1 = new BBB;
+	
+	p1->fct();
+	
+	
+	return 0;
+}
+

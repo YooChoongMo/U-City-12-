@@ -1,0 +1,140 @@
+////////////////////////////////////////////////////////////////////////////////////////배열
+#include <stdio.h>
+
+
+int main()
+{
+	int arr[5];
+	int i; 
+	int sum=0;
+	double avr=0;
+
+	printf("5개 정수를 입력하세요 : ");
+	//scanf("%d %d %d %d %d", &arr[0],&arr[1],&arr[2],&arr[3],&arr[4]);
+	scanf("%d %d %d %d %d", arr, arr+1, arr+2, arr+3, arr+4);		// 배열명으로 접근
+
+	for(i=0; i<5; i++)
+	{
+		sum += arr[i];
+		avr = (double)sum / 5;
+	}
+
+	printf("총 합은 = %d, 평균은 = %.2f ", sum, avr);
+	
+
+	return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////이름 성 받아서 합치기
+#include <stdio.h>
+
+int main()
+{
+	char firstname[20];
+	char lastname[20];
+	char fullname[50];
+	
+	int i = 0;
+	int index = 0;
+
+	printf("firstname을 영문으로 입력하세요 : ");	
+	scanf("%s", firstname );
+	 
+	printf("lastname을 영문으로 입력하세요 : ");
+	scanf("%s", lastname );
+
+	while(firstname[i] != '\0')
+	{
+		fullname[i] = firstname[i];
+		i++;
+	}
+	
+	fullname[i] = ',';
+	i++;
+
+	fullname[i] = ' ';
+	i++;
+
+	while(lastname[index] != '\0')
+	{
+		fullname[i] = lastname[index];
+		i++;
+		index++;
+			
+	}
+	fullname[i] =  '\0';
+	
+	printf("다 합치면 : %s", fullname);
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////////////// 다른배열에 역순으로 복사 & 회문인지 판단!
+
+#include <stdio.h>
+
+int main()
+{
+	char std[30];
+	char dest[30];
+	
+	
+	int index = 0;
+	int count = 0;
+	int num;
+	int i;
+	int check=0;
+
+	printf("문자를 입력하세요 : ");
+	scanf("%s", std);
+
+	while(std[count] != '\0')
+	{
+		count++;
+	}
+	//happy 일때 현재 count = 5 ,, 글자의 마지막 count는 count-1임.
+	//printf("%d", count);
+
+	num = count - 1;   //num = 4
+
+	if((count % 2) != 0) //글씨 홀수일때
+	{
+		for(index=0; index < count; index++)
+		{
+			 dest[num] = std[index];
+			 num--;
+		}
+		
+		dest[count] = '\0';
+	}
+
+	else if((count % 2) == 0) //글씨 짝수일때
+	{
+		for(index=0; index < count; index++)
+		{
+			dest[num] = std[index] ;
+			num--;
+		}
+
+		dest[count] = '\0';
+
+	}
+
+	printf("역순 : %s \n", dest);
+
+	for(i=0; std[i]!='\0'; i++)
+	{
+		if(std[i] == dest[i])
+			check++;
+	}
+
+
+	if(check==i)
+		printf("회문 OK! \n");
+	
+	else if(check!=i)
+		printf("회문 No! \n");
+
+
+	return 0;
+}

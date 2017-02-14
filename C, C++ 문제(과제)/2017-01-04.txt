@@ -1,0 +1,176 @@
+////////////////////////////////////////////////////////// 주소 참조하여 변수 값 바꾸기
+#include <stdio.h>
+
+void reverse(int , int);
+
+int main()
+{
+	int temp = 8;
+	int *ptemp = &temp;
+
+	int val = 5;
+	int *pval = &val;
+
+	printf("temp : %d, val : %d \n", temp, val);
+
+	reverse(ptemp, pval);
+
+	printf("temp : %d, val : %d \n", temp, val);
+
+	return 0;
+}
+
+void reverse(int *num1, int *num2)    //주소를 저장한 포인터 변수를 받음  Call_by_address
+{	
+	int temp;
+	
+	temp = *num1;            //*num1은 num1에 저장된 주소값을 가르킴
+	*num1 = *num2;
+	*num2 = temp;
+}
+
+//////////////////////////////////////////////////////////
+
+#include <stdio.h>
+
+//void reverse(int , int);
+
+int main()
+{
+	
+	int temp = 0x12345678;
+	int *ptemp = &temp;
+	
+	
+	char* ptemp2 = (char*)&temp;
+	
+
+	printf("0x%x \n", ptemp);
+	printf("0x%x \n", *ptemp);
+
+	printf("0x%x \n", *ptemp2);
+	
+	//printf("마지막 주소  0x%x \n", (ptemp2));
+
+	if(*ptemp2 == 0x78)
+		printf("Little endian \n");
+
+	else
+		printf("Big endian \n");
+
+
+
+	printf("0x%x \n", *(ptemp2+3));
+
+
+
+	return 0;
+}
+
+//////////////////////////////////////////////////// 포인터 배열 함수 사용하여 복사하기
+
+#include <stdio.h>
+
+void mystringcpy(char *n1, char *n2);
+
+int main()
+{
+	
+	char src[50];
+	char dest[50];
+
+	scanf("%s", src);
+	
+	mystringcpy(src, dest);
+
+	printf("src : %s \n", src);
+	printf("dest : %s \n", dest);
+
+	return 0;
+}
+
+
+
+void mystringcpy(char *n1, char *n2)
+{
+	int i;
+
+	for(i=0; n1[i] != '\0'; i++)
+		n2[i] = n1[i];
+	
+	n2[i] = '\0';
+
+
+/*	for(i=0; *(n1+i) != '\0'; i++)
+		*(n2+i) = *(n1+i);
+	
+	*(n2+i) = '\0';
+*/
+/*
+	while(*n1 != '\0')                          // 최고!
+           *n2++ = *n1++;
+	
+	*ni = '\0';
+*/
+
+}
+////////////////////////////////////////////// 과제 (입력한것 중 영문자만 골라서 배열에 저장 후 a의 개수 카운팅)
+
+#include <stdio.h>
+
+void modify(char *ps, char *pd);
+int alpha_counting(char *pd);
+
+int main()
+{
+	
+	char src[50];
+	char dest[50];
+	
+
+
+
+	printf("영문, 숫자, 특수문자, 등 입력 : ");
+	scanf("%s", src);
+
+	printf("src : %s \n", src);
+	
+	modify(src, dest);
+	printf("dest : %s \n", dest);
+
+	alpha_counting(dest);
+	printf("dest에서 a의 개수 : %d \n", alpha_counting(dest) );
+
+
+	return 0;
+}
+
+void modify(char *ps, char *pd)
+{
+	while(*ps != '\0')
+	{
+			if(    ((*ps >= 65) && (*ps <= 90)) || ((*ps >= 97) && (*ps <= 122))    )
+			{
+				*pd = *ps;
+				*pd++;
+			}	
+		*ps++;		
+	}
+	*pd = '\0';
+
+	}
+
+int alpha_counting(char *pd)
+{
+	int count = 0;
+
+	while(*pd != '\0')
+	{
+		if(*pd == 'a')
+			count++;
+		*pd++;
+	}
+
+	return count;
+}
+

@@ -1,0 +1,315 @@
+/////////////////////////////////////////////// 배열포인터!!!
+#include <stdio.h>
+
+void Display(int (*pD)[5]);
+int main()
+{		
+	int col;
+	int row;
+
+
+	int Data_Arr[3][5] = { {1,2,3,4,5},
+						   {6,3,2,7,5},
+						   {6,2,6,5,4} };
+	
+	//int (*pD)[5] = Data_Arr;
+
+
+		for(col=0; col<3; col++)
+			{
+				for(row=0; row<5; row++)
+					printf("%d ",Data_Arr[col][row]);
+			
+				printf("\n");
+	
+			} 
+	
+
+		Display(Data_Arr);
+
+
+	return 0;
+}
+
+
+
+void Display(int (*pD)[5])
+{
+	int col;
+	int row;
+
+	for(col=0; col<3; col++)
+	{
+		for(row=0; row<5; row++)
+			printf("%d ",pD[col][row]);
+	}
+
+
+}
+
+//////////////////////////////////////////////////////////////
+
+#include <stdio.h>
+
+void Infor_Insert(char (*ps)[50]);
+void Infor_Display(char (*ps)[50]);
+
+int main()
+{		
+	int col;
+	int row;
+
+
+	char person[2][50];
+	
+
+	Infor_Insert(person);
+	Infor_Display(person);
+
+
+
+	return 0;
+}
+
+
+
+void Infor_Insert(char (*ps)[50])
+{
+	printf("이름을 입력하세요 : \n");
+	scanf("%s", ps[0]);
+
+	printf("주소를 입력하세요 : \n");
+	scanf("%s", ps[1]);
+}
+
+void Infor_Display(char (*ps)[50])
+{
+	int col;
+	int row;
+
+	for(col=0; col<2; col++)
+	{
+		for(row=0; ps[col][row]!='\0'; row++)
+			printf("%c",ps[col][row]);
+	
+		printf("\n");
+	}
+		
+
+}
+//////////////////////////////////////////////////////////////// 교재 p.462__6번문제
+
+
+#include <stdio.h>
+
+int Fill_array(double *pn, int size);
+void Show_array(double *pn, int size);
+void Reverse_array(double *pn, int size);
+
+int main()
+{		
+	double name[10];
+	int counting;
+	
+	counting = Fill_array(name, 10);
+	Show_array(name, counting);
+	
+	Reverse_array(name, counting);
+	Show_array(name, counting);
+
+	return 0;
+}
+
+int Fill_array(double *pn, int size)
+{
+	int index = 0;
+	int count = 0; 
+
+	printf("배열에 들어갈 실수를 입력하세요 : ");
+	scanf("%lf", &pn[index]);
+		if( pn[index] == 0.0 )
+		{		
+			printf("입력을 마칩니다. \n");
+			return count;
+		}
+		else
+			count++;
+		
+	fflush(stdin);
+
+	while( (pn[index] != 0.0) && (index != (size-1) ) )
+	{	
+		index++;
+		printf("실수를 입력하세요 : ");
+		scanf("%lf", &pn[index]);
+		if( pn[index] == 0.0 )
+		{		
+			printf("입력을 마칩니다. \n");
+			return count;
+		}
+		fflush(stdin);
+		count++;
+	}
+	
+		printf("총 입력받은 값의 개수 : %d \n", count);
+
+
+	if( index == (size-1) )
+		printf("메모리가 꽉차서 입력을 마칩니닷! \n");
+
+
+	return count;
+}
+
+void Show_array(double *pn, int size)
+{
+	int i;
+
+	for(i=0; i<size; i++)
+		printf("%.2lf ", pn[i]);
+
+	printf("\n");
+}
+
+void Reverse_array(double *pn, int size)
+{
+	double tmp;
+	int last;
+	int i;
+
+	if(size >= 4)
+	{
+		last = size - 2;						// 마지막 인덱스값
+	
+		for(i=1; i<size/2; i++)
+			{
+				tmp = pn[i];
+				pn[i] = pn[last];
+				pn[last] = tmp;
+
+				last--;
+			}
+	}
+}
+///////////////////////////////////////////////////////////////////////////  구구단 출력!
+
+#include <stdio.h>
+
+void Display(int (*pg)[8]);
+
+int main()
+{		
+	
+	int gugu[9][8] = {  {2,3,4,5,6,7,8,9},
+						{4,6,8,10,12,14,16,18},
+						{6,9,12,15,18,21,24,27},
+						{8,12,16,20,24,28,32,36},
+						{10,15,20,25,30,35,40,45},
+						{12,18,24,30,36,42,48,54},
+						{14,21,28,35,42,49,56,63},
+						{16,24,32,40,48,56,64,72},
+						{18,27,36,45,54,63,72,81} };
+
+	Display(gugu);
+	return 0;
+}
+
+
+void Display(int (*pg)[8])
+{
+	int dan=1;
+	int n=0;
+	int index_r;
+	int index_c;
+
+			for(index_c=0; index_c<9; index_c++)
+				{	
+					
+					n++;
+					for(index_r=0; index_r<8; index_r++)
+						{	
+							dan++;
+							printf("%dX%d=%2d  ",dan, n, pg[index_c][index_r]); 						
+						}	
+					dan=1;
+					printf("\n");
+
+				}
+}
+/////////////////////////////////////////////////////////////  p.304__5번문제
+
+#include <stdio.h>
+
+void month(char **pn, int size);
+
+int main()
+{		
+	char *name[12] = {"1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"};
+
+	month(name, 12);
+
+	return 0;
+}
+
+
+void month(char **pn, int size)
+{
+	int sell[30];
+	int i;
+	int total = 0;
+
+
+	for(i=0; i<size; i++)
+	{
+		printf("%4s 판매량 : ",pn[i]);
+		scanf("%d",&sell[i]);
+		total += sell[i];
+	}
+	
+	printf("연간 총 판매량 : %d권",total);
+
+}
+//////////////////////////////////////////////////////////////////  2차원 배열( 2차원 포인터 배열) 및 배열 포인터(*pn[13]) 사용!
+
+
+#include <stdio.h>
+
+void month(char *(*pn)[13], int size);
+
+int main()
+{			
+	char *name[3][13] = {    {"2014년도","1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"},
+							{"2015년도","1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"},
+							{"2016년도","1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"}
+						};
+
+	month(name, 13);
+
+	return 0;
+}
+
+
+void month(char *(*pn)[13], int size)
+{
+	int sell[30];
+	int year;
+	int mon;
+	int total = 0;
+	int year_total=0;
+
+	for(year=0; year<3; year++)
+	{	
+		total=0;
+
+		for(mon=1; mon<size; mon++)
+			{
+				printf("%s %4s 판매량 : ",pn[year][0],pn[year][mon]);
+				scanf("%d",&sell[mon]);
+				total += sell[mon];
+			}
+		printf("%s 총 판매량 : %d권 \n\n",pn[year][0], total);
+		year_total += total;
+	}
+
+	printf("** 3년간 누적 판매량 : %d권 **\n\n", year_total);
+}

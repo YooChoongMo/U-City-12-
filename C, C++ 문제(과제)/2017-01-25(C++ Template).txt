@@ -1,0 +1,181 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+template <class T>
+void Swap(T &a, T &b);
+template <typename T>
+T Add(T &a, T &b);
+
+int main()
+{
+int i = 10;
+int j = 20;
+
+cout << "i, j = " << i << ", " << j << ".\n";
+cout << "컴파일러가 생성한 int형 교환기를 사용하면\n";
+Swap(i , j);
+cout << "이제 i , j = " << i << ", " << j << ".\n";
+
+cout << "i + j = " << Add(i,j) << endl;
+
+
+double x = 24.5;
+double y = 45.3;
+
+cout << "x, y = " << x << ", " << y << ".\n";
+cout << "컴파일러가 생성한 double형 교환기를 사용하면\n";
+Swap(x , y);
+cout << "이제 x , y = " << x << ", " << y << ".\n";
+cout << "x + y = " << Add(x, y) << endl;
+
+
+return 0;
+}
+
+
+template <class T>
+void Swap(T &a, T &b)
+{
+	T temp;
+	temp = a;
+	a = b;
+	b = temp;
+}
+template <typename T>
+T Add(T &a, T &b) 
+{
+    return a+b;
+}
+
+//////////////////////////////////////////////////// template 사용( 스택구조 )
+
+#include "stack.h"
+#include <iostream>
+#include <string>
+#include <cctype>
+
+
+using namespace std;
+template <typename T>
+
+int main()
+{
+	Stack<string> st;
+	char ch;
+	string po;
+
+	cout << "주문서를 추가하려면 A, 주문서를 처리하려면 P, \n"
+		<< "종료하려면 Q를 입력하십시오. \n";
+
+	while(cin>> ch && toupper(ch) != 'Q')
+	{
+		while(cin.get() != '\n')                  // ==fflush(stdin) 버퍼 비우기
+			continue;
+		if(!isalpha(ch))
+		{
+			cout << '\a';     //경고음
+			continue;
+		}
+
+		switch(ch){
+			case 'A':
+			case 'a':	cout << "추가할 주문서의 번호를 입력하십시오 : ";
+						cin  >> po;
+						if(st.isfull())
+							cout << "스택이 가득 찼습니다. \n";
+						else
+							st.push(po);
+						break;
+											
+			case 'P':
+			case 'p':	if(st.isempty())		
+							cout << "스택이 비어있습니다. \n" ;
+						else{
+							st.pop(po);
+							cout << "#" << po << "주문서를 처리했습니다. \n";
+						}
+						
+						break;
+		}
+		cout << "주문서를 추가하려면 A, 주문서를 처리하려면 P, \n"
+		<< "종료하려면 Q를 입력하십시오. \n";
+	}
+	cout << "프로그램을 종료합니다. \n";
+	return 0;
+}
+
+//////////////////////    헤더파일
+
+#include <iostream>
+
+#ifndef STACK_H_
+#define STACK_H_
+
+#define MAX 10
+using namespace std;
+
+template <typename T>
+class Stack
+{
+private:
+	T items[MAX];
+	int top;
+
+public:
+	Stack();
+	bool isempty() const;
+	bool isfull() const;
+	// push()는 스택이 가득 차 있으면 false를, 아니면 true를 리턴한다.
+	bool push(const T & item);
+	// push()는 스택이 비어 있으면 false를, 아니면 true를 리턴한다.
+	bool pop(T & item);
+};
+
+
+template <typename T>
+Stack<T>::Stack()
+{
+	top = 0;
+}
+
+template <typename T>
+bool Stack<T>::isempty() const
+{
+	return top == 0;
+}
+
+template <typename T>
+bool Stack<T>::isfull() const
+{
+	return top == MAX;
+}
+
+template <typename T>
+bool Stack<T>::push(const T & item)
+{
+	if(top < MAX)
+	{
+		items[top++] = item;
+		return true;
+	}
+	else
+		return false;
+}
+
+template <typename T>
+bool Stack<T>::pop(T & item)
+{
+	if(top>0)
+	{
+		item = items[--top];
+		return true;
+	}
+	else
+		return false;
+}
+
+
+#endif
+
+

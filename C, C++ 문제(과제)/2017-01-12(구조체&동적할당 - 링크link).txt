@@ -1,0 +1,893 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{	
+	char name[30];
+	int age;
+	double grade;
+	struct student *link;
+
+}STU;
+
+void Display(STU *pd);
+void Insert(STU** ptemp_check, STU** pbuff_check);
+
+int main()
+{ 
+	
+	STU *ptemp = NULL;
+	STU *pbuff = NULL;
+	STU *pf = NULL;
+
+	while(1)
+	{
+		int n;
+		
+		printf("1.입력   2.출력   3.종료 : ");
+		scanf("%d",&n);
+
+		switch(n)
+		{
+		case 1: printf("\n입력화면\n");
+				
+				Insert(&ptemp, &pbuff);
+				
+				break;
+
+		case 2:	printf("\n출력화면\n");
+				Display(ptemp);
+				break;
+			
+		case 3:	while(ptemp != NULL)
+				{	
+					pf = ptemp->link;
+					free(ptemp);
+					ptemp = pf;				
+				}
+				printf("종료합니다. \n");
+				return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+void Insert(STU** ptemp_check, STU** pbuff_check)             /////////// 이전꺼를 void형식으로 더블포인트 사용!
+{
+	STU *ptr;
+	
+	ptr = (STU*)malloc(sizeof(STU));
+	
+	printf("이름을 입력하세요 : ");
+	scanf("%s", ptr->name);
+	fflush(stdin);
+
+	printf("나이를 입력하세요 : ");
+	scanf("%d", &ptr->age);
+	fflush(stdin);
+
+	printf("학점을 입력하세요 : ");
+	scanf("%lf", &ptr->grade);
+	fflush(stdin);
+
+	ptr->link = NULL;
+
+	if(*ptemp_check==NULL)
+	{
+		*ptemp_check = ptr;
+		*pbuff_check = ptr;
+	}
+	else
+	{	
+		(*pbuff_check)->link = ptr;
+		(*pbuff_check) = (*pbuff_check)->link;
+
+	}
+
+	
+}
+
+void Display(STU *pd)
+{	
+	while(pd != NULL)
+	{
+		printf("이름 : %s   나이 : %d   학점 : %.2lf \n", pd->name, pd->age, pd->grade);
+		pd = pd->link;	
+	}
+}
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{	
+	char name[30];
+	int age;
+	double grade;
+	struct student *link;
+
+}STU;
+
+void Display(STU *pd);
+void Insert(STU** ptemp_check, STU** pbuff_check);
+
+int main()
+{ 
+	
+	STU *ptemp = NULL;
+	STU *pbuff = NULL;
+	STU *tb = NULL;
+	STU *pf = NULL;
+
+	while(1)
+	{
+		int n;
+		int select;
+		
+		printf("1.입력   2.출력   3.종료 : ");
+		scanf("%d",&n);
+
+		switch(n)
+		{
+		case 1: printf("\n입력화면\n");
+				
+				Insert(&ptemp, &pbuff);
+				
+				break;
+
+		case 2:	printf("\n1.처음 입력한 순서대로 출력   2.최신 입력한 순서대로 출력   3.이전메뉴 : ");
+				scanf("%d", &select);
+				if(select==1)                          //순서대로 정렬해주는 알고리즘
+				{	
+					if(ptemp->link ==NULL)
+					{
+						tb = pbuff;
+
+						while(tb->link != NULL)
+						{
+							if(tb->link->link == NULL)
+							{
+								tb->link->link = tb;
+								tb->link = NULL;
+								tb = pbuff;
+								continue;
+							}
+						
+							tb = tb->link;					
+						}
+					}
+					printf("\nold순 출력화면\n");
+					Display(ptemp);
+				}
+				else if(select==2)                       //역순으로 정렬해주는 알고리즘
+				{	
+					if(pbuff->link==NULL)
+					{
+					
+						tb = ptemp;
+
+						while(tb->link != NULL)
+						{
+							if(tb->link->link == NULL)
+							{
+								tb->link->link = tb;
+								tb->link = NULL;
+								tb = ptemp;
+								continue;
+							}
+						
+							tb = tb->link;					
+						}
+					}
+
+
+					printf("\n최신순 출력화면\n");
+					Display(pbuff);
+				}
+				break;
+			
+		case 3:	while(ptemp != NULL)
+				{	
+					pf = ptemp->link;
+					free(ptemp);
+					ptemp = pf;				
+				}
+				printf("종료합니다. \n");
+				return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+void Insert(STU** ptemp_check, STU** pbuff_check)       /////////// 이전꺼를 void형식으로 더블포인트 사용!
+{
+	STU *ptr;
+	
+	ptr = (STU*)malloc(sizeof(STU));
+	
+	printf("이름을 입력하세요 : ");
+	scanf("%s", ptr->name);
+	fflush(stdin);
+
+	printf("나이를 입력하세요 : ");
+	scanf("%d", &ptr->age);
+	fflush(stdin);
+
+	printf("학점을 입력하세요 : ");
+	scanf("%lf", &ptr->grade);
+	fflush(stdin);
+
+	ptr->link = NULL;
+
+	if(*ptemp_check==NULL)
+	{
+		*ptemp_check = ptr;
+		*pbuff_check = ptr;
+	}
+	else
+	{	
+		(*pbuff_check)->link = ptr;
+		(*pbuff_check) = (*pbuff_check)->link;
+	}
+}
+
+void Display(STU *pd)
+{	
+	while(pd != NULL)
+	{
+		printf("이름 : %s   나이 : %d   학점 : %.2lf \n", pd->name, pd->age, pd->grade);
+		pd = pd->link;	
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{	
+	char name[30];
+	int age;
+	double grade;
+	struct student *link;
+
+}STU;
+
+void Display(STU *pd);
+void Insert(STU** ptemp_check, STU** pbuff_check);
+void Modify(STU** pm);
+void Data_Delete(STU** pd);
+
+int main()
+{ 
+	
+	STU *ptemp = NULL;
+	STU *pbuff = NULL;
+	STU *tb = NULL;
+	STU *pf = NULL;
+	STU *pstart = NULL;
+
+	while(1)
+	{
+		int n;
+		int select=0;
+		
+		printf("1.입력   2.출력   3.데이터 수정   4.삭제   5.종료 : ");
+		scanf("%d",&n);
+
+		switch(n)
+		{
+		case 1: printf("\n입력화면\n");
+				
+				Insert(&ptemp, &pbuff);
+				pstart = ptemp;
+
+				break;
+
+		case 2:	if(pstart == NULL)
+				{
+					printf("\n출력할 데이터가 없습니다. \n");
+					break;
+				}
+
+				while(select!=3)                      //이전 메뉴 나올때 까지 반복
+				{
+				printf("\n1.처음 입력한 순서대로 출력   2.최신 입력한 순서대로 출력   3.이전메뉴 : ");
+				scanf("%d", &select);
+				fflush(stdin);
+
+				if(select==1)                          //순서대로 정렬해주는 알고리즘
+				{	
+					if(ptemp->link ==NULL)
+					{
+						tb = pbuff;
+
+						while(tb->link != NULL)
+						{
+							if(tb->link->link == NULL)
+							{
+								tb->link->link = tb;
+								tb->link = NULL;
+								tb = pbuff;
+								continue;
+							}
+							tb = tb->link;					
+						}
+					}
+					pstart = ptemp;                     //시작주소를 pstart로 통일
+					 
+					printf("\nold순 출력화면\n");
+					Display(pstart);
+				}
+				else if(select==2)                       //역순으로 정렬해주는 알고리즘
+				{	
+					if(pbuff->link==NULL)
+					{
+					
+						tb = ptemp;
+
+						while(tb->link != NULL)
+						{
+							if(tb->link->link == NULL)
+							{
+								tb->link->link = tb;
+								tb->link = NULL;
+								tb = ptemp;
+								continue;
+							}
+						
+							tb = tb->link;					
+						}
+					}
+
+					pstart = pbuff;						  //시작주소를 pstart로 통일
+					printf("\n최신순 출력화면\n");
+					Display(pstart);
+				}
+				}
+				
+				break;
+			
+		
+		case 3: Modify(&pstart);
+				break;
+
+
+		case 4: Data_Delete(&pstart);
+				break;
+		
+		
+		
+		
+		
+		case 5:	while(pstart != NULL)
+				{	
+					pf = pstart->link;
+					free(pstart);
+					pstart = pf;				
+				}
+				printf("종료합니다. \n");
+				return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+void Insert(STU** ptemp_check, STU** pbuff_check)       /////////// 이전꺼를 void형식으로 더블포인트 사용!
+{
+	STU *ptr;
+	
+	ptr = (STU*)malloc(sizeof(STU));
+	
+	printf("이름을 입력하세요 : ");
+	scanf("%s", ptr->name);
+	fflush(stdin);
+
+	printf("나이를 입력하세요 : ");
+	scanf("%d", &ptr->age);
+	fflush(stdin);
+
+	printf("학점을 입력하세요 : ");
+	scanf("%lf", &ptr->grade);
+	fflush(stdin);
+
+	ptr->link = NULL;
+
+	if(*ptemp_check==NULL)
+	{
+		*ptemp_check = ptr;
+		*pbuff_check = ptr;
+	}
+	else
+	{	
+		(*pbuff_check)->link = ptr;
+		(*pbuff_check) = (*pbuff_check)->link;
+	}
+}
+
+void Display(STU *pd)
+{	
+	while(pd != NULL)
+	{
+		printf("이름 : %s   나이 : %d   학점 : %.2lf \n", pd->name, pd->age, pd->grade);
+		pd = pd->link;	
+	}
+}
+
+void Modify(STU** pm)
+{
+	char tmp[30];
+	int select=0;
+	int check = 0;
+	STU *pt = NULL;
+	
+	pt = *pm;
+
+	printf("검색하는 이름을 입력하세요 : ");
+	scanf("%s",tmp);
+	fflush(stdin);
+	
+/////////////////////////////검색 알고리즘	
+
+	if( (pt->link == NULL) )                           //노드가 한 개인 경우!
+	{
+		if(strcmp( pt->name, tmp) != 0)
+			printf("해당하는 이름이 없습니다. \n");
+		
+		else 
+			check = 1;
+	}	
+
+	else 					     	                    //노드가 두개 이상인 경우!		
+	{
+		while( (pt->link != NULL) )						
+		{
+			if(strcmp( pt->name, tmp) != 0)
+			{
+				pt = pt->link;
+				
+				if( (pt->link == NULL) && (strcmp( pt->name, tmp) != 0))
+					printf("해당하는 이름이 없습니다. \n");
+						
+				else if( strcmp( pt->name, tmp) == 0)
+					check = 1;
+			}
+		}
+		
+	}
+
+
+	while( (select != 4) && (check == 1))
+	{
+		printf("\n변경하는 데이터를 고르세요. \n");
+		printf("1.이름   2.나이   3.학점   4.이전 메뉴 : ");
+		scanf("%d", &select);
+		fflush(stdin);
+
+		if(select==1)
+		{
+			printf("\n변경할 이름을 입력하세요 : ");
+			scanf("%s", pt->name);
+			fflush(stdin);
+		}
+		else if(select==2)
+		{
+			printf("\n변경할 나이를 입력하세요 : ");
+			scanf("%d", &(pt->age));
+			fflush(stdin);
+		}
+		else if(select==3)
+		{
+			printf("\n변경할 학점을 입력하세요 : ");
+			scanf("%lf", &(pt->grade));
+			fflush(stdin);
+		}
+	}
+}
+
+
+
+void Data_Delete(STU** pd)
+{
+	char temp[30];
+	STU *pt=NULL;
+	STU *pfree=NULL;                                //삭제할 노드의 시작주소 보관
+
+	pt = *pd;
+
+	printf("삭제하려는 노드가 가지고 있는 이름을 입력하세요 : ");
+	scanf("%s",temp);
+	fflush(stdin);
+	
+/////////////////////////////검색 알고리즘/////////////////////////////////////	
+
+	if( (pt->link == NULL) )                           //노드가 한 개인 경우!
+	{
+		if(strcmp( pt->name, temp) != 0)
+			printf("해당하는 이름이 없습니다. \n");
+		
+		else 
+			free(*pd);		//동적메모리 해제
+			*pd = NULL;		//가르키던 포인터 초기화
+			//check = 1;
+	}	
+/*
+	else    //노드가 두개 이상 경우!		
+	{
+		while(pt->link->link != NULL)
+		{
+			if(strcmp(pt->name, temp) == 0)     // pt 노드에서 발견
+			{
+				pfree = pt;
+				pt = pfree->link;
+				pfree->link = NULL;
+				*pd = pt;						
+
+				free(pfree);
+			}
+
+			else if(strcmp( pt->link->name, temp) == 0)	 // pt 노드 다음
+			{
+				pfree = pt->link;
+				pt->link = pfree->link;
+				pfree->link = NULL;
+				*pd = pt;
+				
+				free(pfree);		
+			}
+
+				pt = pt->link;                    //둘다 없으면 pt 다음노드로 이동
+
+			if( (strcmp( pt->link->name, temp) != 0) && (pt->link->link == NULL))  //이동 후 검사->없으면 검색 실패!
+				printf("해당하는 이름이 없습니다. \n");
+		}
+	}
+	*/
+}
+
+
+
+
+///////////////////////////////////////제일 마지막 코드 손바야댐
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{	
+	char name[30];
+	int age;
+	double grade;
+	struct student *link;
+
+}STU;
+
+void Display(STU *pd);
+void Insert(STU** ptemp_check, STU** pbuff_check);
+void Modify(STU** pm);
+void Data_Delete(STU** ps, STU** pb);
+
+int main()
+{ 
+	
+	STU *ptemp = NULL;
+	STU *pbuff = NULL;
+	STU *tb = NULL;
+	STU *pf = NULL;
+	STU *pstart = NULL;  //변경되는 시작노드 보관
+	STU *pback = NULL;  //변경되는 마지막 노드 보관
+	while(1)
+	{
+		int n;
+		int select=0;
+		
+		printf("1.입력   2.출력   3.데이터 수정   4.삭제   5.종료 : ");
+		scanf("%d",&n);
+
+		switch(n)
+		{
+		case 1: printf("\n입력화면\n");
+				
+				Insert(&ptemp, &pbuff);
+				pstart = ptemp;
+
+				break;
+
+		case 2:	if(pstart == NULL)
+				{
+					printf("\n출력할 데이터가 없습니다. \n");
+					break;
+				}
+
+			while(select!=3)                      //이전 메뉴 나올때 까지 반복
+			{
+				printf("\n1.처음 입력한 순서대로 출력   2.최신 입력한 순서대로 출력   3.이전메뉴 : ");
+				scanf("%d", &select);
+				fflush(stdin);
+
+				if(select==1)                          //순서대로 정렬해주는 알고리즘
+				{	
+					
+					if(ptemp->link ==NULL)            //이전에 역방향 정렬한 적이 있을 경우(다시 순방향 정렬)
+					{
+						tb = pbuff;
+
+						while(tb->link != NULL)
+						{
+							if(tb->link->link == NULL)
+							{
+								tb->link->link = tb;
+								tb->link = NULL;
+								tb = pbuff;
+								continue;
+							}
+							tb = tb->link;					
+						}
+					}
+					pstart = ptemp;						//노드 시작 ptemp로 초기화					 
+					pback = pbuff;						//노드 마지막 pbuff로 초기화
+					printf("\nold순 출력화면\n");
+					Display(pstart);
+				}
+				else if(select==2)                       //역순으로 정렬해주는 알고리즘
+				{	
+					if(pbuff->link==NULL)                //순방향 상태에서 진입 pbuff는 제일 마지막 노드
+					{
+						tb = ptemp;
+
+						while(tb->link != NULL)
+						{
+							if(tb->link->link == NULL)
+							{
+								tb->link->link = tb;
+								tb->link = NULL;
+								tb = ptemp;
+								continue;
+							}
+						
+							tb = tb->link;					
+						}
+					}
+
+					pstart = pbuff;						  //시작 pbuff로 초기화
+					pback = ptemp;						  //마지막 ptemp로 초기화
+					printf("\n최신순 출력화면\n");
+					Display(pstart);
+				}
+			}
+				
+				break;
+			
+		
+		case 3: Modify(&pstart);
+				break;
+
+
+		case 4: Data_Delete(&pstart, &pback);
+				break;
+		
+		
+		
+		
+		
+		case 5:	while(pstart != NULL)
+				{	
+					pf = pstart->link;
+					free(pstart);
+					pstart = pf;				
+				}
+				printf("종료합니다. \n");
+				return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+void Insert(STU** ptemp_check, STU** pbuff_check)       /////////// 이전꺼를 void형식으로 더블포인트 사용!
+{
+	STU *ptr;
+	
+	ptr = (STU*)malloc(sizeof(STU));
+	
+	printf("이름을 입력하세요 : ");
+	scanf("%s", ptr->name);
+	fflush(stdin);
+
+	printf("나이를 입력하세요 : ");
+	scanf("%d", &ptr->age);
+	fflush(stdin);
+
+	printf("학점을 입력하세요 : ");
+	scanf("%lf", &ptr->grade);
+	fflush(stdin);
+
+	ptr->link = NULL;
+
+	if(*ptemp_check==NULL)
+	{
+		*ptemp_check = ptr;
+		*pbuff_check = ptr;
+	}
+	else
+	{	
+		(*pbuff_check)->link = ptr;
+		(*pbuff_check) = (*pbuff_check)->link;
+	}
+}
+
+void Display(STU *pd)
+{	
+	while(pd != NULL)
+	{
+		printf("이름 : %s   나이 : %d   학점 : %.2lf \n", pd->name, pd->age, pd->grade);
+		pd = pd->link;	
+	}
+}
+
+void Modify(STU** pm)
+{
+	char tmp[30];
+	int select=0;
+	int check = 0;
+	STU *pt = NULL;
+	
+	pt = *pm;
+
+	printf("검색하는 이름을 입력하세요 : ");
+	scanf("%s",tmp);
+	fflush(stdin);
+	
+/////////////////////////////검색 알고리즘	
+
+	if( (pt->link == NULL) )                           //노드가 한 개인 경우!
+	{
+		if(strcmp( pt->name, tmp) != 0)
+			printf("해당하는 이름이 없습니다. \n");
+		
+		else 
+			check = 1;
+	}	
+
+	else 					     	                    //노드가 두개 이상인 경우!		
+	{
+		while( (pt->link != NULL) )						
+		{
+			if(strcmp( pt->name, tmp) != 0)
+			{
+				pt = pt->link;
+				
+				if( (pt->link == NULL) && (strcmp( pt->name, tmp) != 0))
+					printf("해당하는 이름이 없습니다. \n");
+						
+				else if( strcmp( pt->name, tmp) == 0)
+					check = 1;
+			}
+		}
+		
+	}
+
+
+	while( (select != 4) && (check == 1))
+	{
+		printf("\n변경하는 데이터를 고르세요. \n");
+		printf("1.이름   2.나이   3.학점   4.이전 메뉴 : ");
+		scanf("%d", &select);
+		fflush(stdin);
+
+		if(select==1)
+		{
+			printf("\n변경할 이름을 입력하세요 : ");
+			scanf("%s", pt->name);
+			fflush(stdin);
+		}
+		else if(select==2)
+		{
+			printf("\n변경할 나이를 입력하세요 : ");
+			scanf("%d", &(pt->age));
+			fflush(stdin);
+		}
+		else if(select==3)
+		{
+			printf("\n변경할 학점을 입력하세요 : ");
+			scanf("%lf", &(pt->grade));
+			fflush(stdin);
+		}
+	}
+}
+
+
+
+void Data_Delete(STU** ps, STU** pb)                //(시작노드 주소, 마지막노드 주소)
+{
+	char temp[30];
+	STU *pstart=NULL;                               //시작노드 주소 보관
+	STU *pt=NULL;									//이동하면서 검사할 포인터
+	STU *pfree=NULL;                                //삭제할 노드의 시작주소 보관
+	int check = 0;
+
+	pt = *ps; 
+	pstart = *ps;
+	printf("삭제하려는 노드가 가지고 있는 이름을 입력하세요 : ");
+	scanf("%s",temp);
+	fflush(stdin);
+	
+/////////////////////////////검색 알고리즘/////////////////////////////////////	
+
+	if( (pt->link == NULL) )                           //노드가 한 개인 경우
+	{
+		if(strcmp( pt->name, temp) != 0)
+			printf("해당하는 이름이 없습니다. \n");
+		
+		else 
+		{
+			free(*ps);		//동적메모리 해제
+			pt = NULL;
+			*ps = NULL;		//시작 포인터 초기화
+			*pb = NULL;     //마지막 포인터 초기화
+		}	
+	}	
+
+	else                                               //노드가 두개 이상 경우		
+	{
+		while(pt->link != NULL)
+		{
+			if(strcmp(pt->name, temp) == 0)            // pt 노드에서 발견
+			{
+				pfree = pt;
+				pt = pfree->link;
+				pfree->link = NULL;
+				*ps = pt;						
+
+				free(pfree);
+				break;
+			}
+
+			else if(strcmp( pt->link->name, temp) == 0)	 // pt 노드 다음
+			{
+				pfree = pt->link;
+				pt->link = pfree->link;
+				pfree->link = NULL;
+					if(check == 0)                    //pt의 이동이 없을 때
+						*ps = pt;
+					else
+					{	
+						*ps = pstart;				  //pt의 이동이 생기면 pt는 제일 처음이 아니기 때문에 pstart사용
+						while(pstart->link != NULL)
+							pstart = pstart->link;    //pstart == 마지막 노드
+						*pb = pstart;			      //마지막 노드 주소 대입
+					}
+				free(pfree);		
+				break;
+			}
+
+			if( (strcmp( pt->link->name, temp) != 0) && (pt->link->link == NULL))  //이동 후 검사->없으면 검색 실패!
+			{
+				printf("해당하는 이름이 없습니다. \n");
+				break;
+			}
+			
+			pt = pt->link;                    //둘다 없으면 pt 다음노드로 이동
+			check = 1;
+		}
+
+		//제일 마지막 노드가 삭제되었을 경우엔 pback(메인) == pb 가 가르키는게 없어진다.
+		//pback의 위치를 다시 잡아준다.
+		while(pstart->link != NULL)
+			pstart = pstart->link;    //pstart == 마지막 노드 탐색
+
+		*pb = pstart;				  //마지막 노드 주소 대입
+
+	}
+	
+}
+
+
+

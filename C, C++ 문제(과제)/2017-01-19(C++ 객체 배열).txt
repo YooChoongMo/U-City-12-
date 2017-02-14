@@ -1,0 +1,195 @@
+////////////////////////////////////////////////////////////
+//stock20.h
+#ifndef STOCK20_H_
+#define STOCK20_H_
+
+#include <string>
+
+class stock{
+private:
+	char company[30];
+	int shares;
+	double share_val;
+	double total_val;
+	void set_tot(){ total_val = shares * share_val; }
+
+public:
+	stock();
+	stock(const char* co, int n, double pr);
+	~stock();
+	void acquire(const char* co, int n, double pr);
+	void buy(int num, double price);
+	void sell(int num, double price);
+	void update(double price);
+	void show();
+	stock & topval(const stock & s);
+};
+
+#endif
+
+///////////////////////////////////////////////////////////////
+//stock20.cpp
+
+#include "stock20.h"
+#include <iostream>
+using namespace std;
+
+stock::stock()
+{	
+	char co[30] = "no name";
+
+	int k=0;
+	while(co[k] !='\0')
+	{
+		company[k] = co[k];
+		k++;
+	}
+	company[k] = '\0';
+
+	
+	shares =0;
+	share_val = 0.0;
+	total_val = 0.0;
+}
+
+
+stock::stock(const char* co, int n, double pr)
+{
+	int k=0;
+	while(co[k] !='\0')
+	{
+		company[k] = co[k];
+		k++;
+	}
+	company[k] = '\0';
+
+	if(n<0)
+	{
+		std::cout<<"주식 수는 음수가 될 수 없으므로, "
+				 <<company << " shares를 0으로 설정합니다. \n";
+		shares = 0;
+	}
+	else
+	{
+		shares = n;
+		share_val = pr;
+		set_tot();
+	}
+}
+
+stock::~stock()
+{}
+
+
+	void stock::buy(int num, double price)
+	{
+		if(num<0)
+		{
+			std::cout <<"매입 주식 수는 음수가 될 수 없으므로, "
+					  << "거래가 취소되었습니다. \n";
+		}
+
+		else
+		{
+			shares += num;
+			share_val = price;
+			set_tot();
+		}
+	}
+
+	void stock::sell(int num, double price)
+	{
+		using std::cout;
+		if(num<0)
+		{
+			cout<< "매도 주식 수는 음수가 될 수 없으므로, "
+				<< "거래가 취소되었습니다. \n";
+		}
+
+		else if(num>shares)
+		{
+			cout<< "보유 주식보다 많은 주식을 매도할 수 없으므로, "
+				<< "거래가 취소되었습니다. \n";
+		}
+		else 
+		{
+			shares -= num;
+			share_val = price;
+			set_tot();
+		}
+	}
+
+	void stock::update(double price)
+	{
+		share_val = price;
+		set_tot();
+	}
+
+	void stock::show()
+	{	/*
+		//포맷을 #.###에 세팅한다
+		ios_base::fmtflags orig = 
+			cout.setf(ios_base::fixed, ios_base::floatfield);
+		streamsize prec = cout.precision(3);
+*/
+
+		cout << "회사명: "<< company
+			<< " 주식수: " << shares << '\n'
+			<< " 주가: $"<< share_val;
+			cout << "주식 총 가치: $"<<total_val<< '\n';
+
+	/*		
+		//포맷을 #.##에 세팅한다		
+		streamsize prec = cout.precision(2);
+		
+
+		//원본 포맷을 저장
+		cout.setf(orig, ios_base::floatfield);
+		cout.precision(prec);
+	*/}
+
+	 stock & stock::topval(const stock & s) 
+	{
+		if(s.total_val > total_val)
+			return s;
+		else
+			return *this;
+	}
+//////////////////////////////////////////////////////
+//usestock.cpp
+
+#include "stock20.h"
+#include<iostream>
+using std::cout;
+using std::endl;
+
+const int STKS = 4;
+
+int main(void)
+{
+	stock stocks[STKS] = {
+							stock("NanoSmart", 12, 20.0),
+							stock("Boffo Objects", 200, 2.0),
+							stock("Monolithic Oblisks", 130, 3.25),
+							stock("Fleep Enterprises", 60, 6.5)
+						};
+
+	cout << "보유 주식 리스트: \n";
+	int st;
+	for(st =0; st< STKS; st++)
+		stocks[st].show();
+
+	//첫번째 원소에 포인터 지정
+
+	const stock *top = &stocks[0];
+	for(st=1; st<STKS; st++)
+		top = &top->topval(stocks[st]);
+
+	//가장 가치 있는 주식의 최고치
+
+	cout<< "\n 최고 가치의 주식: \n";
+	top->show();
+
+	return 0;
+
+}

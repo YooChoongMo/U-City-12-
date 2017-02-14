@@ -1,0 +1,157 @@
+//classic.h
+
+class Cd     // CD디스크를 나타낸다
+{
+	char performers[50];   
+	char label[20];
+	int selections;		//수록 곡목 수
+	double playtime;	// 분 단위의 연주시간
+
+public:
+
+	Cd(char *s1, char *s2, int n, double x);
+	Cd(const Cd & d);
+	Cd();
+	~Cd();
+
+	virtual void Report() const;
+	Cd & operator = (const Cd & d);
+};
+
+
+class classic : public Cd
+{
+	
+	char titlename[50];
+
+public:
+
+	classic(char *t, char *s1, char *s2, int n, double x);
+	classic();
+	~classic();
+
+	void Report() const;
+
+
+
+};
+
+//classic.cpp
+
+#include <iostream>
+#include "classic.h"
+
+using namespace std;
+
+
+Cd::Cd(char *s1, char *s2, int n, double x)
+{
+	strcpy(performers, s1);
+	strcpy(label, s2);
+	
+	selections = n;
+	playtime = x;
+	cout << "부모 매개변수 객체 생성" << endl;
+}
+
+Cd::Cd(const Cd & d)
+{
+	strcpy(performers, d.performers);
+	strcpy(label, d.performers);
+	
+	selections = d.selections;
+	playtime = d.playtime;
+
+	cout << "부모 참조 객체 생성" << endl;
+}
+Cd::Cd()
+{cout << "부모 보이드 객체 생성" << endl;}
+
+Cd::~Cd()
+{cout << "부모 객체 종료" << endl;}
+
+void Cd::Report() const
+{
+	cout << "Performers: " << performers << endl;
+	cout << "label: " << label << endl;
+	cout << "selections: " << selections << endl;
+	cout << "playtime: " << playtime << endl;
+}
+
+Cd & Cd::operator = (const Cd & d)
+{
+	strcpy(performers, d.performers);
+	strcpy(label, d.performers);
+	
+	selections = d.selections;
+	playtime = d.playtime;
+
+	return *this;
+}
+
+/////////////////////////////////// classic 클래스 메서드
+
+
+classic::classic(char *t, char *s1, char *s2, int n, double x) : Cd(s1,s2,n,x)
+{
+	strcpy(titlename, t);
+	cout << "자식 매개변수 객체 생성" << endl;
+}
+
+classic::classic()
+{
+	cout << "자식 보이드형 객체 생성" << endl;
+}
+
+classic::~classic()
+{
+	cout << "자식 객체 종료" << endl;
+}
+
+void classic::Report() const
+{
+	cout << "title name: " << titlename << endl;
+	
+}
+
+//useclassic.cpp
+
+#include <iostream>
+#include <string>
+#include "classic.h"
+
+using namespace std;
+
+void  Bravo(const Cd & d);
+
+int main()
+{
+	Cd c1("Beatles", "Capitol", 14, 35.5);
+	classic c2("Piano Sonata in B flat, Fantasiain C", "Alfred Brendel", "Philips", 2, 57.17);
+	Cd *pcd = &c1;
+
+	cout << "객체를 직접 사용한다: \n" ;
+	c1.Report();
+	c2.Report();
+
+	cout << "객체를 지시하는 Cd * 포인터를 사용한다 : \n";
+	pcd->Report();
+	pcd = &c2;
+	pcd->Report();
+
+	cout << "참조 매개변수를 사용하여 함수를 호출한다: \n";
+	Bravo(c1);
+	Bravo(c2);
+
+	cout << "대입을 테스트한다: \n";
+	classic copy;
+	copy = c2;
+	copy.Report();
+	
+	return 0;
+}
+
+void  Bravo(const Cd & d)
+{
+	d.Report();
+}

@@ -1,0 +1,196 @@
+//////////////////////////////////////////////// 구조체 직접 접근!
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct person
+{
+	char name[30];
+	int age;
+	double grade;
+}PER;
+
+int main()
+{
+	PER p1;
+
+	printf("이름을 입력하세요 : ");
+	scanf("%s",p1.name);
+
+	printf("나이를 입력하세요 : ");
+	scanf("%d",&p1.age);
+
+	printf("학점을 입력하세요 : ");
+	scanf("%lf",&p1.grade);
+
+	printf("이름 : %s\n나이 : %d\n학점 : %.2lf\n", p1.name, p1.age, p1.grade);
+	
+	return 0;
+}
+
+///////////////////////////////////////////////// 구조체 멤버 변수 초기화  (함수부분 중요!!!) 
+
+#include <stdio.h>
+#include <stdlib.h>
+	
+typedef struct
+{
+	char name[30];
+	double weight;
+	int cal;
+}CandyBar;
+
+void insert(CandyBar *ps);
+
+int main()
+{
+	CandyBar snack = {"새우깡",30.85,50 };
+	
+	printf("변경전\n상표명 : %s\n중량 : %.1lf\n칼로리 : %d\n\n", snack.name, snack.weight , snack.cal);
+
+	insert(&snack);
+	
+	printf("변경후\n상표명 : %s\n중량 : %.1lf\n칼로리 : %d\n", snack.name, snack.weight , snack.cal);
+	
+	printf("%d", sizeof(CandyBar));
+
+	return 0;
+}
+
+void insert(CandyBar *ps)                // 매개변수 자료형 잘 맞추기!     ///////////     Call-by-address 방식
+{	
+	int num=0;
+	char arr[30] = "오뜨";          // *ps == snack 같은 의미
+
+	while(arr[num] != '\0')
+	{
+		(*ps).name[num] = arr[num];  // (*ps).name == ps->name 
+		num++;
+	}
+	
+	(*ps).name[num] = '\0';
+
+	(*ps).cal = 500;
+	(*ps).weight = 20.8;
+
+}
+
+CandyBar insert(void)                //////////////   Call_By_Value방식
+{
+	CandyBar pass = {"오예쓰",11.22, 400};
+	
+	return pass;
+
+}
+
+//////////////////////////////////////////////////////   구조체 배열 사용해서 초기화 시키기!!!
+#include <stdio.h>
+#include <stdlib.h>
+	
+typedef struct
+{
+	char name[30];
+	double weight;
+	int cal;
+}CandyBar;
+
+void Insert_Data(CandyBar *pa);
+
+int main()
+{
+	int i;
+	
+	CandyBar CandyArr[3];
+
+	Insert_Data(CandyArr);
+
+	for(i=0; i<3; i++)         //전체 출력
+	{
+		printf("%d번째 상품\n",i+1);
+		printf("상품명 : %s  중량 : %.2lf  칼로리 : %d  \n\n",CandyArr[i].name, CandyArr[i].weight, CandyArr[i].cal);
+	}
+	return 0;
+}
+
+void Insert_Data(CandyBar *pa)
+{
+	int index2 ;
+
+
+	for(index2=0; index2<3; index2++)
+		{
+			printf("%d번째 상품의 상품명을 입력하세요 : ", index2+1);
+			scanf("%s", pa[index2].name);
+			fflush(stdin);
+
+			printf("%d번째 상품의 중량을 입력하세요 : ", index2+1);
+			scanf("%lf", &pa[index2].weight);
+			fflush(stdin);
+
+			printf("%d번째 상품의 칼로리를 입력하세요 : ", index2+1);
+			scanf("%d", &pa[index2].cal);
+			fflush(stdin);
+			printf("\n");
+		}
+}
+/////////////////////////////////////////////////////////    배열대신 동적메모리 사용
+#include <stdio.h>
+#include <stdlib.h>
+	
+typedef struct
+{
+	char name[30];
+	double weight;
+	int cal;
+}CandyBar;
+
+void Insert_Data(CandyBar *pm);
+
+int main()
+{
+	int i=0;
+	int k;
+	//CandyBar pc;
+	//CandyBar *CandyArr[3];
+	
+	CandyBar *pm = (CandyBar*)malloc(sizeof(CandyBar)*3);
+
+	
+	
+	 Insert_Data(pm);
+	
+
+	for(i=0; i<3; i++)         //전체 출력
+	{
+		printf("%d번째 상품\n",i+1);
+		printf("상품명 : %s  중량 : %.2lf  칼로리 : %d  \n\n",pm[i].name, pm[i].weight, pm[i].cal);
+	}
+	
+	free(pm);
+
+	return 0;
+}
+
+
+
+void Insert_Data(CandyBar *pm)
+{
+	int index;
+
+	for(index=0; index<3; index++)
+		{
+			printf("상품의 상품명을 입력하세요 : ");
+			scanf("%s", pm[index].name);
+			fflush(stdin);
+
+			printf("상품의 중량을 입력하세요 : ");
+			scanf("%lf", &(pm[index].weight));
+			fflush(stdin);
+
+			printf("상품의 칼로리를 입력하세요 : ");
+			scanf("%d", &(pm[index].cal));
+			fflush(stdin);
+			printf("\n");
+	}
+
+	
+}

@@ -1,0 +1,323 @@
+//employee.h
+
+class Employee
+{
+   char name[30];
+
+public:
+
+	Employee(char *pn);
+	char* GetName();
+	virtual int GetPay() = 0;	// 순수가상함수=0 (정의 안써도됨)
+								// 두개의 자식 클래스에 같은 함수가
+								// 있으므로 정의를 할 수 없음
+};
+
+class Permanent : public Employee
+{
+   int salary;  // 정규직 급여
+
+public:
+	
+	Permanent(char *pn ,int s);    //생성자 구현
+    int GetPay();				   // 급여 출력함수 구현
+};
+
+class Temporary : public Employee
+{
+   int time;  // 일한 시간
+   int pay;   // 시간당 급여
+
+public:
+	Temporary(char *pn, int t, int p);	//생성자 구현
+	int GetPay();						//급여 출력함수 구현
+};
+
+class Department
+{
+   Employee *emplist[10];
+   int idx;
+
+public:
+	Department();					 //생성자 구현
+	~Department();
+
+
+	void AddEmployee(Employee *pe);	 //멤버함수 구현
+	
+    void ShowPayList();				 //급여 리스트 출력 함수 구현
+};
+
+
+
+
+//employee.cpp
+
+#include "employee.h"
+#include <iostream>
+
+using namespace std;
+
+
+Employee::Employee(char *pn)
+{
+	strcpy(name, pn);
+	cout << "Employee 객체 생성" << endl;
+}
+
+char* Employee::GetName()
+{
+	return name;
+}
+
+Permanent::Permanent(char *pn, int s) : Employee(pn)
+{
+	salary = s;
+}
+
+int Permanent::GetPay()
+{
+	cout << "정규직 급여: " << salary << endl;
+	return salary;
+}
+
+Temporary::Temporary(char *pn, int t, int p) : Employee(pn)
+{
+	time = t;
+	pay = p;
+}
+
+int Temporary::GetPay()
+{
+	int total;
+	total = time * pay;
+	cout << "일용직 급여: " << total << endl;
+
+	return total;
+}
+
+Department::Department()
+{
+	idx = 0;
+}
+
+void Department::AddEmployee(Employee *pe)
+{
+	emplist[idx] = pe;
+	idx++;
+}
+
+void Department::ShowPayList()
+{
+	int sum=0;
+	int i;
+	
+	for(i=0; i<idx; i++)
+		sum += emplist[i]->GetPay();
+
+	cout << "\n지급해야 할 총 급여는?" << endl;
+	cout << sum << "원 입니다. \n\n";
+}
+
+Department::~Department()
+{
+	int i;
+
+	for(i=0; i<idx; i++)
+	{
+		delete emplist[i];
+		cout << "동적할당 해제\n"; 
+	}
+}
+
+
+
+
+//useemp.cpp
+
+#include <iostream>
+#include <string>
+#include "employee.h"
+
+using namespace std;
+
+int main()
+{
+   Department manage;
+   manage.AddEmployee(new Permanent("HONG", 1000));
+   manage.AddEmployee(new Permanent("LEE", 3000));
+   manage.AddEmployee(new Temporary("PARK", 20, 300));
+   manage.AddEmployee(new Temporary("SHIN", 30, 500));
+   
+   // 지급해야할 총 급여는?
+
+   manage.ShowPayList();
+
+   return 0;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class port
+{
+	char *brand;
+	char style[20];
+	int bottles;
+
+public:
+
+	port(const char * br = "none", const char *st = "none", int b=0);
+	port(const port & p);
+	
+	virtual ~port()
+	{delete []brand;}
+	
+	port & operator = (const port & p);
+	port & operator += (int b);
+	port & operator -= (int b);
+	int BottleCount() const { return bottles; }
+	virtual void show() const;
+	friend ostream & operator << (ostream & os, const port & p);
+};
+
+class Vintageport : public port
+{
+	char *nickname;		//닉네임
+	int year;           //포도 수확 년도(빈티지)
+
+public:
+
+	Vintageport();
+	Vintageport(const char *br, int b, const char *nn, int y);
+	Vintageport(const Vintageport & vp);
+	~Vintageport() {delete []nickname;}
+
+	Vintageport & operator = (const Vintageport & vp);
+	void show() const;
+	friend ostream & operator << (ostream & os, const Vintageport & vp);
+};
+
+port::port(const char *br, const char *st, int b)
+{
+	brand = new char[strlen(br)+1];
+	strcpy(brand, br);
+	
+	strcpy(style, st);
+
+	bottles = b;
+}
+
+port::port(const port &p)
+{
+	brand = new char[strlen(p.brand)+1];
+	strcpy(brand, p.brand);
+	
+	strcpy(style, p.style);
+
+	bottles = p.bottles;
+}
+
+port & port::operator = (const port &p)
+{
+	brand = new char[strlen(p.brand)+1];
+	strcpy(brand, p.brand);
+	
+	strcpy(style, p.style);
+
+	bottles = p.bottles;
+
+	return *this;
+}
+
+port & port::operator += (int b)
+{
+	bottles += b;
+	return *this;
+}
+
+port & port::operator -= (int b)
+{
+	bottles -= b;
+	return *this;
+}
+
+
+void port::show() const
+{
+	cout << "브랜드: "<< brand << endl;
+	cout << "스타일: "<< style << endl;
+	cout << "수량: "<< bottles << endl;
+}
+
+ostream & operator << (ostream & os, const port & p)  // os == cout 의미
+{
+	os << p.brand << ", " << p.style << ", " << p.bottles << endl;
+	
+	return os;
+}
+
+Vintageport::Vintageport(const char *br, int b, const char *nn, int y) : port(br, b)
+{
+	nickname = new char[strlen(nn)+1];
+	strcpy(nickname, nn);
+	
+	year = y;
+}
+
+Vintageport::Vintageport()
+{
+	cout << "빈티지 보이드 객체 생성\n";
+}
+
+Vintageport::Vintageport(const Vintageport &vp)
+{
+	nickname = new char[strlen(vp.nickname)+1];
+	strcpy(nickname, vp.nickname);
+	
+	year = vp.year;
+}
+
+Vintageport & Vintageport::operator = (const Vintageport &vp)
+{
+	nickname = new char[strlen(vp.nickname)+1];
+	strcpy(nickname, vp.nickname);
+	
+	year = vp.year;
+}
+
+void Vintageport::show() const
+{
+	cout << "닉네임: "<< nickname << endl;
+	cout << "년도: "<< year << endl;	
+}
+
+ostream & operator << (ostream & os, const Vintageport & vp)  // os == cout 의미
+{
+	os << vp.nickname << ", " << vp.nickname << ", \n";
+	
+	return os;
+}
+
+
+int main()
+{
+	port p("Gallo", "Vintage", 20);
+	Vintageport v("ggggg", 2, "Nobless",20);
+
+	p.show();
+	v.show();
+	
+
+
+
+
+
+
+
+return 0;
+}

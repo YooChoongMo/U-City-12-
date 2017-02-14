@@ -1,0 +1,109 @@
+////////////////////////////////////////////  STL ==> vector
+
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <vector>
+
+using namespace std;
+
+
+int main()
+{
+	vector<int> v1;
+	//vector<int> v1(4);
+	//vector<int> v1(4,10);
+	
+	//v1.reserve(10);
+	//v1.at(0) = 1;
+	//v1[1] = 2;
+
+	v1.push_back(10);
+	v1.push_back(20);
+	v1.push_back(30);
+	v1.push_back(40);
+	cout << "v1.capacity() = " << v1.capacity() << endl;
+
+	cout << "for: " << endl;
+	for(int i =0; i < v1.size(); i++)
+	{
+		cout << v1[i] << endl;
+	}
+
+	v1.erase(v1.begin() + 2); //30 삭제
+
+	cout << endl << "iterator:" << endl;
+	vector<int>::iterator it1;   //it1은 변수명 //내용물이 int, char , string 뭐가 올지 모르기 때문에 iterator를 사용!!!!!
+    for (it1 = v1.begin(); it1 != v1.end(); it1++) //비긴은 컨테이너 처음위치
+    {
+        cout << *it1 << endl;
+    }
+  
+    cout << endl << "reverse_iterator:" << endl;
+
+    v1.insert(v1.begin() + 2, 30); // 30 추가
+
+    vector<int>::reverse_iterator it2;
+    for (it2 = v1.rbegin(); it2 != v1.rend(); it2++)
+    {
+        cout << *it2 << endl;
+    }
+    v1.clear(); // V1 벡터 삭제
+    return 0;
+}
+
+
+////////////////////////////////////////////  STL ==> list
+/* list
+전통적인 포인터를 이용한 이중 연결 리스트를 대신하여 사용할 수 있음
+데이터가 연속으로 할당되지는 않으며, 임의의 위치에서 삽입과 삭제가 빠름
+push_back( ) : 리스트의 끝 부분에 데이터를 삽입함
+push_front( ) : 리스트의 처음 부분에 데이터를 삽입함
+front( ) : 리스트의 맨 앞에 있는 멤버를 반환함
+pop_front( )  : 리스트의 맨 앞에 있는 멤버를 삭제함
+back( ) : 리스트의 맨 뒤에 있는 멤버를 반환함
+pop_back( ) : 리스트의 맨 뒤에 있는 멤버를 삭제함
+size( ) : 리스트가 담고 있는 요소의 개수를 반환함 */
+
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <list>
+
+using namespace std;
+
+
+int main()
+{
+	list<int> L1;
+
+	L1.push_back(20);  //20
+	L1.push_front(10); //10 20
+	L1.push_back(30);  //10 20 30
+	L1.push_back(40); //10 20 30 40
+	
+	L1.insert(L1.begin(), 5);  //5 10 20 30 40	
+	cout << "L1.size() = " << L1.size() << endl;
+
+	list<int>::iterator it;
+	
+	for(it = L1.begin(); it != L1.end(); it++)
+		cout << *it << " ";
+	
+	cout << endl;
+
+	cout << "L1.front() = " << L1.front() << endl;
+	L1.pop_front();
+
+	cout << "L1.back() = " << L1.back() << endl;
+	L1.pop_back();
+
+	for(it = L1.begin(); it != L1.end(); it++) //비긴은 컨테이너 처음위치
+		cout << *it << " ";
+	
+	cout << endl;
+    
+	L1.clear();
+
+    return 0;
+}

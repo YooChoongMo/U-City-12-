@@ -1,0 +1,409 @@
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class Point
+{
+	int x , y;
+
+public:
+
+	Point(int _x = 0 , int _y = 0): x(_x), y(_y){}
+	void showposition();
+	void operator + (int val);                           //멤버함수로 오버로딩
+};
+
+void Point::showposition()
+{
+	cout << x << " " << y << endl;
+}
+
+void Point::operator + (int val)       //함수 정의 이름 주의
+{
+	x += val;
+	y += val;
+}
+
+int main()
+{	
+	Point p(3,4);
+	p.showposition();
+
+	p + 10;                 // 10은 변수로 받아도 상관없음
+	p.showposition();
+
+	return 0;
+}
+//////////////////////////////////////////////////////////////      operator 사용-> 객체리턴을 사용
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class Point
+{
+	int m_x , m_y;
+
+public:
+
+	Point(int _x = 0 , int _y = 0): m_x(_x), m_y(_y){}
+	void ShowPosition();
+	Point operator - (Point & t) ;                          ////멤버함수로 오버로딩
+};
+
+void Point::ShowPosition()
+{
+	cout << m_x << " " << m_y << endl;
+}
+
+Point Point::operator - (Point & t)       //함수 정의 이름 주의
+{
+	Point result;
+		
+	result.m_x = m_x - t.m_x ;
+	result.m_y = m_y - t.m_y ;
+
+	return result;
+}
+
+int main()
+{	
+	Point p1(2,3);
+	Point p2(4,8);
+	
+	Point p3 = p2 - p1;
+	
+	p3.ShowPosition(); // 2, 5가 출력되도록 연산자 오버로딩 하시오.
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class Point
+{
+	int m_x , m_y;
+
+public:
+
+	Point(int _x = 0 , int _y = 0): m_x(_x), m_y(_y){}
+	void ShowPosition();
+	bool operator != (Point & t) ;
+};
+
+void Point::ShowPosition()
+{
+	cout << m_x << " " << m_y << endl;
+}
+
+bool Point::operator != (Point & t)       //함수 정의 이름 주의
+{
+	if( (m_x != t.m_x) || (m_y != t.m_y) )
+		return true;
+	else
+		return false;
+}
+
+int main()
+{	
+	Point p1(2,3);
+	Point p2(4,8);
+	Point p3(4,8);
+	
+	if( (p1 != p2) )
+		cout << "다르요!" << endl;
+	else
+		cout << "같소!" << endl;
+
+	if( (p2 != p3) )
+		cout << "다르요!" << endl;
+	else
+		cout << "같소!" << endl;
+
+	cout << endl;
+
+	return 0;
+}
+////////////////////////////////////////////////////////////// 전역함수로 오버로딩(friend 선언)
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+class Point
+{
+	int m_x , m_y;
+
+public:
+
+	Point(int _x = 0 , int _y = 0): m_x(_x), m_y(_y){}
+	void ShowPosition();
+	friend Point operator+(const Point & p1,const Point & p2);////전역함수로 오버로딩
+	
+};
+
+void Point::ShowPosition()
+{
+	cout << m_x << " " << m_y << endl;
+}
+
+Point operator+(const Point & p1,const Point & p2)       //함수 정의 이름(Point::operator) 주의
+{							 //원래 Point::을 써야하지만 전역함수로 보고 일반 함수처럼 (return type 함수명)
+	Point result(p1.m_x + p2.m_x, p1.m_y + p2.m_y);	
+
+	return result;
+}
+
+int main()
+{	
+	Point p1(2,3);
+	Point p2(4,8);
+	
+	Point p3 = p2 + p1;
+	
+	p3.ShowPosition(); 
+
+	return 0;
+}
+
+
+//////////////////////////////////////////////////////////////
+//mytime0.h
+#ifndef MYTIME0_H_
+#define MYTIME0_H_
+
+
+class Time
+{
+private:
+	
+	int hours;
+	int minutes;
+	
+public:
+		
+	Time();
+	Time(int h, int m = 0);
+	void AddMin(int m);
+	void AddHr(int h);
+	void Reset(int h = 0, int m = 0);
+	//Time Sum(const Time &t) const;
+	void show() const;
+	Time operator + (Time & t);
+
+};
+#endif
+
+
+
+//////////////////////////////////////////////////////////////    ppt(10장) && 대입 연산자 오버로딩
+//mytime0.cpp
+#include <iostream>
+#include <cstring>
+#include "mytime0.h"
+using namespace std;
+
+Time::Time()
+{
+	hours = minutes = 0;
+}
+
+Time::Time(int h, int m)
+{
+	hours = h;
+	minutes = m;
+}
+
+void Time::AddMin(int m)
+{
+	minutes += m;
+	hours += minutes / 60;
+	minutes %= 60;
+}
+
+void Time::AddHr(int h)
+{
+	hours += h;
+}
+
+void Time::Reset(int h, int m)
+{
+	hours = h;
+	minutes = m;
+}
+
+/*
+Time Time::Sum(const Time &t) const
+{
+	Time sum;
+	sum.minutes = minutes + t.minutes;
+	sum.hours = hours + t.hours + sum.minutes / 60;
+	sum.minutes %= 60;
+	
+	return sum;
+}
+*/
+void Time::show() const
+{
+	cout << hours << "시간, " << minutes << "분";
+}
+
+Time::Time operator + (Time & t)
+{
+	Time sum;
+	sum.minutes = minutes + t.minutes;
+	sum.hours = hours + t.hours + sum.minutes / 60;
+	sum.minutes %= 60;
+	
+	return sum;
+}
+////////////////////////////////////////////////////////////// ppt10장 p.27 
+//usemytime0.cpp
+#include <iostream>
+#include <cstring>
+#include "mytime0.h"
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+
+int main()
+{	
+	Time planning;
+	Time coding(2, 40);
+	Time fixing(5, 55);
+	Time total;
+
+	cout << "planning time = ";
+	planning.show();
+	cout << endl;
+
+	cout << "coding time = ";
+	coding.show();
+	cout << endl;
+
+	cout << "fixing time = ";
+	fixing.show();
+	cout << endl;
+
+
+	total = coding + fixing;
+	//연산자 표시
+	cout << "coding + fixing = ";
+	total.show();
+	cout << endl;
+	
+	Time morefixing(3, 28);
+	cout << " more fixing time = ";
+	morefixing.show();
+	cout << endl;
+	total = morefixing.operator +(total);
+	//함수 표기
+	cout << " more fixing time+ (total) = ";
+	total.show();
+	cout << endl;
+
+	return 0;
+}
+
+//////////////////////////////////////////////////////////////  
+#include <iostream>
+#include <cstring>
+#include <cctype>
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+using std::ostream;
+
+class Person {
+private:
+    char *m_name;
+
+public:
+    
+	Person(char *name);
+	Person(const Person& p);
+	~Person();
+	char* getName();
+
+	void operator = (Person & p);
+	//friend ostream& operator << (ostream & os, const Point & p);  //라이브러리에 있는 ostream 참조하기 위해 friend 선언!!!
+	friend ostream& operator << (ostream & os, Person & p);  
+
+};
+
+Person::Person(char *name)
+{
+        m_name = new char[strlen(name)+1];
+        strcpy(m_name, name);
+}
+
+Person::Person(const Person& p)
+{
+        m_name = new char[strlen(p.m_name)+1];
+        strcpy(m_name, p.m_name);
+}
+
+Person::~Person()         //마지막 소멸자 함수로서 동적메뫼 해제
+{
+	delete []m_name;
+}
+
+char* Person::getName()   //m_name의 주소를 리턴
+{
+	return m_name;
+}
+
+
+void Person::operator = (Person & p)     // p1 = p2(대입연산 오퍼레이터) => 가지고 있던 동적메모리를 먼저 해제시킨 후
+										 // 새로운 메모리를 할당 받아 p2의 문자열을 "깊은복사" 실행
+{
+	delete []m_name;
+
+	m_name = new char[strlen(p.m_name) + 1];
+	strcpy(m_name, p.m_name);
+}
+
+ostream& operator << (ostream & os, Person & p)  // os == cout 의미
+{
+	os << p.getName();
+	
+	return os;
+}
+
+int main()
+{
+
+	Person p1("LEE JUNE");
+    Person p2("HONG KEN");
+
+    cout << p1 << endl;
+    cout << p2 << endl;
+
+    p1 = p2;                 // 문제의 원인(중간에 객체 대 객체 대입을 하면 얕은복사(디폴트 복사 오퍼레이터)가 실행됨
+							 // 문자열을 동적할당을 받아 메모리에 저장했으므로 얕은 복사는 주소만 복사!
+							 // 따라서 원래 p1의 동적메모리가 남아 오류 발생!
+    cout << p1 << endl;
+
+	return 0;
+}

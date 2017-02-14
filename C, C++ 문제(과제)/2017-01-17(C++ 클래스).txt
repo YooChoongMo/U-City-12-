@@ -1,0 +1,216 @@
+////////////////////     stock00.h 헤더파일
+
+
+class stock{
+private:
+	char company[30];
+	int shares;
+	double share_val;
+	double total_val;
+	void set_tot(){ total_val = shares * share_val; }
+
+public:
+	void acquire(const char* co, int n, double pr);
+	void buy(int num, double price);
+	void sell(int num, double price);
+	void update(double price);
+	void show();
+};
+
+////////////////////     stock00.cpp
+
+#include "stock00.h"
+#include <iostream>
+
+void stock::acquire(const char* co, int n, double pr)
+{
+	int k=0;
+	while(co[k] !='\0')
+	{
+		company[k] = co[k];
+		k++;
+	}
+	company[k] = '\0';
+
+	if(n<0)
+	{
+		std::cout<<"주식 수는 음수가 될 수 없으므로, "
+				 <<company << " shares를 0으로 설정합니다. \n";
+		shares = 0;
+	}
+	else
+	{
+		shares = n;
+		share_val = pr;
+		set_tot();
+	}
+}
+	void stock::buy(int num, double price)
+	{
+		if(num<0)
+		{
+			std::cout <<"매입 주식 수는 음수가 될 수 없으므로, "
+					  << "거래가 취소되었습니다. \n";
+		}
+
+		else
+		{
+			shares += num;
+			share_val = price;
+			set_tot();
+		}
+	}
+
+	void stock::sell(int num, double price)
+	{
+		using std::cout;
+		if(num<0)
+		{
+			cout<< "매도 주식 수는 음수가 될 수 없으므로, "
+				<< "거래가 취소되었습니다. \n";
+		}
+
+		else if(num>shares)
+		{
+			cout<< "보유 주식보다 많은 주식을 매도할 수 없으므로, "
+				<< "거래가 취소되었습니다. \n";
+		}
+		else 
+		{
+			shares -= num;
+			share_val = price;
+			set_tot();
+		}
+	}
+
+	void stock::update(double price)
+	{
+		share_val = price;
+		set_tot();
+	}
+
+	void stock::show()
+	{
+		std::cout << "회사명: "<< company
+			<< " 주식수: " << shares << '\n'
+			<< " 주가: $"<< share_val
+			<< "주식 총 가치: $"<<total_val<< '\n';
+	}
+
+
+/////////////////////////////     usestock0.cpp
+
+#include "account.h"
+#include <iostream>
+#define _CRT_SECURE_NO_DEPRECATE
+
+
+int main()
+{
+	stock fluffy_the_cat;       //클래스 변수선언!!
+
+	fluffy_the_cat.acquire("Nanosmart", 20, 12.50);
+	fluffy_the_cat.show();
+	fluffy_the_cat.buy(15,18.125);
+	fluffy_the_cat.show();
+	fluffy_the_cat.sell(400,20.00);
+	fluffy_the_cat.show();
+	fluffy_the_cat.buy(30000,40.125);
+	fluffy_the_cat.show();
+	fluffy_the_cat.sell(300000,0.125);
+	fluffy_the_cat.show();
+
+	return 0;
+}
+
+
+
+ ///////////////////////////////////////////////////////////////////////// 705p. 1번문제
+
+//account.h
+
+class account{
+
+public:
+
+	char name[30];
+	char ID[30];
+	double balance;
+	
+
+	
+	void show(const char* na, const char* IDp, double bal);
+	void deposit(double money);
+	void withdraw(double money);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+//account.cpp
+
+#include "account.h"
+#include <iostream>
+using std::cout;
+
+void account::show(const char* na, const char* IDp, double bal)
+{
+	int k=0;
+	int i=0;
+
+	while(na[k] !='\0')
+	{
+		name[k] = na[k];
+		k++;
+	}
+	name[k] = '\0';
+
+	while(IDp[i] !='\0')
+	{
+		ID[i] = IDp[i];
+		i++;
+	}
+	ID[i] = '\0';
+	
+	balance = bal;
+
+	cout<< "예금주의 이름: "<< name << " 계좌번호: "<< account::ID 
+		<< " 잔액: "<< balance;
+}
+
+void account::deposit(double money)
+{
+	balance += money;
+}
+
+void account::withdraw(double money)
+{
+	balance -= money;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+//useaccount.cpp
+
+#include "account.h"
+#include <iostream>
+#define _CRT_SECURE_NO_DEPRECATE
+
+using namespace std;
+
+int main()
+{
+	account ant;                     //클래스 변수선언!!
+
+	ant.show("유충모", "842-910198-42607", 65900);
+	cout << endl;
+
+	ant.deposit(100000);
+	cout << "입금 후 잔액: " << ant.balance << endl;
+
+	ant.withdraw(50000);
+	cout << "출금 후 잔액: " << ant.balance << endl;
+
+	return 0;
+}
+
+

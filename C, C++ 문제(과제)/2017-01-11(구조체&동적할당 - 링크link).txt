@@ -1,0 +1,242 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define SLEN 30
+
+typedef struct
+{
+	char fullname[SLEN];
+	char hobby[SLEN];
+	int ooplevel;
+
+}STU;
+
+void getinfo(STU *pa, int n);
+void Display1(STU st);
+void Display2(STU *st);
+void Display3(STU *pa, int n);
+
+int main()
+{
+	int class_size;
+	int entered;
+	int i;
+	STU *ptr_stu;                                        //먼저 구조체 포인터 변수 선언 후
+
+	printf("학급의 학생 수를 입력하십시오 : ");
+	scanf("%d",&class_size);
+	fflush(stdin);
+	
+	ptr_stu = (STU*)malloc(sizeof(STU)*class_size);       //ptr_stu에 동적메모리 시작 주소를 대입!
+	
+	getinfo(ptr_stu, class_size);
+	entered = class_size;
+
+	for(i=0; i<entered; i++)
+	{
+		Display1(ptr_stu[i]);					//각 요소씩 출력
+		Display2(&ptr_stu[i]);
+	}
+
+	Display3(ptr_stu, entered);                  //전체 출력
+	
+	printf("프로그램을 종료합니다. \n");
+	free(ptr_stu);
+	return 0;
+}
+
+void getinfo(STU *pa, int n)
+{
+	int i;
+	
+
+	for(i=0; i<n; i++)
+	{
+		printf("이름을 입력하시오 : ");
+		scanf("%s", pa[i].fullname);
+
+		printf("취미를 입력하시오 : ");
+		scanf("%s", pa[i].hobby);
+
+		printf("ooplevel을 입력하시오 : ");
+		scanf("%d", &pa[i].ooplevel);
+
+		printf("\n");
+		
+	}	
+
+
+
+}
+
+void Display1(STU st)
+{
+	printf("이름 : %s\n취미 : %s\nooplevel : %d\n\n", st.fullname, st.hobby, st.ooplevel);
+}
+
+void Display2(STU *st)
+{
+	printf("이름 : %s\n취미 : %s\nooplevel : %d\n\n", st->fullname, st->hobby, st->ooplevel);
+}
+
+void Display3(STU *pa, int n)
+{
+	int i;
+	
+	for(i=0; i<n; i++)
+		printf("이름 : %s\n취미 : %s\nooplevel : %d\n\n", pa[i].fullname, pa[i].hobby, pa[i].ooplevel);	
+}
+
+////////////////////////////////////////////////////  링크로 연결된 구조체들을 포인터이용해서 출력
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{	
+	char name[30];
+	int age;
+	double grade;
+	struct student *link;
+
+}STU;
+
+int main()
+{ 
+	STU p1, p2, p3;
+	STU *pstart;
+	STU *ptemp;
+	
+	pstart = &p1;
+	ptemp = &p1;
+	
+	printf("p1 내용물 입력 : \n");
+	scanf("%s", p1.name);
+	scanf("%d", &p1.age);
+	scanf("%lf", &p1.grade);
+	p1.link = &p2;
+
+	printf("p2 내용물 입력 : \n");
+	scanf("%s", p2.name);
+	scanf("%d", &p2.age);
+	scanf("%lf", &p2.grade);
+	p2.link = &p3;
+
+	printf("p3 내용물 입력 : \n");
+	scanf("%s", p3.name);
+	scanf("%d", &p3.age);
+	scanf("%lf", &p3.grade);
+	p3.link = NULL;
+
+
+	while( ptemp != NULL)
+	{
+		printf("p1내용물 %s, %d, %.2lf\n", ptemp->name, ptemp->age, ptemp->grade);
+		ptemp = ptemp->link;
+	}
+
+
+	return 0;
+}
+
+
+
+///////////////////////////////////////////////////////////////////
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{	
+	char name[30];
+	int age;
+	double grade;
+	struct student *link;
+
+}STU;
+
+void Display(STU *pd);
+STU* Insert();
+
+int main()
+{ 
+	int count = 0;
+	STU *ptemp = NULL;
+	STU *pBuff = NULL;
+	STU *pf = NULL;
+
+	while(1)
+	{
+		int n;
+		
+		printf("1.입력   2.출력   3.종료 : ");
+		scanf("%d",&n);
+
+		switch(n)
+		{
+		case 1: printf("\n입력화면\n");
+				if(count==0)
+				{
+					ptemp = Insert();
+					pBuff = ptemp;
+					count++;
+				}
+				
+				else
+				{
+					pBuff->link = Insert();
+					pBuff = pBuff->link;
+					count++;
+				}
+				
+				break;
+
+		case 2:	printf("\n출력화면\n");
+				Display(ptemp);
+				break;
+			
+		case 3:	while(ptemp != NULL)
+				{	
+					pf = ptemp->link;
+					free(ptemp);
+					ptemp = pf;				
+				}
+				printf("종료합니다. \n");
+				return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+STU* Insert()
+{
+	STU *ptr;
+
+	ptr = (STU*)malloc(sizeof(STU));
+
+	printf("이름을 입력하세요 : ");
+	scanf("%s", ptr->name);
+	fflush(stdin);
+
+	printf("나이를 입력하세요 : ");
+	scanf("%d", &ptr->age);
+	fflush(stdin);
+
+	printf("학점을 입력하세요 : ");
+	scanf("%lf", &ptr->grade);
+	fflush(stdin);
+
+	ptr->link = NULL;
+
+	return ptr;
+}
+
+void Display(STU *pd)
+{
+	while(pd != NULL)
+	{
+		printf("이름 : %s   나이 : %d   학점 : %.2lf \n", pd->name, pd->age, pd->grade);
+		pd = pd->link;	
+	}
+}

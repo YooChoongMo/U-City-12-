@@ -1,0 +1,195 @@
+///////////////////////////////////////상속은 안들어가지만 string 클래스 사용
+//tabtenn0.h
+#ifndef TABTENN0_H_
+#define TABTENN0_H_
+
+#include <string>
+
+using namespace std;
+
+class TableTennisPlayer
+{
+	string firstname;
+	string lastname;
+	bool hasTable;
+public:
+	
+	TableTennisPlayer(const string & fn = "none", const string & ln = "none", bool ht = false);
+
+	void name();
+	
+	bool HasTable()
+	{
+		return hasTable;
+	};
+	
+	void ResetTable(bool v)
+	{
+		hasTable = v;
+	};
+};
+
+#endif
+		
+
+//tabtenn0.cpp
+#include "tabtenn0.h"
+#include <iostream>
+
+TableTennisPlayer::TableTennisPlayer(const string & fn, const string & ln, bool ht) : firstname(fn),
+						lastname(ln), hasTable(ht){}
+
+void TableTennisPlayer::name()
+{
+	cout << lastname << ", " << firstname << endl;
+}
+
+//usetab.cpp
+#include <cstring>
+#include <iostream>
+#include "tabtenn0.h"
+
+using namespace std;
+
+
+int main()
+{
+	TableTennisPlayer player1("chuck", "blizzard", true);
+	TableTennisPlayer player2("Tara", "Boomdea", false);
+
+	player1.name();
+
+	if(player1.HasTable())
+		cout << ": 탁구대가 있다. \n";
+	else
+		cout << ": 탁구대가 없다. \n";
+
+	player2.name();
+	
+	if(player2.HasTable())
+		cout << ": 탁구대가 있다. \n";
+	else
+		cout << ": 탁구대가 없다. \n";
+
+
+	return 0;
+}
+///////////////////////////////////////////////////////////// RatedPlayer 상속클래스 사용]
+//tabtenn0.h
+#ifndef TABTENN0_H_
+#define TABTENN0_H_
+
+#include <string>
+
+using namespace std;
+
+class TableTennisPlayer
+{
+	string firstname;
+	string lastname;
+	bool hasTable;
+public:
+	
+	TableTennisPlayer(const string & fn = "none", const string & ln = "none", bool ht = false);
+
+	void name();
+	
+	bool HasTable()
+	{
+		return hasTable;
+	};
+	
+	void ResetTable(bool v)
+	{
+		hasTable = v;
+	};
+};
+
+
+class RatedPlayer : public TableTennisPlayer
+{
+	unsigned int rating;
+
+public:
+
+	RatedPlayer(unsigned int r = 0, const string & fn = "none", const string & ln = "none", bool ht = false);
+	RatedPlayer(unsigned int r, const TableTennisPlayer & tp);
+	unsigned int Rating()
+	{	return rating;}
+	void ResetRating(unsigned int r)
+	{	rating = r;}
+};
+
+
+
+
+
+#endif
+		
+//"tabtenn0.cpp"
+#include "tabtenn0.h"
+#include <iostream>
+
+TableTennisPlayer::TableTennisPlayer(const string & fn, const string & ln, bool ht) : firstname(fn),
+						lastname(ln), hasTable(ht){}
+
+void TableTennisPlayer::name()
+{
+	cout << lastname << ", " << firstname << endl;
+}
+
+//Ratedplayer 메서드
+RatedPlayer::RatedPlayer(unsigned int r, const string & fn, const string & ln, bool ht) : TableTennisPlayer(fn, ln, ht)
+{
+	rating = r;
+}
+
+RatedPlayer::RatedPlayer(unsigned int r, const TableTennisPlayer &tp) : TableTennisPlayer(tp), rating(r){}
+
+//usetab.cpp
+#include <cstring>
+#include <iostream>
+#include "tabtenn0.h"
+
+using namespace std;
+
+
+int main()
+{
+	TableTennisPlayer player1("chuck", "blizzard", true);
+	RatedPlayer rplayer1(1140, "Mallory","Duck", true);
+
+	rplayer1.name();
+
+	if(rplayer1.HasTable())
+		cout << ": 탁구대가 있다. \n";
+	else
+		cout << ": 탁구대가 없다. \n";
+
+
+
+	player1.name();
+
+	if(player1.HasTable())
+		cout << ": 탁구대가 있다. \n";
+	else
+		cout << ": 탁구대가 없다. \n";
+
+
+	cout << "이름: " ;
+	rplayer1.name();
+	cout << "; 랭킹: " << rplayer1.Rating() << endl;
+
+	RatedPlayer rplayer2(1212, player1);
+
+	cout << "이름: " ;
+	rplayer2.name();
+	cout << "; 랭킹: " << rplayer2.Rating() << endl;
+
+
+
+
+
+	return 0;
+}
+

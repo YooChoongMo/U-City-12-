@@ -1,0 +1,119 @@
+#include <iostream>
+#include <typeinfo>                //typeid연산자 쓰기위해
+#include "pocket.h"
+
+using namespace std;
+
+void main()
+{
+
+	Demon *pd = NULL;
+	bool flag = false;
+
+	while (1)
+	{
+		cout << "생성할 캐릭터를 고르시오. \n";
+		cout << "1.피카츄   2.꼬부기   3.파이리 4.종료: ";
+		int choice;
+		cin >> choice;
+
+		switch (choice)
+		{
+
+		case 1:	pd = new Picachu();
+			flag = true;
+			break;
+
+		case 2:	pd = new Gobook();
+			flag = true;
+			break;
+
+		case 3:	pd = new Lee();
+			flag = true;
+			break;
+
+		case 4:
+			cout << "게임을 종료합니다.\n";
+			cout << endl;
+			flag = false;
+			break;
+		}
+		if (choice == 4)
+			break;
+
+		while (flag == true)
+		{
+			cout << "1.밥먹기   2.잠자기   3.놀기   4.운동하기   5.스킬연습   6.정보확인   7.종료 : ";
+			int act;
+			cin >> act;
+
+			switch (act)
+			{
+			case 1: pd->eat();
+				break;
+
+			case 2: pd->sleep();
+				break;
+
+			case 3: 
+
+				if (pd->play() == false)
+				{
+					cout << "캐릭터가 죽었습니다ㅠㅠ\n";
+					flag = false;
+				}
+				break;
+
+			case 4: 
+
+				if (pd->exercise() == false)
+				{
+					cout << "캐릭터가 죽었습니다ㅠㅠ\n";
+					flag = false;
+				}
+				break;
+
+			case 5: 
+				if (typeid(*pd) == typeid(Picachu))
+				{
+					if(((Picachu*)pd)->electric_shock() == false)
+					{
+						cout << "캐릭터가 죽었습니다ㅠㅠ\n";
+						flag = false;
+					}
+				}
+				
+				else if(typeid(*pd) == typeid(Gobook))
+				{
+					if(((Gobook*)pd)->water_pump() == false)
+					{
+						cout << "캐릭터가 죽었습니다ㅠㅠ\n";
+						flag = false;
+					}
+				}
+				
+				else if (typeid(*pd) == typeid(Lee))
+				{
+					if(((Lee*)pd)->leap_Attack() == false)
+					{
+						cout << "캐릭터가 죽었습니다ㅠㅠ\n";
+						flag = false;
+					}
+				}
+				break;
+
+			case 6: pd->printInfo();
+				break;
+
+			case 7: flag = false;
+					break;
+
+			}
+			
+			cout << endl;
+		}
+
+		delete pd;
+
+	}
+}

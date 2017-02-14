@@ -1,0 +1,58 @@
+//////////////////////구구단 코드
+
+#include <stdio.h>
+
+int main()
+{
+
+	int num = 0;
+	int input;
+
+	printf("입력할 숫자? ");
+	scanf("%d", &input);
+
+	for(num=1 ; num < 10; num++) 
+	{
+		printf("%d X %d = %d \n", input, num, input*num);
+	}
+	
+	return 0;
+}
+
+
+//////////////////////입력한 숫자의 높이 만큼 피라미드를 형성하시오!
+
+#include <stdio.h>
+
+int main()
+{
+
+	int num;
+	int input;
+	int space;
+	int height;
+	int temp;
+
+	printf("높이를 입력? ");
+	scanf("%d", &input);
+
+	temp = input;
+	
+	for(height=1; height<input+1; height++) //층
+		{
+			for(space=temp; space>1; space--)
+				{
+				printf(" ");					
+				}
+
+			for(num=0; num<(height*2-1); num++) // 별* 개수
+				{			
+					printf("*");
+				}
+			
+			temp--;
+			printf("\n");
+		}
+
+	return 0;
+}

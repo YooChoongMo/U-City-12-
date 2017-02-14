@@ -1,0 +1,152 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Account
+{
+	int m_id;   //계좌번호
+	int m_balance; //잔액
+	char *m_name;  //이름
+
+public:
+	
+	Account(int id, char *name, int balance);
+	Account(const Account & acc);
+	~Account();
+	Account();
+
+	int GetID() const;         //계좌번호 조회
+	int GetBalance() const;    //잔액조회
+	void AddMoney(int val);    //입금
+	void SubMoney(int val);    //출금
+	const char *GetName() const;
+	void ShowAllData();
+	
+};
+
+Account::Account(int id, char *name, int balance)
+{
+	m_name = new char[(strlen(name)+1)];
+	strcpy(m_name, name);
+
+	m_id = id;
+	m_balance = balance;
+}
+
+Account::Account(const Account &acc)
+{
+	m_name = new char[(strlen(acc.m_name)+1)];
+	strcpy(m_name, acc.m_name);
+
+	m_id = acc.m_id;
+	m_balance = acc.m_balance;
+
+}
+Account::Account()
+{}
+
+Account::~Account()
+{	
+	delete []m_name;
+}
+
+int Account::GetID() const
+{
+	return m_id;
+}
+
+int Account::GetBalance() const
+{
+	return m_balance;
+}
+
+void Account::AddMoney(int val)
+{
+	m_balance += val;
+}
+
+void Account::SubMoney(int val)
+{
+	m_balance -= val;
+}
+
+const char* Account::GetName() const
+{
+	return m_name;
+}
+
+void Account::ShowAllData()
+{
+	cout << "이름: " << GetName() << endl;
+	cout << "계좌번호: "<< GetID() << endl;
+	cout << "잔액: "<< GetBalance() << endl;
+}
+
+
+int main()
+{
+/*
+	int t;
+	int Id[3];
+	char *name[3];
+	int bal[3];
+	
+	
+	for(t=0; t<3; t++)
+	{
+		name[t] = new char[10];
+		
+		cout << "ID입력";
+		cin >> Id[t];
+		cout << "이름입력";
+		cin >> name[t];
+		cout << "잔액입력";
+		cin >> bal[t];
+	}
+
+	Account *pAcc[3] = { 
+						new Account(Id[0], name[0], bal[0]),
+						new Account(Id[1], name[1], bal[1]),
+						new Account(Id[2], name[2], bal[2]) 
+						};
+*///값을 입력 받아서 초기화 시킬때
+
+						// 포인터배열 문법을 활용하여  3명분의  계좌정보를 등록할 객체를 생성하고
+                        // 객체 생성과 동시 초기화로 값을 초기화 하던, 입력받아서 저장하던
+                        // 3명분의 각각의 객체에 데이를 입력하여
+                     
+                        //  ShowAllData() 함수를 이용해서  각각의 계좌정보를 출력하도록
+                        //   구현 하시오~~
+
+	Account *pAcc[3] = { 
+						new Account(10, "유충모", 50000),
+						new Account(20, "유충모2", 1000000),
+						new Account(30, "유충모3", 10000) 
+						};
+
+
+	int k;
+	for(k=0; k<3; k++)
+	{
+		pAcc[k]->ShowAllData();      //초기화 된 값 출력
+		cout << endl;
+	}
+	for(k=0; k<3; k++)
+	{
+		pAcc[k]->AddMoney(3000);
+		pAcc[k]->ShowAllData();		 //3000원 더한 값 출력
+		cout << endl;
+	}
+
+	int i;
+	
+	for(i=0; i<3; i++)
+	{
+		delete pAcc[i];               //메모리 해제
+		//delete name[i];             //초기화 시킬 애들 입력받을 때 
+	}
+
+	return 0;
+}
+

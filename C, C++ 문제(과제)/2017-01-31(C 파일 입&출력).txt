@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main()
+{
+	int ch;
+	FILE *fp = NULL, *fp2 = NULL;
+	fp2 = fopen("../files/a.txt", "w");  // "w" 쓰기모드
+
+	puts("메세지를 입력하라");
+	while ((ch = getchar()) != '\n')
+	{
+		fputc(ch, fp2);                 //키보드로부터 문자 하나씩 입력
+
+	}
+	fclose(fp2);
+	
+	fp = fopen("../files/a.txt", "r");  //../은 이 폴더 기준으로 하나 위 폴더로 간다음 files찾음
+	
+	if (fp == NULL)
+	{
+		printf("file open error");
+		exit(-1);                    //부모프로세스에게 상태를 알려주며 종료 (-1)은 비정상 / (양수) 정상종료
+	}
+
+	while ((ch = fgetc(fp)) != -1)   // -1은 파일의 끝을 알림 == eof(end of file)
+	{
+
+		//printf("%c", (char)ch);
+		putc(ch, stdout);
+	}
+	fclose(fp);                       //파일 닫기
+}
+
+////////////////////////////// gets_s, fputs
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main()
+{
+	int ch;
+	char buf[255];
+	FILE *fp = NULL, *fp2 = NULL;
+	fp2 = fopen("../files/a.txt", "w");
+
+	puts("메세지를 입력하라");
+	while (strncmp("end", buf, 3))
+	{
+		gets_s(buf);
+		fputs(buf, fp2);
+		fputs("\n", fp2);
+	}
+	fclose(fp2);
+	
+	fp = fopen("../files/a.txt", "r");  //../은 이 폴더 기준으로 하나 위 폴더로 간다음 files찾음
+	
+	if (fp == NULL)
+	{
+		printf("file open error");
+		exit(-1);                    //부모프로세스에게 상태를 알려주며 종료 (-1)은 비정상 / (양수) 정상종료
+	}
+
+	while (fgets(buf, 255, fp) != NULL)   // -1은 파일의 끝을 알림 == eof(end of file)
+	{
+
+		printf("%s", buf);
+		//puts(buf);
+	}
+	fclose(fp);                       //파일 닫기
+}
+
+//////////////////////////////////////        
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int add(int c, ...);
+
+int main()
+{
+	printf("%d\n", add(3, 1, 2, 3));
+	printf("%d\n", add(5, 1, 2, 3, 4, 5));
+
+	return 0;
+	
+}
+
+int add(int c, ...)   //...은 가변인자 몇개 올지 미정
+{
+	int sum = 0, i;
+	
+	for (i = 0; i < c; i++)
+	{
+		//sum += *(&c + i);            // 매개변수의 이름이 없기때문에 (주소)로 접근!
+		sum += (&c)[i];
+	}
+
+	return sum;
+
+}

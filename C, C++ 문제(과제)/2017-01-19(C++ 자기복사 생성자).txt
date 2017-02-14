@@ -1,0 +1,318 @@
+#include <iostream>
+using namespace std;
+
+
+class point
+{
+
+	int m_x, m_y;
+public:
+	point(int x, int y)
+	{
+		m_x = x;
+		m_y = y;
+	}
+
+	void show()
+	{ cout << m_x << ' ' << m_y << endl;}
+};
+
+int main()
+{
+	point p1(10,20);
+	point p2(p1);                  // p2에 p1을 복사!!!!!!!!!!!  //디폴트 복사 생성자함수 존재(얕은 복사)
+	p1.show();
+	p2.show();
+	return 0;
+
+
+}
+
+//////////////////////////////////////
+// strngbad.h
+
+#include <iostream>
+#ifndef STRNGBAD_H_
+#define STRNGBAD_H_
+
+
+class stringbad
+{
+private:
+	char *str;
+	int len;
+	
+public:
+	
+	stringbad(const char *s);    //생성자 함수
+	stringbad();			     //생성자 보이드 함수
+	~stringbad();
+	void Display();
+
+};
+
+#endif
+
+////////////////////////////////////
+// strngbad.cpp
+#include "strngbad.h"
+#include <cstring>
+using namespace std;
+
+stringbad::stringbad(const char *s)
+{
+	len = strlen(s);
+	str = new char[len+1];
+	strcpy(str, s);
+	cout << str << endl;
+	cout << "객체 생성 \n";	
+}
+
+stringbad::stringbad()
+{
+	len =4;
+	str = new char[4];
+	strcpy(str, "C++");
+	cout << str<< endl;
+	cout << "보이드 객체 생성 \n";
+
+}
+
+stringbad::~stringbad()
+{	
+		delete []str;
+		str = new char[len+1];
+}
+
+void stringbad::Display()
+{
+	cout << str <<endl;
+}
+
+///////////////////////////////////
+//vegnews.cpp
+#include "strngbad.h"
+#include <cstring>
+#include <iostream>
+using namespace std;
+
+
+void callme1(stringbad &s);
+void callme2(stringbad sb);
+
+int main(void)
+{
+	cout << endl;	
+
+	{
+		cout << "내부 블록을 시작한다. \n";
+		stringbad headline1("Celery Stalks at Midnight");
+		stringbad headline2("Lettuce Prey");
+		stringbad sports("Spinach Leaves Bowl for Dollars");
+		//stringbad com();
+
+		cout << "headline1: " ;
+		headline1.Display();
+
+		cout << "headline2: " ;
+		headline2.Display();
+
+		cout << "Sports: "  ;
+		sports.Display();
+
+		//cout << "com: "  ;
+		//com.
+		
+		
+		 
+		callme1(headline1);
+		cout << "headline1: " ;
+		headline1.Display();
+
+		callme2(headline2);		
+		cout << "headline2: ";
+		headline1.Display();
+
+		
+
+	}
+	return 0;
+
+}
+
+
+void callme1(stringbad &s)
+{
+	cout << "참조로 전달된 stringbad : \n";
+	s.Display();
+}
+
+void callme2(stringbad sb)
+{
+	cout << "값으로 전달된 stringbad : \n";
+	sb.Display();
+	
+}
+
+/////////////////////////////////////////////////////////////// 복사 생산자 함수 직접 정의
+#include <cstring>
+#include <iostream>
+
+using namespace std;
+
+class person
+{
+	char *m_name;
+	char *m_phone;
+	int m_age;
+
+public:
+	person(char *name, char *phone, int age);
+	person(const person &p);
+	~person();
+	void show();
+};
+
+person::person(char *name, char *phone, int age)
+{
+	m_name = new char[strlen(name)+1];
+	strcpy(m_name, name);
+
+	m_phone = new char[strlen(phone)+1];
+	strcpy(m_phone, phone);
+	
+	m_age = age;
+}
+
+person::person(const person & p)
+{
+	m_name = new char[strlen(p.m_name)+1];
+	strcpy(m_name, p.m_name);
+
+	m_phone = new char[strlen(p.m_phone)+1];
+	strcpy(m_phone, p.m_phone);
+	
+	m_age = p.m_age;
+}
+person::~person( )
+{
+	delete [ ]m_name;
+	delete [ ]m_phone;
+}
+void person::show( )
+{
+	cout<<" m_name: "<<m_name<<endl;
+	cout<<" m_phone: "<<m_phone<<endl;
+	cout<<" m_age: "<<m_age<<endl;
+}
+
+int main(void)
+{
+	person p1("kim", "010-2203-4040",22);
+	person p2=p1;
+	p1.show( );
+	p2.show( );
+	return 0;
+}
+
+///////////////////////////////////////////////////  p.889  & 2번 문제
+// cow.h
+
+#include <iostream>
+
+using namespace std;
+
+class Cow
+{
+	char m_name[20];
+	char *m_hobby;
+	double m_weight;
+
+public:
+
+	Cow();
+	Cow(const char *name, const char *hobby, double weight);
+	Cow(const Cow & c);
+	~Cow();
+	void show();
+
+	Cow & operator = (const Cow & c);
+};
+
+
+//cow.cpp
+#include <cstring>
+#include <iostream>
+#include "cow.h"
+
+using namespace std;
+
+Cow::Cow()
+{};
+
+Cow::Cow(const char *name, const char *hobby, double weight)
+{
+	strcpy(m_name, name);
+
+	m_hobby = new char[strlen(hobby)+1];
+	strcpy(m_hobby, hobby);
+	
+	m_weight = weight;
+}	
+Cow::Cow(const Cow & c)                             //생성자 함수  ==> 객체 만들어지면서 할때 Cow c2(c1);
+{
+	//m_name = new char[strlen(c.name)+1];
+	strcpy(m_name, c.m_name);
+
+	m_hobby = new char[strlen(c.m_hobby)+1];
+	strcpy(m_hobby, c.m_hobby);
+	
+	m_weight = c.m_weight;
+}
+
+
+Cow::~Cow()
+{
+	delete []m_hobby;
+}
+
+void Cow::show()
+{
+	cout << "name : " << m_name << endl;
+	cout << "hobby : " << m_hobby << endl;
+	cout << "weight : " << m_weight << endl;
+}
+
+Cow & Cow::operator = (const Cow & c)                // 멤버함수 오버로딩 operator => 중간에 c2 = c1; 할때
+{
+	Cow cc;
+
+	strcpy(cc.m_name, c.m_name);
+	cc.m_hobby = c.m_hobby;
+	cc.m_weight = c.m_weight;
+
+	return cc;
+}
+
+
+//usecow.cpp
+#include <cstring>
+#include <iostream>
+#include "cow.h"
+
+using namespace std;
+
+int main()
+{
+	Cow c1("젖소", "밥먹기", 500);
+	c1.show();
+
+	Cow c2(c1);
+	c2.show();
+
+
+	return 0;
+}
+
+
+

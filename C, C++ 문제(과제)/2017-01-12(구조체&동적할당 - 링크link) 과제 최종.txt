@@ -1,0 +1,398 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct student
+{
+   char name[30];
+   int age;
+   double grade;
+   struct student *link;
+
+}STU;
+
+void Display(STU *pd);
+void Insert(STU** pstart, STU** pback, STU** pstart_reverse, STU** pback_reverse);
+void Modify(STU** pm, STU** pm2);
+void Data_Delete(STU** ps, STU** pb, STU** ps_reverse, STU** pb_reverse);
+
+int main()
+{
+
+   STU *pf = NULL;
+   STU *pstart = NULL;  //변경되는 시작노드 보관
+   STU *pback = NULL;   //변경되는 마지막 노드 보관
+   STU *pstart_reverse = NULL;
+   STU *pback_reverse = NULL;
+
+   while (1)
+   {
+      int n;
+      int select = 0;
+
+      printf("1.입력   2.출력   3.데이터 수정   4.삭제   5.종료 : ");
+      scanf("%d", &n);
+
+      switch (n)
+      {
+      case 1: printf("\n입력화면\n");
+
+         Insert(&pstart, &pback, &pstart_reverse, &pback_reverse);
+         break;
+
+      case 2:   if (pstart == NULL)
+      {
+         printf("\n출력할 데이터가 없습니다. \n");
+         break;
+      }
+
+            while (select != 3)                        //이전 메뉴 나올때 까지 반복
+            {
+               printf("\n1.처음 입력한 순서대로 출력   2.최신 입력한 순서대로 출력   3.이전메뉴 : ");
+               scanf("%d", &select);
+               fflush(stdin);
+
+               if (select == 1)                            //입력한 순서대로 출력
+               {
+                  printf("\nold순서 출력화면\n");
+                  Display(pstart);
+               }
+               else if (select == 2)                       //역순으로 출력               
+               {
+                  printf("\nNew순서 출력화면\n");
+                  Display(pstart_reverse);
+               }
+            }
+
+            break;
+
+
+      case 3: Modify(&pstart, &pstart_reverse);
+         break;
+
+
+      case 4: Data_Delete(&pstart, &pback, &pstart_reverse, &pback_reverse);
+         break;
+
+
+
+
+
+      case 5:      while (pstart != NULL)                      //순방향으로 저장된 동적메모리 해제
+      {
+         pf = pstart->link;
+         free(pstart);
+         pstart = pf;
+      }
+
+               while (pstart_reverse != NULL)               //역방향으로 저장된 동적메모리 해제
+               {
+                  pf = pstart_reverse->link;
+                  free(pstart_reverse);
+                  pstart_reverse = pf;
+               }
+               printf("동적메모리 해제 완료\n종료합니다. \n");
+               return 0;
+      }
+      printf("\n");
+   }
+}
+
+
+void Insert(STU** pstart, STU** pback, STU** pstart_reverse, STU** pback_reverse)  // 이전꺼를 void형식으로 더블포인트 사용!
+{
+   STU *ptr;
+   STU *ptr2;
+   int i = 0;
+
+   ptr = (STU*)malloc(sizeof(STU));           //순방향 저장
+   ptr2 = (STU*)malloc(sizeof(STU));         //역방향 저장
+
+   printf("이름을 입력하세요 : ");
+   scanf("%s", ptr->name);
+   fflush(stdin);
+
+   printf("나이를 입력하세요 : ");
+   scanf("%d", &ptr->age);
+   fflush(stdin);
+
+   printf("학점을 입력하세요 : ");
+   scanf("%lf", &ptr->grade);
+   fflush(stdin);
+   ///////////////////////////////////////////////////////// ptr의 내용 ptr2에 복사
+   ptr2->age = ptr->age;
+   ptr2->grade = ptr->grade;
+   while (ptr->name[i] != '\0')
+   {
+      ptr2->name[i] = ptr->name[i];
+      i++;
+   }
+   ptr2->name[i] = '\0';
+
+   ptr->link = NULL;
+   ptr2->link = NULL;
+   ///////////////////////////////////////////////////////// 순서대로 저장
+   if (*pstart == NULL)
+   {
+      *pstart = ptr;
+      *pback = ptr;
+   }
+   else
+   {
+      (*pback)->link = ptr;
+      (*pback) = (*pback)->link;
+   }
+
+   ////////////////////////////////////////////////////////// 역순으로 저장
+   if (*pstart_reverse == NULL)
+   {
+      *pstart_reverse = ptr2;
+      *pback_reverse = ptr2;
+   }
+   else
+   {
+      ptr2->link = *pstart_reverse;
+      *pstart_reverse = ptr2;
+   }
+
+
+}
+
+void Display(STU *pd)
+{
+   while (pd != NULL)
+   {
+      printf("이름 : %s   나이 : %d   학점 : %.2lf \n", pd->name, pd->age, pd->grade);
+      pd = pd->link;
+   }
+}
+
+void Modify(STU** pm, STU** pm2)
+{
+   char tmp[30];
+   int select = 0;
+   int check = 0;
+   int check2 = 0;
+   STU *pt = NULL;
+   STU *pt2 = NULL;
+   int i = 0;
+
+   pt = *pm;
+   pt2 = *pm2;
+
+   printf("검색하는 이름을 입력하세요 : ");
+   scanf("%s", tmp);
+   fflush(stdin);
+
+   /////////////////////////////검색 알고리즘   
+
+   if ((pt->link == NULL))                        //(순방향) 노드가 한 개인 경우!
+   {
+      if (strcmp(pt->name, tmp) != 0)
+         printf("해당하는 이름이 없습니다. \n");
+
+      else
+      {
+         check = 1;
+
+      }
+
+   }
+   else                                            //노드가 두개 이상인 경우!      
+   {
+      while ((strcmp(pt->name, tmp) != 0))
+      {
+         if (strcmp(pt->name, tmp) != 0)
+         {
+            pt = pt->link;
+
+            if ((pt->link == NULL) && (strcmp(pt->name, tmp) != 0))
+               printf("해당하는 이름이 없습니다. \n");
+
+            else if (strcmp(pt->name, tmp) == 0)
+            {
+               check = 1;
+               check2 = 1;
+            }
+         }
+      }
+
+   }
+   if (check2 == 1)                     // 검색한 이름이 노드에 있을 경우(역방향 구조체에서도 검색실행)
+   {
+      while (strcmp(pt2->name, tmp) != 0)
+      {
+         if (strcmp(pt2->name, tmp) != 0)
+            pt2 = pt2->link;
+      }
+   }
+   while ((select != 4) && (check == 1))
+   {
+      printf("\n변경하는 데이터를 고르세요. \n");
+      printf("1.이름   2.나이   3.학점   4.이전 메뉴 : ");
+      scanf("%d", &select);
+      fflush(stdin);
+
+      if (select == 1)
+      {
+         printf("\n변경할 이름을 입력하세요 : ");
+         scanf("%s", pt->name);
+         fflush(stdin);
+
+         while (pt->name[i] != '\0')
+         {
+            pt2->name[i] = pt->name[i];
+            i++;
+         }
+         pt2->name[i] = '\0';
+      }
+      else if (select == 2)
+      {
+         printf("\n변경할 나이를 입력하세요 : ");
+         scanf("%d", &(pt->age));
+         fflush(stdin);
+         pt2->age = pt->age;
+      }
+      else if (select == 3)
+      {
+         printf("\n변경할 학점을 입력하세요 : ");
+         scanf("%lf", &(pt->grade));
+         fflush(stdin);
+         pt2->grade = pt->grade;
+      }
+
+
+   }
+}
+
+void Data_Delete(STU** ps, STU** pb, STU** ps_reverse, STU** pb_reverse)
+{
+   char temp[30];
+   STU *pstart = NULL;                             //시작노드 주소 보관
+   STU *pstart_reverse = NULL;
+   STU *pt = NULL;                           //이동하면서 검사할 포인터
+   STU *pt2 = NULL;
+   STU *pfree = NULL;                              //삭제할 노드의 시작주소 보관
+   int check = 0;
+   int check_reverse = 0;
+
+   pt = *ps;
+   pt2 = *ps_reverse;
+   pstart = *ps;
+   pstart_reverse = *ps_reverse;
+
+   printf("삭제하려는 노드가 가지고 있는 이름을 입력하세요 : ");
+   scanf("%s", temp);
+   fflush(stdin);
+
+   /////////////////////////////검색 알고리즘///////////////////////   
+
+   if ((pt->link == NULL))                                    //노드가 한 개인 경우
+   {
+      if (strcmp(pt->name, temp) != 0)
+         printf("해당하는 이름이 없습니다. \n");
+
+      else
+      {
+         free(*ps);                        //동적메모리 해제
+         free(*ps_reverse);
+         pt = NULL;
+         *ps = NULL;                        //시작 포인터 초기화
+         *pb = NULL;                      //마지막 포인터 초기화
+         *ps_reverse = NULL;
+         *pb_reverse = NULL;
+      }
+   }
+
+   else                                         //노드가 두개 이상 경우      
+   {
+      while (strcmp(pt->name, temp) != 0)
+      {
+         if (strcmp(pt->name, temp) == 0)     // pt 노드에서 발견
+         {
+            pfree = pt;
+            pt = pfree->link;
+            pfree->link = NULL;
+            *ps = pt;
+            check_reverse = 1;
+
+            free(pfree);
+            break;
+         }
+
+         else if (strcmp(pt->link->name, temp) == 0)      // pt 노드의 다음 노드에서 발견
+         {
+            pfree = pt->link;
+            pt->link = pfree->link;
+            pfree->link = NULL;
+
+            if (check == 0)                             //pt의 이동이 없을 때
+            {
+               *ps = pt;
+            }
+            else
+            {
+               *ps = pstart;                   //pt의 이동이 생기면 pt는 제일 처음이 아니기 때문에 pstart사용
+               while (pstart->link != NULL)
+                  pstart = pstart->link;           //pstart == 마지막 노드
+               *pb = pstart;                   //마지막 노드 주소 대입
+
+            }
+            check_reverse = 1;
+            free(pfree);
+            break;
+         }
+
+         if ((strcmp(pt->link->name, temp) != 0) && (pt->link->link == NULL))     //이동 후 검사->없으면 검색 실패!
+         {
+            printf("해당하는 이름이 없습니다. \n");
+            break;
+         }
+
+         pt = pt->link;                                //둘다 없으면 pt 다음노드로 이동
+         check = 1;
+      }
+
+      ////////////////////역방향 구조체/////////////////// 
+      if (check_reverse == 1)                         //순방향 구조체에서 삭제를 한 경우(삭제할 노드 존재하기 때문에 바로 진행)
+      {
+         while (strcmp(pt2->name, temp) != 0)
+         {
+            if (strcmp(pt2->name, temp) == 0)           // pt 노드에서 발견
+            {
+               pfree = pt2;
+               pt2 = pfree->link;
+               pfree->link = NULL;
+               *ps_reverse = pt2;
+
+               free(pfree);
+               break;
+            }
+
+            else if (strcmp(pt2->link->name, temp) == 0)    // pt 노드의 다음 노드에서 발견
+            {
+               pfree = pt2->link;
+               pt2->link = pfree->link;
+               pfree->link = NULL;
+
+               if (check == 0)                       //pt의 이동이 없을 때
+                  *ps_reverse = pt2;
+               else
+               {
+                  *ps_reverse = pstart_reverse;              //pt의 이동이 생기면 pt는 제일 처음이 아니기 때문에 pstart사용
+                  while (pstart_reverse->link != NULL)
+                     pstart_reverse = pstart_reverse->link;       //pstart_reverse == 마지막 노드
+                  *pb_reverse = pstart_reverse;               //마지막 노드 주소 대입
+               }
+               free(pfree);
+               break;
+            }
+            pt2 = pt2->link;                                     //둘다 없으면 pt 다음노드로 이동
+            check = 1;
+         }
+
+      }
+   }
+
+}

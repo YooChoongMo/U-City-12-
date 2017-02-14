@@ -1,0 +1,192 @@
+#include <stdio.h>
+
+int main()
+{
+	int i;
+	int num;
+	int sum = 0;
+	
+	printf("값 5개의 합계와 평균을 구합니다. \n");
+	printf("값 5개를 입력하세요. \n");
+
+	for(i=0; i<5; i++)
+	{
+		printf("값 : ");
+		scanf("%d", &num);
+
+		sum = sum + num;
+	}
+	
+	printf("값 5개가 모두 입력되었습니다. \n");
+	printf("입력한 값 5개의 합계는 %d입니다. \n", sum);
+	printf("입력한 값 5개의 평균은 %.2f입니다. \n", (double)sum/5);   //(double)자동 형변환!!!  5는 자동으로
+	printf("감사합니다.");						  // 더블로 승격!
+		
+	return 0;
+}
+
+//////////////////////////////////////////////////// ex) 2 ,9 입력 사이에 숫자들 모두 합
+#include <stdio.h>
+
+int main()
+{
+	int i;
+	int num;
+	int num2;
+	int sum = 0;
+	
+	printf("값 2개를 입력하세요 : ");
+	scanf("%d %d", &num, &num2);
+
+	for(i=num; i<=num2; i++)
+		sum = sum + i;
+	
+	printf("모든 정수들의 합계는 %d입니다. \n", sum);
+		
+	return 0;
+}
+
+/////////////////////////////////////////////////////// 홀,짝 판별
+#include <stdio.h>
+
+int main()
+{
+	int n;
+	int space = 0;
+	int total = 0;
+
+	scanf("%d", &n);
+
+	while(n !=0)
+	{
+
+		if(n%2 == 0)
+			printf("짝수\n");
+	
+		else
+			printf("홀수\n");
+	
+		scanf("%d", &n);
+	}
+
+	return 0;
+}
+/////////////////////////////////////////////////////////
+#include <stdio.h>
+
+
+int main()
+{
+	
+	char choice;
+	
+	scanf("%c",&choice);
+	fflush(stdin);
+
+
+	while((choice != 'Q') && (choice != 'q'))
+	{
+		switch(choice)
+		{
+			case 'a' : 
+			case 'A' : printf("A를 입력하셨습니다. \n");
+						break;
+
+			case 'r' : 
+			case 'R' : printf("R를 입력하셨습니다. \n");
+						break; 
+
+
+			case 'l' : 
+			case 'L' : printf("사장님은 오늘 회사에 계셨습니다. \n");
+						break;
+
+			case 'c' : 
+			case 'C' : printf("C를 입력하셨습니다. \n");
+						break; 
+
+
+			default : printf("그것은 선택할 수 없습니다. \n");
+		}
+
+		scanf("%c",&choice);
+		fflush(stdin);
+
+	}
+
+	return 0;
+}
+///////////////////////////////////////////////////////////////  프로그래밍 연습  p368 3번문제 
+#include <stdio.h>
+
+
+int main()
+{
+	char ch;
+
+	printf("다음 선택 사항 중에서 하나를 선택하십시오. (끝내려면 q) \n");
+	printf("c) camera        p) pianist \n");
+	printf("t) tree          g) game \n");
+
+	scanf("%c", &ch);
+	fflush(stdin);
+
+	while(ch != 'q')
+	{
+
+		switch(ch)
+		{
+		case 'c' : printf("난 camera를 구매했습니다. \n");
+					break;
+
+		case 'p' : printf("난 pianist입니다. \n");
+					break;
+
+		case 't' : printf("단풍나무는 잎이 별처럼 생겼습니다. \n");
+					break;
+
+		case 'g' : printf("난 game을 좋아합니다. \n");
+					break;
+
+		default : printf("해당 문자가 없습니다.\n다시 선택하십시오(끝내려면 q) : ");
+		
+		}
+
+		scanf("%c", &ch);
+		fflush(stdin);
+	}
+
+	return 0;
+}
+///////////////////////////////////////////////////////////////  선생님 칠판 과제(성적내기)
+
+#include <stdio.h>
+
+
+int main()
+{
+	
+	int score_a;
+	int score_b;
+	int score_c;
+	double average;
+
+	printf("국어, 영어, 수학 정수를 입력하세요 : ");
+	scanf("%d %d %d", &score_a, &score_b, &score_c);
+	fflush(stdin);
+
+	average = (double)(score_a + score_b + score_c)/3;
+	printf("당신의 평균 점수는 %.2f입니다. \n", average);
+
+	if(average >= 90)
+		printf("당신의 성적은 \"우수\"합니다. \n");
+
+	else if((average >= 60) && (average <= 89))
+		printf("당신의 성적은 \"양호\"합니다. \n");
+
+	else if(average < 60)
+		printf("당신의 성적은 \"노력중\"이군요! \n");
+	
+
+	return 0;
+}
