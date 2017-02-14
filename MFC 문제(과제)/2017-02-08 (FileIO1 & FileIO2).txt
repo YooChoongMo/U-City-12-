@@ -1,0 +1,71 @@
+////////////////////// FileIO1 
+
+void CMFCFileIODlg::OnBnClickedButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(true);
+	int size = 0;
+	CFile file;                       //파일의 정보를 가진 객체
+	file.Open(path,CFile::modeRead);  //읽기모드로 파일 오픈
+	size = file.GetLength() + 1;
+	char *buf = new char[size];
+	memset(buf, '\0', size);           //버프 초기화 (스레기값)
+	file.Read(buf, size);
+	file.Close();
+	content.Format("%s", buf);
+	UpdateData(false);
+	delete[] buf;
+}
+
+
+void CMFCFileIODlg::OnBnClickedButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(true);
+	CFile file;                       //파일의 정보를 가진 객체
+	char buf[255];
+	file.Open(path, CFile::modeCreate | CFile::modeWrite);  //없으면 생성 & 쓰기
+	file.Write(content, lstrlen(content));    //lstrlen(content) 컨텐트의 길이만큼
+	file.Close();
+	content = "";
+	UpdateData(false);
+}
+
+
+/////////////////////   FileIO2 (아카이브 이용)
+
+void CMFCFileIO2Dlg::OnBnClickedButton2()  //Write   myEdit1,2 모두를 쓴다
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	UpdateData(true);
+
+	CFile file;
+	file.Open("C:/text/yyy.txt", CFile::modeCreate | CFile::modeWrite);
+	CArchive ar(&file, CArchive::store);  
+	//stor은 모드임(그쪽으로 데이터를 보냄/ load면 받아옴)
+	//아카이브 스트림=>지정된 경로에 데이터를 보냄!!
+	//read & write가 용이!!
+	ar << myEdit1 << myEdit2;
+	myEdit1 = "";
+	myEdit2 = "";
+	UpdateData(false);
+	ar.Close();
+	file.Close();
+}
+
+
+void CMFCFileIO2Dlg::OnBnClickedButton1()  //Read
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	CString str1, str2;
+	CFile file;
+	file.Open("C:/text/yyy.txt",  CFile::modeRead);
+	CArchive ar(&file, CArchive::load);
+	ar >> str1 >> str2;  
+	//Cin 하고 비슷 / 직렬화(여러 데이터를 한줄로 나열)
+	MessageBox(str1 + ":" + str2);
+	ar.Close();
+	file.Close();
+}

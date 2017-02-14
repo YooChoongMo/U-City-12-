@@ -1,0 +1,25 @@
+각각
+리소스 - 추가 - 다이얼로그
+
+각 다이얼로그에서 무선 클래스 추가
+Cproperty형식으로 만듬
+
+원래 다이얼로그에선 
+MySheet로 클래스 추가
+
+
+
+
+
+
+**기능 함수들은 MFC.h를 추가한 후 
+MFC.cpp에 선언을 해준다 ex) warehouse w; Stor st;
+
+
+
+함수 
+
+CString str2 = str.Tokenize(".", cnt);
+'.'을 기준으로 나눔 
+/ cnt = 0 이면 기준 앞 글자들!
+/ cnt = 1 이면 기준 뒤 글자들!

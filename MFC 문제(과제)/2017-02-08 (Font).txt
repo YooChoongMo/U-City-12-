@@ -1,0 +1,39 @@
+
+void CMFC_FontDlg::OnBnClickedButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CClientDC dc(this);
+	CFont font, *oldFont;  //글씨 객체 = font객체
+	font.CreateFont(25, 25, -60, 0, 600, 0, 0, 1, 
+		ANSI_CHARSET, OUT_DEFAULT_PRECIS, 
+		CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, VARIABLE_PITCH | FF_SWISS, "바탕체");
+	//(가로,세로,각도,개별각도, 두께,이탤릭체(기울림),언더라인,관통선
+	//글자 종류(표준), 정밀도(기본)
+	//글자의 질(표준), 
+	oldFont = dc.SelectObject(&font);
+	dc.TextOut(10, 40, "안녕하세요");
+	//10,40 위치에 텍스트 출력
+	dc.SelectObject(oldFont);
+
+}
+
+//키보다다운 쓰려면 화면에 버튼이 없어야한다
+//다이얼로그 -> 클래스 마법사-> 메세지 (OnKeyDown)
+
+void CMFC_FontDlg::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	CClientDC dc(this);
+	int keyval = 0;
+	char str[30] = "";
+	keyval = MapVirtualKey(nChar, 2); //아스키 코드값을 넣어줌
+	sprintf(str, "클릭된 키:%c, 아스키코드:%d", (char)nChar, keyval);
+	dc.TextOut(10, 10, str);
+	
+	
+	
+	CDialogEx::OnKeyDown(nChar, nRepCnt, nFlags);
+
+	
+}

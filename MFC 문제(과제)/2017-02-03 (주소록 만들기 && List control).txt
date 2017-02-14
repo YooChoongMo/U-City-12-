@@ -1,0 +1,219 @@
+
+// MFCprac4Dlg.cpp : 구현 파일
+//
+
+#include "stdafx.h"
+#include "MFCprac4.h"
+#include "MFCprac4Dlg.h"
+#include "afxdialogex.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
+// 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
+
+class CAboutDlg : public CDialogEx
+{
+public:
+	CAboutDlg();
+
+// 대화 상자 데이터입니다.
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_ABOUTBOX };
+#endif
+
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
+
+// 구현입니다.
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
+{
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+END_MESSAGE_MAP()
+
+
+// CMFCprac4Dlg 대화 상자
+
+
+
+CMFCprac4Dlg::CMFCprac4Dlg(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_MFCPRAC4_DIALOG, pParent)
+	, name(_T(""))
+	, email(_T(""))
+	, tel(_T(""))
+{
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+void CMFCprac4Dlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, name);
+
+	DDX_Control(pDX, IDC_LIST1, mylistcontrol);
+	DDX_Text(pDX, IDC_EDIT2, email);
+	DDX_Text(pDX, IDC_EDIT3, tel);
+}
+
+BEGIN_MESSAGE_MAP(CMFCprac4Dlg, CDialogEx)
+	ON_WM_SYSCOMMAND()
+	ON_WM_PAINT()
+	ON_WM_QUERYDRAGICON()
+	
+	ON_BN_CLICKED(IDC_BUTTON2, &CMFCprac4Dlg::OnBnClickedButton2)
+END_MESSAGE_MAP()
+
+
+// CMFCprac4Dlg 메시지 처리기
+
+BOOL CMFCprac4Dlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
+
+	// IDM_ABOUTBOX는 시스템 명령 범위에 있어야 합니다.
+	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	ASSERT(IDM_ABOUTBOX < 0xF000);
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != NULL)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
+
+	// 이 대화 상자의 아이콘을 설정합니다.  응용 프로그램의 주 창이 대화 상자가 아닐 경우에는
+	//  프레임워크가 이 작업을 자동으로 수행합니다.
+	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
+	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
+
+	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	char *str[3] = { "name", "email", "tel" };
+	int colW[3] = { 60, 100, 100 }; //가로길이   
+	//컬럼의 길이(이름은 짧고, 이메일은 길고)=>폴더열면 이름, 수정날짜 이런 칸
+	LVCOLUMN cols;  //컬럼 객체를 하나 만듬
+	cols.mask = LVCF_FMT | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH; 
+	//포맷, 서브항복, 텍스트, 가로길이 => 변경전 설정 할거라고 말함
+	cols.fmt = LVCFMT_LEFT; //왼쪽 정렬
+
+	for (int i = 0; i < 3; i++) //이름, 메일, tel 세 개
+	{
+		cols.pszText = str[i];
+		cols.iSubItem = i;
+		cols.cx = colW[i];  //까지 컬럼을 설정
+		mylistcontrol.InsertColumn(i, &cols); //컬럼을 추가(i번째 index에다가)
+	}
+	
+	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
+}
+
+void CMFCprac4Dlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}
+	else
+	{
+		CDialogEx::OnSysCommand(nID, lParam);
+	}
+}
+
+// 대화 상자에 최소화 단추를 추가할 경우 아이콘을 그리려면
+//  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 응용 프로그램의 경우에는
+//  프레임워크에서 이 작업을 자동으로 수행합니다.
+
+void CMFCprac4Dlg::OnPaint()
+{
+	if (IsIconic())
+	{
+		CPaintDC dc(this); // 그리기를 위한 디바이스 컨텍스트입니다.
+
+		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+
+		// 클라이언트 사각형에서 아이콘을 가운데에 맞춥니다.
+		int cxIcon = GetSystemMetrics(SM_CXICON);
+		int cyIcon = GetSystemMetrics(SM_CYICON);
+		CRect rect;
+		GetClientRect(&rect);
+		int x = (rect.Width() - cxIcon + 1) / 2;
+		int y = (rect.Height() - cyIcon + 1) / 2;
+
+		// 아이콘을 그립니다.
+		dc.DrawIcon(x, y, m_hIcon);
+	}
+	else
+	{
+		CDialogEx::OnPaint();
+	}
+}
+
+// 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서
+//  이 함수를 호출합니다.
+HCURSOR CMFCprac4Dlg::OnQueryDragIcon()
+{
+	return static_cast<HCURSOR>(m_hIcon);
+}
+
+void CMFCprac4Dlg::OnBnClickedButton2()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+		char str[50] = "";
+		static int idx = 0;
+		UpdateData(true);
+		LVITEM item;
+		item.mask = LVIF_TEXT;
+		item.iItem = idx;
+
+		item.iSubItem = 0;
+		//subitem 은 name | email뜨는 맨 윗줄 인덱스
+		//iItem 은 항목의 줄번호
+		sprintf(str, "%s", name);
+		//메모리에다 출력하는 함수
+		//sprintf(str, "%s%d", name,정수...등등);
+		//str에다가 정수를 쓰든 문자를 쓰든 짬뽕 모두 가능!!!
+		item.pszText = (LPSTR)str;
+		mylistcontrol.InsertItem(&item);  //맨처음은 InserItem으로(새로운 줄을 만들기!!)
+
+		item.iSubItem = 1;
+		sprintf(str, "%s", email);
+		item.pszText = (LPSTR)str;
+		mylistcontrol.SetItem(&item);     //그 다음부터는 만든 줄에다가 값을 추가하는 방식!!
+
+		item.iSubItem = 2;
+		sprintf(str, "%s", tel);
+		item.pszText = (LPSTR)str;
+		mylistcontrol.SetItem(&item);     //그 다음부터는 만든 줄에다가 값을 추가하는 방식!!
+
+		name = "";
+		email = "";
+		tel = "";
+		idx++; //줄이 하나 추가됬으니까 그 다음줄로 이동
+
+		UpdateData(false);
+	}
+
+

@@ -1,0 +1,47 @@
+1. MFC 이벤트를 뭐라 하냐
+ - 메시지
+
+2. 마우스 왼쪽버튼
+ - WM_LBUTTONDOWN
+
+3. 다이얼로그에서 버튼클릭-> 메시지박스(버튼클릭이라는 )띄우기 OnBnClickedButton1()
+ - 코드짜기
+ - MessageBox("버튼클릭");
+
+4. 다이얼로그 종료 함수 -> onOK()함수 
+void page1::OnOK()
+{
+}
+
+5. 뷰 컨트롤러 변수에-> UpdateData(true)저장 / (false)출력
+
+6. 에디트 컨트롤러에 이름을 입력하면 -> 이름+안녕하세요를 다시 출력
+UpdateData(true);
+str += "안녕하세요"; 
+UpdateData(false)
+
+7. 리스트 박스
+선택된 항목을 메시지 박스로 출력
+	
+	int idx;
+	idx = myList.GetCurSel();
+	CString str;
+	myList.GetText(idx, str);
+	MessageBox(str);
+
+8. 화면에 그림 출력 (가상메모리잡는) => CClientDC
+CClientDC dc(this);
+
+9. 파일 입출력 =====> ** 아카이브(클래스이름 쓰기)
+파일의 직렬화 -> 아카이브(클래스이름 쓰기) CArchive
+CArchive::
+
+10. 프로젝트 생성 
+// CMFC_finalApp 생성
+// CMFC_finalDlg 대화 상자
+
+app , Dlg 두개 이름과 역할
+
+App클래스 => 프로젝트 전반적인 정보를 갖고 전체를 관장하는 코드 입력하는곳, 다이얼로그 시작하면 바로 뜨게 해주는곳
+Dlg => 다이얼로그 하나에 대해서만 관리 OnInitDialog() UI초기화 담당, OnPaint() 화면을 다시 뿌릴때, 
+	Eventhandler현재다이얼로그의 이벤트를 관리

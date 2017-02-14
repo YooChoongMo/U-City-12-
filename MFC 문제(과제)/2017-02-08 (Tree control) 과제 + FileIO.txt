@@ -1,0 +1,418 @@
+
+// MFCAteacherDlg.h : 헤더 파일
+//
+
+#pragma once
+#include "afxcmn.h"
+#include "afxwin.h"
+
+
+// CMFCAteacherDlg 대화 상자
+class CMFCAteacherDlg : public CDialogEx
+{
+// 생성입니다.
+public:
+	CMFCAteacherDlg(CWnd* pParent = NULL);	// 표준 생성자입니다.
+
+// 대화 상자 데이터입니다.
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_MFCATEACHER_DIALOG };
+#endif
+
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 지원입니다.
+
+
+// 구현입니다.
+protected:
+	HICON m_hIcon;
+
+	// 생성된 메시지 맵 함수
+	virtual BOOL OnInitDialog();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
+	afx_msg void OnPaint();
+	afx_msg HCURSOR OnQueryDragIcon();
+	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnTvnSelchangedTree1(NMHDR *pNMHDR, LRESULT *pResult);
+	CTreeCtrl myC;
+	afx_msg void OnBnClickedButton1();
+	void searchTree(HTREEITEM parent, CString path);
+	//CString searchTree2(CString path, CString fname);
+	
+	CString srcPath;
+	CString space;
+//	CEdit myName;
+	afx_msg void OnBnClickedButton2();
+	CString myName;
+	afx_msg void OnBnClickedButton3();
+	CString fd;
+	CString first;
+	HTREEITEM nowtree;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
+// MFCAteacherDlg.cpp : 구현 파일
+//
+
+#include "stdafx.h"
+#include "MFCAteacher.h"
+#include "MFCAteacherDlg.h"
+#include "afxdialogex.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
+
+
+// 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
+
+class CAboutDlg : public CDialogEx
+{
+public:
+	CAboutDlg();
+
+// 대화 상자 데이터입니다.
+#ifdef AFX_DESIGN_TIME
+	enum { IDD = IDD_ABOUTBOX };
+#endif
+
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
+
+// 구현입니다.
+protected:
+	DECLARE_MESSAGE_MAP()
+};
+
+CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
+{
+}
+
+void CAboutDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+}
+
+BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+END_MESSAGE_MAP()
+
+
+// CMFCAteacherDlg 대화 상자
+
+
+
+CMFCAteacherDlg::CMFCAteacherDlg(CWnd* pParent /*=NULL*/)
+	: CDialogEx(IDD_MFCATEACHER_DIALOG, pParent)
+	, srcPath(_T(""))
+	, space(_T(""))
+	, myName(_T(""))
+{
+	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+}
+
+void CMFCAteacherDlg::DoDataExchange(CDataExchange* pDX)
+{
+	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_TREE1, myC);
+	DDX_Text(pDX, IDC_EDIT1, srcPath);
+	DDX_Text(pDX, IDC_EDIT2, space);
+	//  DDX_Control(pDX, IDC_EDIT3, myName);
+	DDX_Text(pDX, IDC_EDIT3, myName);
+}
+
+BEGIN_MESSAGE_MAP(CMFCAteacherDlg, CDialogEx)
+	ON_WM_SYSCOMMAND()
+	ON_WM_PAINT()
+	ON_WM_QUERYDRAGICON()
+	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE1, &CMFCAteacherDlg::OnTvnSelchangedTree1)
+	ON_BN_CLICKED(IDC_BUTTON1, &CMFCAteacherDlg::OnBnClickedButton1)
+	ON_BN_CLICKED(IDC_BUTTON2, &CMFCAteacherDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDC_BUTTON3, &CMFCAteacherDlg::OnBnClickedButton3)
+END_MESSAGE_MAP()
+
+
+// CMFCAteacherDlg 메시지 처리기
+
+BOOL CMFCAteacherDlg::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
+
+	// IDM_ABOUTBOX는 시스템 명령 범위에 있어야 합니다.
+	ASSERT((IDM_ABOUTBOX & 0xFFF0) == IDM_ABOUTBOX);
+	ASSERT(IDM_ABOUTBOX < 0xF000);
+
+	CMenu* pSysMenu = GetSystemMenu(FALSE);
+	if (pSysMenu != NULL)
+	{
+		BOOL bNameValid;
+		CString strAboutMenu;
+		bNameValid = strAboutMenu.LoadString(IDS_ABOUTBOX);
+		ASSERT(bNameValid);
+		if (!strAboutMenu.IsEmpty())
+		{
+			pSysMenu->AppendMenu(MF_SEPARATOR);
+			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
+		}
+	}
+
+	// 이 대화 상자의 아이콘을 설정합니다.  응용 프로그램의 주 창이 대화 상자가 아닐 경우에는
+	//  프레임워크가 이 작업을 자동으로 수행합니다.
+	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
+	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
+
+	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
+}
+
+void CMFCAteacherDlg::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
+	{
+		CAboutDlg dlgAbout;
+		dlgAbout.DoModal();
+	}
+	else
+	{
+		CDialogEx::OnSysCommand(nID, lParam);
+	}
+}
+
+// 대화 상자에 최소화 단추를 추가할 경우 아이콘을 그리려면
+//  아래 코드가 필요합니다.  문서/뷰 모델을 사용하는 MFC 응용 프로그램의 경우에는
+//  프레임워크에서 이 작업을 자동으로 수행합니다.
+
+void CMFCAteacherDlg::OnPaint()
+{
+	if (IsIconic())
+	{
+		CPaintDC dc(this); // 그리기를 위한 디바이스 컨텍스트입니다.
+
+		SendMessage(WM_ICONERASEBKGND, reinterpret_cast<WPARAM>(dc.GetSafeHdc()), 0);
+
+		// 클라이언트 사각형에서 아이콘을 가운데에 맞춥니다.
+		int cxIcon = GetSystemMetrics(SM_CXICON);
+		int cyIcon = GetSystemMetrics(SM_CYICON);
+		CRect rect;
+		GetClientRect(&rect);
+		int x = (rect.Width() - cxIcon + 1) / 2;
+		int y = (rect.Height() - cyIcon + 1) / 2;
+
+		// 아이콘을 그립니다.
+		dc.DrawIcon(x, y, m_hIcon);
+	}
+	else
+	{
+		CDialogEx::OnPaint();
+	}
+}
+
+// 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서
+//  이 함수를 호출합니다.
+HCURSOR CMFCAteacherDlg::OnQueryDragIcon()
+{
+	return static_cast<HCURSOR>(m_hIcon);
+}
+
+
+
+void CMFCAteacherDlg::OnTvnSelchangedTree1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+	nowtree = pNMTreeView->itemNew.hItem;
+
+	
+	CString str = myC.GetItemText(pNMTreeView->itemNew.hItem);//str에 선택한 폴더명 저장
+	CString path = myC.GetItemText(myC.GetParentItem(pNMTreeView->itemNew.hItem));
+	
+	
+	if (str.Find('/') < 0)  //파일인 경우!!!
+	{
+	//폴더의 이름을 반환!!*********이걸 알면 끝
+	srcPath = path;
+	myName = str;
+	}
+	
+	else   //디렉토리인 경우 (폴더 경로만 표시)
+	{
+		srcPath = str;
+		myName = "";
+	}
+
+	UpdateData(false);  //파일 이름만 띄우고
+
+/*
+	CFileFind ff;
+	if (ff.IsArchived())
+	{
+		myName = str;
+		UpdateData(false);
+	}
+	else if (ff.IsDirectory())
+	{
+		srcPath = str;
+	UpdateData(false);
+	}
+*/
+
+	*pResult = 0;
+}
+
+
+void CMFCAteacherDlg::OnBnClickedButton1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	UpdateData(true);
+	first = srcPath;
+	
+	searchTree(0, srcPath);
+}
+
+
+void CMFCAteacherDlg::searchTree(HTREEITEM parent, CString path) {
+	CFileFind finder;
+	CString fileName;
+	CString DirName;
+	CFile file;
+	BOOL flag = finder.FindFile(path + "/*.*");
+	TVINSERTSTRUCT tInsert;
+	tInsert.hParent = parent;
+	tInsert.hInsertAfter = TVI_SORT;
+	tInsert.item.mask = TVIF_TEXT;
+	char _fileName[255];
+	char _path[255];
+	HTREEITEM curDir;
+
+	sprintf(_path, "%s", path);
+	tInsert.item.pszText = _path;
+	curDir = myC.InsertItem(&tInsert);
+	while (flag)
+	{
+		flag = finder.FindNextFile();
+		if (finder.IsArchived())
+		{
+			fileName = finder.GetFileName();
+			sprintf(_fileName, "%s", fileName);
+			tInsert.hParent = curDir;
+			tInsert.item.pszText = _fileName;
+			myC.InsertItem(&tInsert);
+		}
+		if (finder.IsDirectory())
+		{
+			DirName = finder.GetFileName();
+			if (DirName == "." || DirName == "..")
+				continue;
+			//		MessageBox(DirName);
+			searchTree(curDir, path + "/" + DirName);
+		}
+	}
+	//	MessageBox(fileName);
+
+}
+
+//\\가 하나가 없어짐 ㅡㅡ
+//replace 함수 \\->\ => \->\\
+==> path1.Replace("\\","\\\\");  특수문자 쓰려면\를 앞에 붙여줘야 한다(\\\\==실제\\)
+
+//searchTree2(srcPath, myName);
+//그 파일의 전체 경로 따내려는 함수
+
+// 파일의 폴더명 따오는거 몰랐을때 찾는 함수였음...
+
+/*
+CString CMFCAteacherDlg::searchTree2(CString path, CString fname) //루트경로,찾을파일 이름
+{
+	CFileFind finder;
+	CString fileName;
+	CString DirName;
+	CFile file;
+	BOOL flag = finder.FindFile(path + "/*.*");
+	CString address = path;
+	char _fileName[255];
+	char _path[255];
+	CString Find;
+
+	sprintf(_path, "%s", path);
+	while (flag)
+	{
+		flag = finder.FindNextFile();
+		if (finder.IsArchived())
+		{
+			fileName = finder.GetFileName();
+			
+			if (fileName == fname)		    //파일 발견하면!!
+			{
+				Find = finder.GetFilePath();  //그놈의 전체 경로이름 반환!!
+				return Find;
+			}
+			
+			sprintf(_fileName, "%s", fileName);
+		}
+		if (finder.IsDirectory())
+		{
+			DirName = finder.GetFileName();
+			if (DirName == "." || DirName == "..")
+				continue;
+			//		MessageBox(DirName);
+			searchTree2(path + "/" + DirName, fname);
+		}
+	}
+	//	MessageBox(fileName);
+
+}*/
+
+
+void CMFCAteacherDlg::OnBnClickedButton2()  //Read
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	//UpdateData(true); //=> myName에 a.txt 파일이름을 넣어줌
+	//fd = searchTree2(first, myName); //전체 경로를 파일 이름 입력칸에 넣음
+
+	CString ser;
+	ser = srcPath + "/" + myName;
+	int size = 0;
+	CFile file;                       //파일의 정보를 가진 객체
+	file.Open(ser, CFile::modeRead);  //읽기모드로 파일 오픈
+	size = file.GetLength() + 1;
+	char *buf = new char[size];
+	memset(buf, '\0', size);           //버프 초기화 (스레기값)
+	file.Read(buf, size);
+	file.Close();
+	space.Format("%s", buf);
+	UpdateData(false);
+	delete[] buf;
+}
+
+void CMFCAteacherDlg::OnBnClickedButton3()  //Write
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+	CFile file;      
+	//파일의 정보를 가진 객체
+	CString ser;
+	UpdateData(true);
+	ser = srcPath + "/" + myName;
+	char buf[255];
+	file.Open(ser, CFile::modeCreate | CFile::modeWrite);  //없으면 생성 & 쓰기
+	file.Write(space, lstrlen(space));    //lstrlen(content) 컨텐트의 길이만큼
+	file.Close();
+	space = "";
+
+// 저장하자마자 트리에 넣고 싶을땐
+	TVINSERTSTRUCT tInsert;
+	tInsert.hParent = nowtree;
+	tInsert.hInsertAfter = TVI_SORT;
+	tInsert.item.mask = TVIF_TEXT;
+	tInsert.item.pszText = LPSTR(LPCTSTR(myName));
+	myC.InsertItem(&tInsert);
+	
+	UpdateData(false);
+	
+}
