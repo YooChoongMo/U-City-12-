@@ -1,0 +1,18 @@
+﻿  MFC_final.cpp
+  코드를 생성하고 있습니다...
+  컴파일하고 있습니다...
+  page1.cpp
+d:\c_c++수업\visual 2015\mfc_final\mfc_final\page1.cpp(104): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1769): note: 'sprintf' 선언을 참조하십시오.
+d:\c_c++수업\visual 2015\mfc_final\mfc_final\page1.cpp(109): warning C4477: 'sprintf' : 서식 문자열 '%s'에 'char *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'CString'입니다.
+d:\c_c++수업\visual 2015\mfc_final\mfc_final\page1.cpp(109): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1769): note: 'sprintf' 선언을 참조하십시오.
+d:\c_c++수업\visual 2015\mfc_final\mfc_final\page1.cpp(115): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1769): note: 'sprintf' 선언을 참조하십시오.
+d:\c_c++수업\visual 2015\mfc_final\mfc_final\page1.cpp(117): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1769): note: 'sprintf' 선언을 참조하십시오.
+  코드를 생성하고 있습니다...
+  건너뛰고 있습니다... (관련된 변경 내용 없음)
+  mySheet.cpp
+  MFC_final.vcxproj -> D:\C_C++수업\visual 2015\MFC_final\Debug\MFC_final.exe
+  MFC_final.vcxproj -> D:\C_C++수업\visual 2015\MFC_final\Debug\MFC_final.pdb (Partial PDB)
