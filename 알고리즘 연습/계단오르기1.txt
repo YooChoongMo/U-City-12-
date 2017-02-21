@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int search(int n);
+int fac(int k);
+
+int main()
+{
+	int n;
+		
+	printf("오를 계단의 수 n을 입력하시오 :");
+	scanf("%d", &n);
+	
+	printf("계단을 오를 수 있는 방법의 수 : %d\n", search(n));
+
+	return 0;
+
+}
+int search(int n)
+{
+	int count = 0;
+	int val = 0;
+
+	if (n == 1)
+	{
+		count = 1;
+		return count;
+	}
+	if (n == 2)
+	{
+		count = 2;
+		return count;
+	}
+
+	if(n > 2)		
+	{
+		int tmp = 0;
+		int space = 0;		//2의 개수에 따른 자리수
+		int i, k;
+		int val_tmp;
+		int space_tmp;
+		int result = 1;
+		int sum = 0;
+		
+		int a;
+		int r;
+
+		count = 1;			//기본 1계단 씩 오르기
+		val = n / 2;		//몫 = 2의 최대 개수
+
+		val_tmp = val;
+		space = n - val;
+		space_tmp = space;
+
+		
+		for (i = 0; i < val; i++)
+		{
+			result = fac(space_tmp) / (fac(space_tmp - val_tmp)*fac(val_tmp));
+			space_tmp++;
+			val_tmp--;
+			
+			sum += result;
+		}
+		count += sum;
+
+		return count;
+	}
+}
+
+int fac(int k)      //콤비네이션
+{
+	int temp = 1;
+
+	for (int i = 1; i <= k; i++)
+		temp *= i;
+
+	return temp;
+}
