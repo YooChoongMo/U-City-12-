@@ -1,0 +1,138 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define TRUE 1
+#define FALSE 0
+
+
+
+/*
+void Insert(List **start, List **last);
+void Show(List *start);
+void reverse_Show(List *last);
+void Delete(List **start, List **last);
+void Modify(List **start);
+*/
+#define MAX 10
+
+typedef struct{
+	
+	int Data[MAX];
+	int Top;
+	
+}Stack;
+
+void Init(Stack *data);
+int Is_empty(Stack *data);
+void Push(Stack *data);
+int Pop(Stack *data);
+void Show(Stack *data);
+
+
+
+
+int main()
+{
+	int a = 0;
+	Stack S1;
+
+	Init(&S1);
+
+	while (a == 0)
+	{
+		int n;
+
+
+
+		printf("1.PUSH  2.POP  3.SHOW   4.종료 : ");
+		scanf("%d", &n);
+
+		switch (n)
+		{
+		case 1:
+			Push(&S1);	break;
+		case 2:
+			Pop(&S1);	break;
+		case 3:	Show(&S1);	break;
+
+		case 4:	a = 2;		break;
+		
+		}
+
+	}
+	return 0;
+}
+
+
+
+void Init(Stack *data)
+{
+	data->Top = -1; //아무 위치 아님
+}
+
+int Is_empty(Stack *data)
+{
+	if (data->Top == MAX)
+	{
+		//printf("스택이 가득 차 있습니다.");
+		return FALSE;
+	}	
+
+	else 
+	{
+		//printf("스택이 비어있습니다.");
+		return TRUE;
+	}
+}
+
+void Push(Stack *data)
+{
+	(data->Top)++;
+	int n;
+
+	if (Is_empty(data))
+	{
+		printf("저장할 데이터를 입력하시오 : ");
+		scanf("%d", &n);
+		data->Data[data->Top] = n;
+	}
+	else
+	{
+		printf("스택이 가득 차 있습니다. 더이상 넣을 수 없습니다.");
+		data->Top = MAX-1;
+	}
+}
+
+int Pop(Stack *data)
+{
+	int temp;
+
+	if (data->Top == -1)
+	{
+		printf("스택이 비어있습니다.");
+		return -1;
+	}
+	else
+	{
+		temp = data->Data[data->Top];
+		data->Data[data->Top] = 0;
+		(data->Top)--;
+		return temp;
+	}
+}
+
+void Show(Stack *data)
+{
+	int i;
+
+	printf("스택에 저장된 데이터 \n");
+	if (!(data->Top == -1))
+	{
+		for (i = 0; i < (data->Top) + 1; i++)
+		{
+			printf("%d ", data->Data[i]);
+		}
+	}
+	printf("\n");
+}

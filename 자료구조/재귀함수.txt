@@ -1,0 +1,165 @@
+//////////////////////////////////  팩토리얼
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int pactorial(int n);
+
+int main()
+{
+	int n;
+		
+	printf("n!를 구할 n을 입력 :");
+	scanf("%d", &n);
+	
+	pactorial(n);
+	
+	printf("%d! = %d", n, pactorial(n));
+	
+	return 0;
+}
+
+
+int pactorial(int n)
+{
+
+	if (n == 0)
+		return 1;
+
+	else
+	{
+		return n * pactorial(n - 1);
+	}
+}
+
+//////////////////////////////////  피보나치
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int Fibo(int n);
+
+int main()
+{
+	int n;
+	int i;
+	printf("피보나치 수열 ");
+	scanf("%d", &n);
+	
+	for (i = 1; i < n; i++) {
+
+		printf("%d ", Fibo(i));
+	}
+	
+	return 0;
+}
+
+
+int Fibo(int n)
+{
+	//n = (n-1) + (n-2)
+	int i;
+
+	if (n == 1)
+		return 0;
+	else if (n == 2)
+		return 1;
+
+	else
+		return Fibo(n-1) + Fibo(n-2);
+	
+}
+
+//////////////////////////////////  하노이타워무브
+
+#include <stdio.h>
+#include <stdlib.h>
+
+
+void HinoiTowerMove(int n, char from, char by, char to);
+
+int main()
+{
+
+
+	HinoiTowerMove(3, 'A', 'B', 'C');
+	return 0;
+}
+
+
+void HinoiTowerMove(int n, char from, char by, char to)  //n개의 원반, 
+{
+	if (n == 1)
+		printf("원반1을 %c에서 %c로 이동 \n", from,to);
+	
+	else
+	{
+		HinoiTowerMove(n-1, from, to, by);
+		printf("원반%d를 %c에서 %c로 이동\n", n, from, to);
+		HinoiTowerMove(n - 1, by, from, to);
+	}
+}
+
+//////////////////////////////////  구조체 (추상 자료형 정의)
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct 
+{
+	int coin100num;
+	int bill5000num;
+}Wallet;
+
+int TakeOutMoney(Wallet * pw, int coinNum, int billNum);
+int PutMoney(Wallet * pw, int coinNum, int billNum);
+
+
+int main()
+{
+	Wallet wa = { 20, 5 };
+	printf("현재 지갑에 있는 돈 = %d\n", (wa.coin100num * 100) + (wa.bill5000num * 5000));
+
+	TakeOutMoney(&wa, 5, 3);
+	printf("뺀 후 지갑에 있는 돈 = %d\n", (wa.coin100num * 100) + (wa.bill5000num * 5000));
+
+	PutMoney(&wa, 10, 6);
+	
+	printf("넣은 후 지갑에 있는 돈 = %d\n", (wa.coin100num*100) + (wa.bill5000num*5000));
+
+	return 0;
+}
+
+int TakeOutMoney(Wallet * pw, int coinNum, int billNum)
+{
+	int sum;
+
+	if (pw->coin100num < coinNum || pw->bill5000num < billNum)
+	{
+		printf("뺄 돈이없단다");
+		return -1;
+	}
+	pw->coin100num -= coinNum;
+	pw->bill5000num -= billNum;
+
+	sum = 100 * coinNum + 5000 * billNum;
+
+	return sum;
+}
+
+int PutMoney(Wallet * pw, int coinNum, int billNum)
+{
+	int sum;
+
+	pw->coin100num += coinNum;
+	pw->bill5000num += billNum;
+
+	sum = 100 * coinNum + 5000 * billNum;
+
+	return sum;
+}
+
+
+

@@ -1,0 +1,55 @@
+0. 커널소스다운로드
+wget https://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.31.tar.bz2 --no-check-certificate
+
+1. 커널압축해제
+tar xvfj linux-2.6.31.tar.bz2
+-tar => 압축해제해는것
+
+2. 의존성 제거
+make mrproper
+
+3. 커널설정	=>	건너뛰면 설정 내용이 없어서 컴파일 불가(아무것도 없어도 해야댐)
+make menuconfig
+
+=>안건들고 exit -> yes
+
+모듈을 붙이면 자동으로 설정되어있음
+
+
+
+4. 컴파일
+make
+
+5. make modules_install
+
+6. make install
+=>설치오류시
+yum install isomd5sum
+yum install mkinitrd
+
+
+[yum안먹으면]
+http://rpm.pbone.net/index.php3/stat/4/idpl/18928102/dir/fedora_12/com/isomd5sum-1.0.5-3.fc12.i686.rpm.html
+에서 isomd5sum-1.0.5-3.fc12.i686.rpm다운로드한뒤 설치
+>rpm -Uvh isomd5sum-1.0.5-3.fc12.i686.rpm
+
+http://rpm.pbone.net/index.php3/stat/4/idpl/13221648/com/mkinitrd-6.0.93-1.fc12.i686.rpm.html
+에서 mkinitrd-6.0.93-1.fc12.i686.rpm다운로드한뒤 설치
+>rpm -Uvh mkinitrd-6.0.93-1.fc12.i686.rpm
+
+
+7. 다시 make install
+
+8. cd /boot
+   cd grub
+   vi grub.conf   =>   부트로더
+(우리가 컴파일한게 추가 되서 위에 fedora가 방금 설치한 것)
+
+9. timeout=10 (0에서 다른 값으로)    [운영체제 두개 설치되어있는데 (페도라 , 커널컴파일 한거) 둘 중에 고르는 시간] 
+   저장하고 나옴 
+
+10. 재부팅 (이름 짧은것으로)
+
+11. 새로 설치된것으로 부팅
+
+12. root 로그인

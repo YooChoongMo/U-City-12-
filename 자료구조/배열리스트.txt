@@ -1,0 +1,162 @@
+//Array.h
+
+#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "NameCard.h"
+
+#define TRUE 1
+#define FALSE 0
+
+#define LEN 100
+typedef NameCard Ldata;
+
+typedef struct
+{
+	Ldata arr[LEN];
+	int num;			//배열 index
+	int curPosition; 
+
+}ArrayList;
+
+
+typedef ArrayList List;
+
+void ListInit(List *plist)
+{
+	plist->num = 0;
+	plist->curPosition = -1; //아무위치 아님
+}
+
+void InsertList(List *plist, Ldata data)
+{
+
+	if (plist->num > LEN)
+	{
+		printf("더이상 추가할 수 없습니다!");
+		return;
+	}
+		
+		plist->arr[plist->num] = data;
+		(plist->num)++;
+}
+
+int LFirst(List *plist, Ldata * pdata)
+{
+	if (plist->num == 0)
+		return FALSE;
+
+	plist->curPosition = 0;
+	*pdata = plist->arr[0];
+	return TRUE;
+}
+
+int LNext(List *plist, Ldata * pdata)
+{
+	if (plist->curPosition >= (plist->num -1))
+		return FALSE;
+
+	(plist->curPosition)++;
+
+	*pdata = plist->arr[plist->curPosition];
+	return TRUE;
+}
+
+Ldata LRemove(List *plist)
+{
+	int rpos = plist->curPosition;
+	int tmp_num = plist->num;
+	int i;
+
+	Ldata rdata = plist->arr[plist->curPosition];
+
+	for (i = rpos; i < tmp_num - 1; i++)
+	{
+		plist->arr[i] = plist->arr[i+1]; //한개씩 앞으로 밀기!
+	}
+	
+	(plist->curPosition)--;
+	(plist->num)--;
+
+	return rdata;
+}
+
+//NameCard.h
+
+#pragma once
+#define NAME_LEN 30
+#define PHONE_LEN 30
+
+typedef struct {
+
+	char name[NAME_LEN];
+	char phone[PHONE_LEN];
+
+}NameCard;
+
+
+NameCard * MakeNameCard(char * name, char * phone);
+
+void ShowNameCardInfo(NameCard * pcard);
+
+int NameCompare(NameCard * pcard, char * name);
+
+void ChangPhoneNum(NameCard * pcard, char * phone);
+
+//부분배열.c
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "NameCard.h"
+#include "Array.h"
+
+
+int main()
+{
+	ArrayList list ;
+	
+	NameCard *pn = MakeNameCard("유충모", "010-8838-9132"); //카드 생성
+	
+	ListInit(&list);
+
+	InsertList(&list, *pn);
+	ShowNameCardInfo(pn);
+
+	return 0;
+}
+
+NameCard * MakeNameCard(char * name, char * phone)
+{
+	NameCard *pt;
+	
+	
+	pt = (NameCard*)malloc(sizeof(NameCard));
+
+	strcpy(pt->name, name);
+	strcpy(pt->phone, phone);
+
+	return pt;
+}
+
+void ShowNameCardInfo(NameCard * pcard)
+{
+	printf("정보 출력\n");
+	printf("name : %s    phon : %s", pcard->name, pcard->phone);
+}
+
+int NameCompare(NameCard * pcard, char * name)
+{
+	return strcmp(pcard->name, name);
+
+}
+
+void ChangPhoneNum(NameCard * pcard, char * phone) //번호 수정
+{
+	strcpy(pcard->phone, phone);
+}
+
+
+
+

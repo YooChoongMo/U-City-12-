@@ -1,0 +1,143 @@
+7 #include <stdio.h>
+8 #include <stdlib.h> /* for exit */
+9 #include <unistd.h> /* for open/close .. */
+10 #include <fcntl.h> /* for O_RDWR */
+11 #include <sys/ioctl.h> /* for ioctl */
+12 #include <linux/fb.h> 
+
+13 #define FBDEVFILE "/dev/fb"
+
+14 int main()
+15 {
+16 int fbfd;
+17 int ret;
+18 struct fb_var_screeninfo fbvar;
+19 struct fb_fix_screeninfo fbfix;
+20 fbfd = open(FBDEVFILE, O_RDWR);
+21 if(fbfd < 0)
+22 {
+23 perror("fbdev open");
+24 exit(1);
+25 }
+26 ret = ioctl(fbfd, FBIOGET_VSCREENINFO, &fbvar);
+27 if(ret < 0)
+28 {
+29 perror("fbdev ioctl(FSCREENINFO)");
+30 exit(1);
+31 }
+32 ret = ioctl(fbfd, FBIOGET_FSCREENINFO, &fbfix);
+33 if(ret < 0)
+34 {
+35 perror("fbdev ioctl(FSCREENINFO)");
+36 exit(1);
+37 }
+38 printf("x-resolution : %d\n", fbvar.xres);
+39 printf("y-resolution : %d\n", fbvar.yres);
+40 printf("x-resolution(virtual) : %d\n", fbvar.xres_virtual);
+41 printf("y-resolution(virtual) : %d\n", fbvar.yres_virtual);
+42 printf("bpp : %d\n", fbvar.bits_per_pixel);
+43 printf("length of frame buffer memory : %d\n", fbfix.smem_len);
+44 close(fbfd);
+46 return 0;
+47 }
+--------------------------------------------------------------------------
+8 #include <stdio.h>
+9 #include <stdlib.h> /* for exit */
+10 #include <unistd.h> /* for open/close .. */
+11 #include <fcntl.h> /* for O_RDONLY */
+12 #include <sys/ioctl.h> /* for ioctl */
+13 #include <sys/types.h>
+14 #include <linux/fb.h> /* for fb_var_screeninfo, FBIOGET_VSCREENINFO */
+15
+16 #define FBDEVFILE "/dev/fb"
+17
+18 typedef unsigned char ubyte;
+19
+20 unsigned short makepixel(ubyte r, ubyte g, ubyte b)
+21 {
+22 return (unsigned short)(((r>>3)<<11)|((g>>2)<<5)|(b>>3));
+23 }
+24
+25 int main()
+26 {
+27 int fbfd;
+28 int ret;
+29 struct fb_var_screeninfo fbvar;
+30 unsigned short pixel;
+31 int offset;
+32
+33 fbfd = open(FBDEVFILE, O_RDWR);
+34 if(fbfd < 0)
+35 {
+36 perror("fbdev open");
+37 exit(1);
+38 }
+39
+40 ret = ioctl(fbfd, FBIOGET_VSCREENINFO, &fbvar);
+41 if(ret < 0)
+42 {
+43 perror("fbdev ioctl");
+44 exit(1);
+45 }
+46
+47 if(fbvar.bits_per_pixel != 16)
+48 {
+49 fprintf(stderr, "bpp is not 16n");
+50 exit(1);
+51 }
+52
+53 /* red pixel @ (0,0) */
+54 if(lseek(fbfd, 0, SEEK_SET) < 0)
+55 {
+56 perror("fbdev lseek");
+57 exit(1);
+58 }
+59 pixel = makepixel(255,0,0); /* red pixel */
+60 write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+61
+62 /* green pixel @ (100,50) */
+63 offset = 50*fbvar.xres*(16/8)+100*(16/8);
+64 if(lseek(fbfd, offset, SEEK_SET) < 0)
+65 {
+66 perror("fbdev lseek");
+67 exit(1);
+68 }
+69 pixel = makepixel(0,255,0); /* green pixel */
+70 write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+71
+72
+73 /* blue pixel @ (50,100) */
+74 offset = 100*fbvar.xres*(16/8)+50*(16/8);
+75 if(lseek(fbfd, offset, SEEK_SET) < 0)
+76 {
+77 perror("fbdev lseek");
+78 exit(1);
+79 }
+80 pixel = makepixel(0,0,255); /* blue pixel */
+81 write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+82
+83 /* white pixel @ (100,100) */
+84 offset = 100*fbvar.xres*(16/8)+100*(16/8);
+85 if(lseek(fbfd, offset, SEEK_SET) < 0)
+86 {
+87 perror("fbdev lseek");
+88 exit(1);
+89 }
+90 pixel = makepixel(255,255,255); /* white pixel */
+91 write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+92
+93 close(fbfd);
+94 exit(0);
+95 return 0;
+96 }
+----------------------------------------------------------
+unsigned char buf[3];
+unsigned short pix;
+bmpfd = open("a.bmp", O_RDWR);
+for(int i=1;i<(640*480-54);i++){
+lseek(bmpfd, -(i*3), SEEK_END);
+read(bmpfd, buf, 3);
+//lcd Ãâ·Â
+pix = makepixel(buf[2], buf[1], buf[0]);
+write(fbfd, &pix, 2);
+);

@@ -1,0 +1,289 @@
+시스템 콜 함수 => 인터럽트
+
+1.하드웨어 인터럽트
+ - 뇌가 없고 동작하는 몸통만 존재
+
+2.소프트웨어 인터럽트
+ - ex)시스템 콜 함수
+ - 소.인 발생 => 커널 메모리 - 80번지로 이동 => 시스템 콜 함수의 핸들러 동작
+
+** 유저 사용 메모리(상위) / 커널 사용 메모리 (메모리 영역 분리 되어있다!!)
+** 서로 다이렉트로 접근 할수 없다! => 주소를 복사해서 줌
+
+
+================================================================
+1. 시스템 콜 번호 추가
+linux-2.6.31/arch/x86/include/asm/unistd_32.h파일에 다음 추가   (PC용)
+linux/include/asm-arm/unistd.h					(보드용)
+#define __NR_newcall 337
+총 개수	338
+
+마지막 숫자 뒤에 것을 사용
+
+
+
+2.시스템 콜 함수 등록
+linux-2.6.31/arch/x86/kernel/syscall_table_32.S파일에 함수명 추가
+linux/arch/arm/kernel/calls.S
+.long sys_newcall
+
+- 순차적으로 등록되어 있음
+- 맨 끝에 추가를 해야함
+
+
+
+3.시스템 콜 함수 구현
+linux-2.6.31/arch/x86/kernel># vi newcall.c	(x86 = pc용) 
+
+linux/kernel>#vi newcall.c
+
+#include<linux/kernel.h>
+
+asmlinkage int sys_newcall(){		
+  printk("hello, kernel\n");
+  return 21;
+}
+
+- 시스템 콜 함수는 sys_* 로 시작해야함!! 
+- asmlinkage 를 붙이면 어셈블리에서도 호출 가능!!
+- printk() 커널에서 출력하는 함수 (호출하면 바로 출력해주지 않음 =>  Dmesg 명령으로 확인해야 한다!)
+								      커널(시스템 콜 함수) 내 코드에서 printk() 쓴것 출력해주는애
+
+
+
+[컴파일 하기전]
+
+4.Makefile 수정
+linux-2.6.31/arch/x86/kernel/Makefile에 다음 추가
+obj-y	+= newcall.o
+
+
+
+
+5.커널 컴파일
+linux-2.6.31># make bzImage	=>  수정된 것만 따로 컴파일 하는 것!!(그냥 make하면 처음부터 또 전체 make되서 시간 오래걸림)
+linux-2.6.31># make install	=>  수정
+
+=> 재부팅
+
+
+
+
+
+6. 재부팅 후 테스트 소스 작성 및 컴파일 실행	(새로 만든 함수를 테스트 하는 application)
+
+--newcallTest.c--
+#include<linux/unistd.h>
+#include<stdio.h>
+
+#define NEWCALL 337
+
+int main(){
+  int i;
+  printf("app start\n");
+  i=syscall(NEWCALL);		(반환 값이 21이 나와야함 => 이외 값은 오류)
+  printf("app i=%d\n", i);
+  return 0;
+}
+
+gcc -I/usr/src/linux-2.6.31/include newcallTest.c -o newcallTest
+  대문자 i		   
+
+
+새로 설치한 리눅스가 아무곳에다 다운받고 압축 해제했기때문에
+
+시스템 콜 함수 추가한 헤더파일이 그곳에 있어서 
+
+헤더파일 있는 곳을 컴파일 할 때 포함 시켜야한다!
+
+=> include 해야한다.
+
+
+================================================
+nfsroot>#vi newcall.c
+
+#include<stdio.h>
+#include<linux/unistd.h>
+_syscall0(int, newcall);
+
+void main(){
+  int i;
+  printf("app start\n");
+  i=newcall();
+  printf("app i=%d\n", i);
+}
+
+#arm-linux-gcc -I /root/PXA~~/kernel/linux/include newcall.c -o newcall
+
+==================================
+asm/uaccess.h
+
+put_user(x, ptr) : 커널 영역의 데이터를 사용자 영역으로 복사
+get_user(x, ptr) : 사용자 영역의 데이터를 커널 영역으로 복사
+
+copy_to_user(void __user *to, const void *from, unsigned long n)
+		유저쪽주고	커널쪽데이터가있는주소
+:커널 영역의 블록 데이터를 사용자 영역으로 복사
+
+copy_from_user(void *to, const void _user *from, unsigned long n)
+:사용자 영역의 블록 데이터를 커널 영역으로 복사
+
+
+ linux-2.6.~/arch/x86/kernel/
+ vi newcall2.c
+
+
+
+
+
+======================================================================================================
+338로 등록
+
+#include <linux/kernel.h>
+#include <asm/uaccess.h>
+
+asmlinkage int sys_newcall2(int a, int b, int *to_user){
+					  이쪽으로 계산해서 보내줌
+  int sum=0;
+  printk("kernel:a=%d, b=%d\n", a,b);
+  sum=a+b;
+  put_user(sum, to_user);	
+  return 21;
+}
+
+
+
+
+--newcall2Test.c--
+#include<linux/unistd.h>
+#include<stdio.h>
+
+#define NEWCALL2 338
+
+int main(){
+  int i, a=22, b=10, from_kernel;
+  printf("app start\n");
+  i=syscall(NEWCALL2,a, b, &from_kernel);
+  printf("app 결과코드=%d, sum=%d\n", i, from_kernel);
+  return 0;
+}
+
+gcc -I/usr/src/linux-2.6.31/include newcall2Test.c -o newcall2Test
+
+==============newcall2Test.c<보드>===========================
+nfsroot>#vi newcall2.c
+
+#include<stdio.h>
+#include<linux/unistd.h>
+_syscall3(int, newcall2, int, a, int, b, int*, to_user);
+      //파라미터 3개가 있어서 3 인것!!
+      //int, a, int, b, int*, to_user
+void main(){
+  int i, a=22, b=10, from_kernel;
+  printf("app start\n");
+  i=newcall2(a, b, &from_kernel);
+  printf("app 결과코드=%d, sum=%d\n", i, from_kernel);
+}
+
+#arm-linux-gcc -I /root/PXA~~/kernel/linux/include newcall.c -o newcall
+
+
+
+
+
+
+메모리 블록을 옮기는 것
+
+--newcall3.c----------------
+#include <linux/kernel.h>
+#include <asm/uaccess.h>
+
+struct my_data{
+  int a;
+  int b;
+  int c;
+};
+
+asmlinkage int sys_newcall3(struct my_data *block){	//구조체 포인터 변수 받아오기
+  int a, b;
+  struct my_data data;
+  copy_from_user(&data, block, sizeof(struct my_data));		//커널로 복사를 해오겠다
+
+  a=data.a;
+  b=data.b;
+  data.a=a+b;
+  data.b=a-b;
+  data.c=a%b;
+  copy_to_user(block, &data, sizeof(struct my_data));
+  return 21;
+}
+
+
+copy_from_user(void *to, const void _user *from, unsigned long n)
+	      커널 코드내 구조체
+			사용자 코드내 구조체 
+						크기
+
+:사용자 영역의 블록 데이터를 커널 영역으로 복사
+
+
+--newcall3Test.c--
+#include<linux/unistd.h>
+#include<stdio.h>
+
+
+_syscall1(int, newcall2, struct my_data*, data);
+
+struct my_data{			//커널꺼랑 똑같은 구조체 만들기
+  int a;
+  int b;
+  int c;
+};
+
+
+int main(){
+  struct my_data data;
+  int i;
+  data.a=1;
+  data.b=2;
+  data.c=0;
+
+  printf("app start\n");
+  i=syscall3(&data);
+
+  printf("app 결과코드=%d, data.a=%d, data.b=%d, data.c=%d\n", i, data.a, data.b, data.c);
+  //커널에서 바꾸기 때문에 1,2,0 이 아니다!
+
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

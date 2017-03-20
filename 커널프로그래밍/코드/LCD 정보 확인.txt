@@ -1,0 +1,48 @@
+#include <stdio.h>
+ #include <stdlib.h>
+ #include <unistd.h>             //open / close
+ #include <fcntl.h>              //O_RDONLY
+ #include <linux/fb.h>
+ #include <sys/ioctl.h>  //ioctl
+
+ #define FBDEVFILE "/dev/fb"
+
+ int main()
+ {
+   int fbfd;
+   int ret;
+
+ struct fb_var_screeninfo fbvar;
+ struct fb_fix_screeninfo fbfix;
+
+   fbfd = open(FBDEVFILE, O_RDWR);
+   if(fbfd<0)
+     {
+   perror("fbdev open");
+   exit(1);
+      }
+
+   ret = ioctl(fbfd, FBIOGET_VSCREENINFO, &fbvar);
+   if(ret<0){
+   perror("fbdev ioctl(FSCREENINFO)");
+   exit(1);
+      }
+
+   ret = ioctl(fbfd, FBIOGET_FSCREENINFO, &fbfix);
+   if(ret<0){
+   perror("fbdev ioctl(FSCREENINFO)");
+   exit(1);
+      }
+
+         printf("x-resolution : %d\n", fbvar.xres);
+         printf("y-resolution : %d\n", fbvar.yres);
+         printf("x-resolution(virtual) : %d\n", fbvar.xres_virtual);
+         printf("y-resolution(virtual) : %d\n", fbvar.yres_virtual);
+         printf("bpp : %d\n", fbvar.bits_per_pixel);
+         printf("length of frame memory : %d\n",fbfix.smem_len);
+
+
+   close(fbfd);
+
+   return 0;
+ }

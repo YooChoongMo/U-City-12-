@@ -1,0 +1,33 @@
+#include<asm/io.h>
+#define KEY_BASE	    0x14000000
+
+unsigned long *keyport;
+static unsigned char key_buf = 0;
+void key_handler(int irq, void *dev_id, struct pt_regs *regs);
+
+void key_handler(int irq, void *dev_id, struct pt_regs *regs)
+{
+    unsigned char key_value;
+
+    keyport = (unsigned long *) ioremap_nocache(KEY_BASE, 0x10);
+    key_value = (*(keyport))&0xf;
+    printk("KEY INPUT : [%d] input!!!!!\n", key_value);
+    key_buf = key_value;
+    iounmap(keyport);
+}
+
+init()에 다음 추가
+int return_val;
+GPDR0 &= ~(1 << 0);
+
+    set_GPIO_IRQ_edge(0, GPIO_RISING_EDGE);
+
+    return_val = request_irq(IRQ_GPIO(0), key_handler, SA_INTERRUPT, "KEY PAD INT", NULL);
+    if(return_val < 0)
+    {
+	printk(KERN_ERR "pxa255_pro_key_init() : Can't request irq %#010x\n", IRQ_GPIO(0));
+	return -1;
+    }
+
+exit()에 다음 추가
+free_irq(IRQ_GPIO(0), NULL);

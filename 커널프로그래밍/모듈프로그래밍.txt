@@ -1,0 +1,511 @@
+1. 모듈 개발 절차
+1) 모듈 프로그램을 작성
+2) 모듈 프로그램 컴파일			==>  ~.ko 파일 생성
+3) 모듈 로드(insmod 명령)		
+4) 로드된 모듈 확인(lsmod)		==> 목록 확인
+5) 모듈제거(rmmod)			==> 제거할때
+
+
+테스트 때는 insmod -> rmmod 계속 (재부팅 하면 사라짐)
+
+실제 완벽히 쓸땐 커널에 올린다. => 재부팅 x도댐
+
+
+
+
+
+2. 모듈 프로그램의 구성
+#include <linux/kernel.h>
+#include <linux/module.h>
+
+//모듈을 로드할 때 수행되야하는 초기화 루틴	// insmod 할때 실행되는 함수  //특정장치에 디바이스드라이버 레지스터 등등
+int __init init_module(void){			=> 함수 호출 규약 __init
+	//초기화 루틴
+	return 0;
+}
+
+//모듈을 제거할 때 수행되야하는 정리 루틴	// rmmod할 때 실행되는 함수(ex d동적메모리 반환, 파일 닫기...등)
+void __exit cleanup_module(void){
+	//정리 루틴
+}
+
+MODULE_LICENSE("GPL");
+
+
+
+==================디바이스드라이버도 커널에 이런 형태로 올린다!!==================
+
+
+3. 실습1 - hello
+1)moduleTest/test1 디렉토리 생성해서 그 디렉토리로 이동
+
+==================
+
+2)모듈 소스 작성
+moduleTest/test1>vi hello.c
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+
+ //초기화 루틴
+ int __init init_hello(void){				//특정장치에 디바이스드라이버 레지스터 등등
+	printk("module message : hello\n");
+	return 0;
+ }
+
+ //종료 루틴
+ void __exit exit_hello(void){				//(ex d동적메모리 반환, 파일 닫기...등)
+	printk("module message : module stop\n");
+ }
+ module_init(init_hello);
+ module_exit(exit_hello);
+ MODULE_LICENSE("GPL");			// 라이센스 정책
+
+==================
+
+3)Makefile 작성
+moduleTest/test1> vi Makefile
+
+obj-m := hello.o
+KDIR := /lib/modules/$(shell uname -r)/build		// 세줄은 다 매크로 //$(shell uname -r) 쉘 명령어
+PWD := $(shell pwd)					// 현재 작업 디렉토리 위치
+
+default://가상대상
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules 	// -C (오브젝트 파일 생성) //$(MAKE) 재귀적으로 반복 처리
+							//modules 붙이면 모듈형식으로 컴파일
+
+clean:				//중간 생성되는 파일들 제거
+	rm -rf *.ko
+	rm -rf *.mod.*
+	rm -rf .*.cmd
+	rm -rf *.o
+
+==================
+
+4)컴파일
+moduleTest/test1>make
+
+
+==>.ko파일 만들어짐
+
+==================
+
+5)lsmod 현재 모듈 확인		
+  insmod hello.ko 모듈 추가		//생성된 모듈을 추가 => 초기화함수 루틴이 실행
+  dmesg					//printk가 실행되어 함
+  lsmod로 hello 추가됨 확인
+  rmmod hello 모듈 제거			//생성된 모듈을 삭제 => 종료함수 루틴이 실행
+  dmesg					//printk가 실행되어 함
+
+==================
+
+6)insmod 수행시 init 루틴 실행 안되면
+linux-2.6.32.60>make menuconfig
+	[*]Enable loadable module support
+		[*]Forced module unloading
+		[*]Automatic kernel module loading
+
+==================
+
+
+
+4. 실습2 - 상호 모듈 참조 (다른 메모리에 있는 함수 호출)
+
+1)moduleTest/test2 디렉토리 생성해서 그 디렉토리로 이동
+
+2)모듈 소스 작성
+moduleTest/test2>vi callee.c	//호출당하는 모듈
+
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+
+
+ //초기화 루틴
+ int __init init_callee(void){
+	printk("module message : callee\n");
+	return 0;
+ }
+
+
+ //종료 루틴
+ void __exit exit_callee(void){
+	printk("module message : callee module stop\n");
+ }
+ int add(int a, int b){
+	printk("module message : callee module add\n");
+	return a+b;
+ }
+ int sub(int a, int b){
+	printk("module message : callee module sub\n");
+	return a-b;
+ }
+
+ 
+ EXPORT_SYMBOL(add);		//이걸 해야 다른곳에서 함수를 사용 가능!!
+ EXPORT_SYMBOL(sub);
+ 
+ module_init(init_callee);
+ module_exit(exit_callee);
+ MODULE_LICENSE("GPL");
+
+
+moduleTest/test2>vi caller.c
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+
+ int add(int, int);
+ int sub(int, int);
+
+ //초기화 루틴
+ int __init init_caller(void){
+	printk("module message : caller\n");
+	printk("module message add:%d\n", add(2,3));
+	printk("module message sub:%d\n", sub(3,1));
+	return 0;
+ }
+
+ //종료 루틴
+ void __exit exit_caller(void){
+	printk("module message : caller module stop\n");
+ }
+
+ module_init(init_caller);
+ module_exit(exit_caller);
+ MODULE_LICENSE("GPL");
+
+
+
+
+3)Makefile 작성
+moduleTest/test2> vi Makefile
+
+obj-m = callee.o caller.o			//모듈 두개니까 한꺼번에
+
+KDIR := /lib/modules/$(shell uname -r)/build
+PWD := $(shell pwd)
+
+default:
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
+
+
+4)컴파일
+moduleTest/test2>make
+----<pxa255 보드용>------------------------------------------
+INCLUDEDIR := /root/PXA255-Pro/kernel/linux-2.4.19-pro3_usb20/include
+CROSS_COMPILE := arm-linux-
+
+CFLAGS := -DEXPORT_SYMTAB -D__KERNEL__ -DMODULE -Wall -O2 -I$(INCLUDEDIR)
+
+CC = $(CROSS_COMPILE)gcc
+LD = $(CROSS_COMPILE)Id
+
+all :callee.o caller.o
+
+callee.o : 
+$(CC) $(CFLAGS) -c callee.c -o callee.o
+
+caller.o:
+$(CC) $(CFLAGS) -c caller.c -o caller.o
+
+clean:
+rm -f *.o *.~
+---------------------------------------------------------------
+
+5)모듈 추가
+insmod callee.ko
+insmod caller.ko
+
+6)모듈 참조 확인
+lsmod
+Module	size	Used	by
+caller	123	0	
+callee	123	1	caller
+
+
+
+
+
+5. 실습3 - 매개변수 전달
+module_param(var, type, perm)	//param:변수, 타입, 권한
+			 0
+타입 : byte, short, ushort, int, uint, long, ulong, charp, bool
+						    문자열(char 포인터)
+
+<param.c>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+
+ int a;
+ char *str;
+ module_param(a, int, 0);		
+ module_param(str, charp, 0);
+
+ //초기화 루틴
+ int __init init_param(void){
+	printk("module message : param\n");
+	printk("module message param a:%d\n", a);
+	printk("module message param str:%s\n", str);
+	return 0;
+ }
+
+ //종료 루틴
+ void __exit exit_param(void){
+	printk("module message : param module stop\n");
+ }
+
+ module_init(init_param);
+ module_exit(exit_param);
+ MODULE_LICENSE("GPL");
+
+
+실행>insmod param.ko a=10 str=aaa
+     파라메터 안넣어주면(숫자는 0, 문자열은 null)
+
+
+
+[배열을 파라미터]
+<param2.c>
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+
+ int b[]={1,2,3,4,5};
+ module_param_array(b, int, NULL, 0);
+		    b배열복사
+			int type
+
+ //초기화 루틴
+ int __init init_param2(void){
+	printk("module message : param2\n");
+	printk("module message param2 array:%d, %d, %d, %d, %d\n", b[0], b[1], b[2], b[3], b[4]);
+	return 0;
+ }
+
+ //종료 루틴
+ void __exit exit_param2(void){
+	printk("module message : param2 module stop\n");
+ }
+
+ module_init(init_param2);
+ module_exit(exit_param2);
+ MODULE_LICENSE("GPL");
+
+실행>insmod param2.ko b=11,22,33,44,55
+ 파라메터 안넣어주면(배열 초기값 1,2,3,4,5)
+
+
+
+
+
+=====================================================================
+디바이스 드라이버
+=====================================================================
+문자 디바이스 작성
+#include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+
+//함수 정의(필요한 것만 정의! => 쓰기 필요없으면 안넣으면 됨)
+int device_open(..){...}
+int device_release(..){...}
+ssize_t device_read(..){...}
+ssize_t device_write(..){...}
+
+
+//구조체 함수 등록(어플리케이션에서 호출하면 동작되는 구조체)
+static struct file_operations device_fops={
+ ...
+ ssize_t (*read)(..);
+ ssize_t (*write)(..);
+ ...
+}
+
+//모듈 초기화 루틴
+int device_init(void){...}	//디바이스드라이버 레지스터 추가 등등
+
+//모듈 정리 루틴
+void device_exit(void){...}	//레지스터 해체(연결되어있는 장치 해체), 메모리해제 등등
+
+module_init(device_init);
+module_exit(device_exit);
+MODULE_LICENSE("GPL");
+
+
+
+
+
+
+실습
+moduleTest/test5>vi virtual_device.c
+#include <linux/init.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/fs.h>
+#include <asm/uaccess.h>
+#include <linux/slab.h>
+
+//유효시간 가장 길기때문 => 프로그램 시작부터 끝까지 살아있다.
+//대부분 정적메모리에 받아서 사용한다!!!
+static char *buffer = NULL;	
+
+//static은 다른파일에서 접근 불가!(exturn 으로 못씀)
+
+
+//이름은 상관없지만 프로토타입은 맞춰야한다.
+//장치를 오픈하는 함수
+
+int virtual_device_open(struct inode *inode, struct file *filp){
+
+  //장치에 대한 초기화 작업(읽기 장치, 쓰기 장치 이런걸로 셋팅)
+  printk(KERN_ALERT "virtual_device open\n");
+  return 0;
+
+}
+//////////////////////////여기서부터 녹음
+//해제하는 코드
+int virtual_device_release(struct inode *inode, struct file *filp){
+  printk(KERN_ALERT "virtual_device release\n");
+  return 0;
+}
+
+//파일구조체 포인터, 장치에다가 쓸 내용이 있는 주소, 크기(이만큼), 위치 오프셋 
+ssize_t virtual_device_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos){
+
+  printk(KERN_ALERT "virtual_device write\n");
+  strcpy(buffer, buf);		//장치에다가 넣어야 하므로 전역변수에 넣어야한다
+				//이것보다 user to kernel 함수를 쓰는게 더 좋다!!
+  return count;
+}
+
+
+//장치에 써있는 것을 => 어플리케이션으로 주는것
+//파일구조체 포인터, buf에다가 써주고, 읽을 크기, 오프셋
+ssize_t virtual_device_read(struct file *filp, const char *buf, size_t count, loff_t *f_pos){
+
+  printk(KERN_ALERT "virtual_device read\n");
+  copy_to_user(buf, buffer, 1024);		//사용자 메모리에 1024만큼 써라
+
+  return count;
+}
+
+
+
+
+
+**외부에서 어떤 용도로 쓰일건가 맵핑해주는 구조체** 꼭 써야한다
+
+//구조체 초기화!! => 맵핑시켜주는 구조체
+//파일이 오픈됬을때 (읽기,쓰기)모드에 따라 동작을 구현
+
+static struct file_operations vd_fops={	
+  .read = virtual_device_read,		//읽기모드 호출하면 얘를 사용
+  .write = virtual_device_write,	//쓰기모드 호출하면 얘를 사용
+  .open = virtual_device_open,		//오픈모드 호출하면 얘를 사용
+  .release = virtual_device_release
+};
+
+
+//register_chrdev얘가 어떤장치이다라는걸 알려줌
+int __init virtual_device_init(void){
+  if(register_chrdev(223, "virtual_device", &vd_fops)<0)   	//223 안쓰고있는 번호에 
+   	      //장치번호, 장치이름	  ,구조체변수 주소
+	printk(KERN_ALERT "driver init failed\n");
+  else
+	printk(KERN_ALERT "driver init successful\n");
+
+
+  buffer = (char*)kmalloc(1024, GFP_KERNEL);		//static 전역 변수에 메모리 할당하기
+							//커널메모리로 할당
+							//유저쪽 메모리 할당받으려면(GFP_USER)
+  if(buffer!=NULL)
+	memset(buffer, 0, 1024);	//성공적 할당되면 => 0으로 쭉 밀기
+
+  return 0;
+}
+
+
+void __exit virtual_device_exit(void){
+
+  unregister_chrdev(223, "virtual_device");
+  kfree(buffer);
+  printk(KERN_ALERT "driver exit successful\n");
+}
+
+module_init(virtual_device_init);
+module_exit(virtual_device_exit);
+MODULE_LICENSE("GPL");
+
+
+
+
+
+
+
+==================디바이스 드라이버 오픈해서 테스트 하는 코드
+
+
+moduleTest/test5>vi virtual_device_app.c
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/fcntl.h>
+
+int main(){
+  int dev;
+  char buff[1024];
+
+  dev = open("/dev/virtual_device", O_RDWR);	//fdno반환 = 3
+
+  printf("dev:%d\n", dev);
+
+  if(dev<0){
+	printf("device open error\n");
+	return -1;
+  }
+
+  write(dev, "1234", 4);		//1234가 buffer에 저장됨
+
+  read(dev, buff, 4);			//1234 읽어오기
+
+  printf("read from device:%s\n", buff);
+  close(dev);
+  return 0;
+}
+
+
+
+==============================*Makefile
+
+moduleTest/test5>vi Makefile
+
+obj-m = virtual_device.o
+TARGETS = virtual_device_app			//실제적 대상 이름(실행파일 생성)
+KDIR := /lib/modules/$(shell uname -r)/build
+PWD := $(shell pwd)
+
+
+default:$(TARGETS)
+	$(MAKE) -C $(KDIR) SUBDIRS=$(PWD) modules
+
+
+
+clean:
+	rm -rf *.ko
+	rm -rf *.mod.*
+	rm -rf .*.cmd
+	rm -rf *.o
+	rm -rf .tmp_versions
+
+moduleTest/test5>make
+*디바이스 파일 생성(mknod 생성할 디바이스 파일 명, 문자c/블럭b, 주번호, 부번호) 
+
+==insmod 하기전에			  c는 장치종류(캐릭터 디바이스 드라이버), 주번호, 부번호(똑같은 장치가 여러개일때 233-1, 233-2 이런식)
+moduleTest/test5>mknod /dev/virtual_device c 223 0	//virtual_device없으니까 먼저 추가를해줌
+moduleTest/test5>ls -l /dev/virtual_device	//virtual_device에 대한 상세한 정보 확인
+moduleTest/test5>insmod virtual_device.ko
+moduleTest/test5>./virtual_device_app
+moduleTest/test5>rmmod virtual_device
+
+moduleTest/test5>rm /dev/virtual_device (장치등록 잘못했을때 장치 삭세)

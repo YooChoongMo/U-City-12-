@@ -1,0 +1,282 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "linkedlist.h"
+
+
+void Insert(List **start, List **last);
+void Show(List *start);
+void reverse_Show(List *last);
+void Delete(List **start, List **last);
+void Modify(List **start);
+
+int main()
+{
+	List *start = NULL;
+	List *last = NULL;
+	List * pf;
+		
+	while (1)
+	{
+		int n;
+		int select = 0;
+
+		printf("1.입력   2.출력   3.데이터 수정   4.삭제   5.종료 : ");
+		scanf("%d", &n);
+
+		switch (n)
+		{
+		case 1: printf("\n입력화면\n");
+
+			Insert(&start, &last);
+			break;
+
+		case 2:   if (start == NULL)
+		{
+			printf("\n출력할 데이터가 없습니다. \n");
+			break;
+		}
+				  while (select != 3)                        //이전 메뉴 나올때 까지 반복
+				  {
+					  printf("\n1.처음 입력한 순서대로 출력   2.최신 입력한 순서대로 출력   3.이전메뉴 : ");
+					  scanf("%d", &select);
+					  fflush(stdin);
+
+					  if (select == 1)                            //입력한 순서대로 출력
+					  {
+						  printf("\nold순서 출력화면\n");
+						  Show(start);
+					  }
+					  else if (select == 2)                       //역순으로 출력               
+					  {
+						  printf("\nNew순서 출력화면\n");
+						  reverse_Show(last);
+					  }
+				  }
+
+				  break;
+
+		case 3: Modify(&start);
+			break;
+
+
+		case 4: Delete(&start, &last);
+			break;
+
+
+		case 5:      while (start != NULL)                      //순방향으로 저장된 동적메모리 해제
+		{
+			pf = start->tail;
+			free(start);
+			start = pf;
+		}
+		
+					 printf("동적메모리 해제 완료\n종료합니다. \n");
+					 return 0;
+		}
+		printf("\n");
+	}
+}
+
+
+
+//linkedlist.h
+
+#pragma once
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct link
+{
+	int number;
+	char name[255];
+	char phone[255];
+	struct link *head;
+	struct link *tail;
+	
+}List;
+
+static int cnt = 1;
+void Insert(List **start, List **last)
+{	
+	List *pt = (List*)malloc(sizeof(List));
+	List *tmp = NULL;
+	char na[255];
+	char ph[255];
+
+	printf("이름을 입력하시오: ");
+	scanf("%s", na);
+
+	printf("번호를 입력하시오: ");
+	scanf("%s", ph);
+
+	pt->number = cnt;
+	tmp = *start;
+	strcpy(pt->name, na);
+	strcpy(pt->phone, ph);
+	
+	if (*start == NULL)
+	{
+		*start = pt;
+		*last = pt;
+		cnt++;
+	}
+	else
+	{
+		(*last)->tail = pt;
+		pt->head = (*last);
+		(*last) = (*last)->tail;
+		(*last)->tail = NULL;
+		cnt++;
+	}
+}
+
+void Show(List *start)
+{
+	int i;
+	List *tmp = NULL;
+	tmp = start;
+
+	for (i = 0; i < cnt-1; i++)
+	{
+		printf("이름%s, 번호%s\n", tmp->name, tmp->phone);
+		tmp = tmp->tail;
+	}
+}
+
+void reverse_Show(List *last)
+{
+	int i;
+	List *tmp = NULL;
+	tmp = last;
+
+	for (i = 0; i < cnt-1; i++)
+	{
+		printf("이름%s, 번호%s\n", tmp->name, tmp->phone);
+		tmp = tmp->head;
+	}
+}
+
+void Delete(List **start, List **last)
+{
+	int n;
+	int i;
+//	List temp;
+	List *tm = NULL;
+	List *num = NULL;
+	tm = (*start);
+
+	printf("몇 번째 리스트 삭제할까요? : ");
+	scanf("%d", &n);
+
+	if (n > cnt)
+	{
+		printf("해당 리스트가 존재하지 않습니다.");
+		return;	}
+	
+	if ((*start)->tail == NULL)
+	{
+		free(tm);
+		printf("리스트 1개 삭제 완료");
+	}
+	else 
+	{	
+		if (n == 1)
+		{
+			(*start) = (*start)->tail;	
+			free(tm);
+			printf("%d번째 리스트 삭제 완료", n);
+			cnt--;
+		}
+		else
+		{
+			for (i = 0; i < n - 1; i++)
+			{
+				tm = tm->tail;
+			}//위치 이동
+			if (tm->tail == NULL)
+			{
+				tm->head->tail = NULL;
+				free(tm);
+				cnt--;
+				return;
+			}
+
+			tm->head->tail = tm->tail; //이어붙이고 
+			tm->tail->head = tm->head;
+
+			num = tm;
+			while (num->tail == NULL)
+			{
+				(num->number)--;
+				num = num->tail;
+			}
+
+			free(tm);
+			printf("%d번째 리스트 삭제 완료", n);
+			cnt--;
+		}
+	}
+}
+
+void Modify(List **start)
+{
+	List *tp = NULL;
+	int n;
+	int a;
+	int i;
+	char tna[255];
+	char tph[255];
+
+	tp = (*start);
+
+	printf("몇 번째 리스트를 수정하세요? : ");
+	scanf("%d", &n);
+
+	if (n > cnt)
+	{
+		printf("해당 리스트가 존재하지 않습니다.");
+		return;
+	}
+
+	printf("수정할 항목을 선택하세요: (1.이름 2.번호)");
+	scanf("%d", &a);
+
+
+	if (n == 1)
+	{
+		if(a==1)
+		{
+			printf("수정할 이름을 작성하세요: ");
+			scanf("%s", tna);
+			strcpy((*start)->name, tna);
+		}
+		else
+		{
+			printf("수정할 번호을 작성하세요: ");
+			scanf("%s", tph);
+			strcpy((*start)->phone, tph);
+		}
+	}
+
+	else
+	{
+		for (i = 0; i < n - 1; i++)
+		{
+			tp = tp->tail;
+		}
+		if (a == 1)
+		{
+			printf("수정할 이름을 작성하세요: ");
+			scanf("%s", tna);
+			strcpy(tp->name, tna);
+		}
+		else
+		{
+			printf("수정할 번호을 작성하세요: ");
+			scanf("%s", tph);
+			strcpy(tp->phone, tph);
+		}
+	}
+}

@@ -1,0 +1,82 @@
+<터미널>
+$mkdir /nfsroot/test3
+$cd /nfsroot/test2
+$cp virtual_device.c /nfsroot/test3/switch_device.c
+$cp Makefile /nfsroot/test3/
+$cd /nfsroot/test3/
+$cd vi switch_device.c
+--switch_device.c의 내용 수정--
+1. open()의 led내용 지우고 
+GPDR1&=~(1<<0);
+작성
+
+2. read()의 내용을 다음으로 수정
+GPLR1의 0번 비트 값을 읽어 copy_to_user로 유저 메모리에 작성
+
+3. 드라이버 등록하는 코드에서 장치명을 "myswitch"로 수정. 장치 번호는 그대로 253
+---------------------------------
+저장하고 나옴
+$vi switch_test.c
+아래와 같은 소스 작성
+--------------------------
+/dev/myswitch오픈
+
+while(1){
+  read();
+  read()로 읽은 값이 0이면 버튼 안눌림
+  read()로 읽은 값이 1이면 버튼 눌림
+}
+
+장치 닫음
+-------------------------------
+$vi Makefile
+하여 내용(파일명) 수정
+
+$make
+
+<미니컴>
+#rmmod virtual_device
+#rm /dev/virtual_device
+#mknod /dev/myswitch c 253 0
+#insmod switch_device.o
+#./switch_test
+
+------------------------------------------
+인터럽트 처리
+$vi ledswitch_device.c
+
+#include <linux/irq.h>
+#include <linux/interrupt.h>
+헤더파일 추가
+
+static void inter_handler(){
+  led 점멸코드;
+
+}
+
+init()에 다음 추가
+
+int return_val=-1;
+set_GPIO_IRQ_edge(32, GPIO_FALLING_EDGE);
+return_val=request_irq(IRQ_GPIO(32), inter_handler, SA_INTERRUPT, 
+"gpio switch", NULL);
+if(return_val<0){
+  printk(KERN_ERR "irq error");
+}
+
+
+exit()에 다음 추가
+free_irq(IRQ_GPIO(32), NULL);
+
+
+
+
+
+
+
+
+
+
+
+
+
