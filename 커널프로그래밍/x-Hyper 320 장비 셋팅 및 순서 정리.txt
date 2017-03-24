@@ -1,0 +1,65 @@
+1. 리눅스에서 CD넣고 크로스 컴파일 설치
+ => CD 모양 -> 셋팅 들어가서 physical로 설정 후 들어간다.
+
+2. compiler -> 다운로드에 복사해놓음.
+
+3. 압축파일 => /usr/local 로 복사(arm-linux-4.1.1.tgz
+
+4. tar zxvf arm-linux-4.1.1.tgz (압축해제)
+
+5. vi ~/.bash_profile 에 경로 추가 => :/usr/local/arm-linux-4.1.1/bin
+ - 크로스 컴파일 설치된 폴더 안에 ARM용으로 컴파일 해주는 gcc가 있어서 경로를 등록해줘야한다.
+
+6. source ~/.bash_profile 적용
+
+7. arm-linux-gcc-4.1.1 --version 체크 ==> ARM용으로 컴파일 시 -4.1.1 빼도댐
+
+8. mkdir nfsroot2 생성
+
+=============== NFS 구성 (p.143)
+
+* VMware -> 설정 -> network -> Bridged 로 바꾸고 -> LAN선 꼽기 (컴퓨터랑 연결)
+
+- vi /etc/exports 에 추가하기
+
+9. ifconfig eth0 192.168.0.1 (PC꺼)
+
+9. /etc/rc.d/init.d/nfs restart
+ 
+10. minicom -s =>  bps 바꾸기 ( 38400 8N1 )
+
+=============== 새 보드에 OS 이미지 올리기
+
+1. 320TKU/Kernel 에 있는 압축파일을
+
+2. mkdir /pxa320_kernel 생성 후 거기다 복사한다.
+
+3. 압축해제
+
+4. p.78 => 의존성 제거 => menuconfig => 커널 컴파일
+
+5. make WNDERS_defconfig
+ 
+6. make menuconfig 기본설정 되어있어서 그냥 나감;
+
+7. 컴파일 make zImage
+
+8. tftpboot로 복사하기
+
+
+<네트워크 환경구축>
+
+보드에서 boot 모드로 진입t
+
+blob 
+setip serverip 192.168.0.1 IP	(PC)
+setip clientip 192.168.0.2 IP	(보드)
+
+=> IP 설정해주기
+
+setip로 확인 가능
+
+
+9. tftp zImage kernel
+
+10. flash 

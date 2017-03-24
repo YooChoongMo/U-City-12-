@@ -1,0 +1,60 @@
+//640*480 24bit그림파일
+//arm-linux-gcc -I 로 컴파일만 하면 됨
+
+#include <stdio.h>
+  #include <stdlib.h> /* for exit */
+  #include <unistd.h> /* for open/close .. */
+  #include <fcntl.h> /* for O_RDONLY */
+  #include <sys/ioctl.h> /* for ioctl */
+  #include <sys/types.h>
+  #include <linux/fb.h> /* for fb_var_screeninfo, FBIOGET_VSCREENINFO */
+
+  #define FBDEVFILE "/dev/fb"
+
+  typedef unsigned char ubyte;
+
+  unsigned short makepixel(ubyte r, ubyte g, ubyte b)
+  {
+  return (unsigned short)(((r>>3)<<11)|((g>>2)<<5)|(b>>3));
+  }
+
+ //480X640
+ //칸당 80X80
+
+  int main()
+  {
+  int fbfd;
+  int bmpfd[5];
+  char *name[5] = {"1.bmp", "2.bmp", "3.bmp", "4.bmp", "5.bmp"};
+  unsigned short pixel;
+  int offset;
+  int i, j;
+  unsigned char buf[3];
+  unsigned short pix;
+
+
+
+
+
+
+ for(j=0; j<5; j++){
+  fbfd = open(FBDEVFILE, O_RDWR);
+  bmpfd[j] = open(name[j], O_RDONLY);
+
+  for(i=1; i<(640*480-54); i++){
+         lseek(bmpfd[j], -(i*3), SEEK_END);
+         read(bmpfd[j], buf, 3);
+         //lcd출력
+        pix = makepixel(buf[2], buf[1], buf[0]);
+         write(fbfd, &pix, 2);
+         };
+
+  close(bmpfd[j]);
+  close(fbfd);
+  sleep(1);
+ }
+
+
+  exit(0);
+  return 0;
+ }

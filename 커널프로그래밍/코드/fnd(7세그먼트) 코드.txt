@@ -1,0 +1,58 @@
+#include    <stdio.h>
+ #include    <stdlib.h>
+ #include    <fcntl.h>
+ #include    <string.h>
+
+
+ #define fnd_dev "/dev/FND"
+
+ #define     MAXFND  8
+
+   /*
+   *  bit# pos
+   *
+   *    --0--
+   *  5|     |1
+   *    --6--
+   *  4|     |2
+   *    --3--  o7
+   */
+ //    0   0   0   0   0   0   0   0
+ // . g f e d c b a
+ int main(){
+
+   int dev;
+   char buf[8];
+   char buf_clear[8];
+
+   char c[8] = {0x06, 0x67, 0x67, 0x5b, 0x3f, 0x7d, 0x3f, 0x6d};
+                                 //         1               9                9       2       0                6      0            s    5
+
+   int i = 0;
+
+         memset(buf_clear,0,sizeof(buf_clear));
+
+         dev = open(fnd_dev, O_RDWR);
+
+         if(dev<0){
+           perror("open error\n");
+           exit(1);
+         }
+
+         for(i=0; i<8; i++){
+           buf[i] = c[i];
+         }
+
+
+         for(i=0; i<5; i++){
+           printf("start\n");
+           printf("19920605\n");
+
+           write(dev, buf, sizeof(buf));
+           sleep(1);
+           write(dev, buf_clear, sizeof(buf_clear));
+           sleep(1);
+         }
+ close(dev);
+ return 0;
+ }

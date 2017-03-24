@@ -1,0 +1,459 @@
+#include    <stdio.h>
+ #include    <stdlib.h>
+ #include    <fcntl.h>   //O_RDONLY
+ #include    <string.h>
+ #include        <unistd.h>              //open / close
+ #include        <linux/fb.h>    //frame buffer
+ #include        <sys/ioctl.h>   //ioctl
+ #include        <sys/types.h>
+
+ #define device1 "/dev/KEY"
+ #define device2 "/dev/CLCD"     //어떤 장비는 clcd 인것도 있음
+#define device3 "/dev/FND"
+ #define device4 "/dev/fb"
+
+ // 800*480
+ //bit 16 / per
+  typedef unsigned char ubyte;
+
+  void stone(int player, int x, int y);          //바둑돌 그리기
+ int victory(void);
+
+  int play_flag = 1;
+ ///////////////////////// fbfd
+  int fbfd;
+  int ret;
+  struct fb_var_screeninfo fbvar;
+  unsigned short pixel;
+  int offset;
+  int i, j;
+
+  int x_point[4] = {250, 350, 450, 550};
+  int y_point[4] = {70, 170, 270, 370};
+
+ ///////////////////////// clcd
+  int clcd;
+  char clcd_buf[32];
+  int len = 0;
+ ///////////////////////// Key
+  int Player1[17];
+  int Player2[17];
+
+
+  unsigned short makepixel(ubyte r, ubyte g, ubyte b)            //color
+  {
+  return (unsigned short)(((r>>3)<<11)|((g>>2)<<5)|(b>>3));
+  }
+
+
+ int main(){
+ ///////////////////////// Key
+  int key;
+  char key_buf;
+  char pre_key[16];
+  int cnt=1;
+  int check_victory;
+ ////////////////////////////////////////////////////////////////// 배경 및 삼목판
+
+ fbfd = open(device4, O_RDWR);
+  if(fbfd < 0)
+  {
+  perror("fbdev open");
+  exit(1);
+  }
+
+  ret = ioctl(fbfd, FBIOGET_VSCREENINFO, &fbvar);
+  if(ret < 0)
+  {
+  perror("fbdev ioctl");
+  exit(1);
+  }
+
+  if(fbvar.bits_per_pixel != 16)
+  {
+  fprintf(stderr, "bpp is not 16n");
+  exit(1);
+  }
+
+ //brown background
+ /* black pixel @ (100,100) */
+ for(i=0; i<800; i++){
+   for(j=0; j<480; j++){                                                 //세로부터
+        offset = j*fbvar.xres*(16/8)+i*(16/8);  //세로+가로
+   if(lseek(fbfd, offset, SEEK_SET) < 0)
+         {
+      perror("fbdev lseek");
+      exit(1);
+         }
+    pixel = makepixel(255,255,50); /* black pixel */
+    write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+     }
+ }
+
+
+  /* white pixel @ (120, 280)x,y 초기좌표            */
+ //세로줄 그리기
+for(i=0; i<4; i++){
+   for(j=0; j<301; j++){
+     offset = (70+j)*fbvar.xres*(16/8)+((250+i*100)*(16/8));
+     if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(0,0,0); /* white pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+ }
+
+ //가로줄 그리기
+for(i=0; i<4; i++){
+   for(j=0; j<301; j++){
+     offset = (70+i*100)*fbvar.xres*(16/8)+((250+j)*(16/8));
+     if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(0,0,0); /* white pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+ }
+ //////////////////////////////////////////////////////////////////  Gamestart출력
+
+        clcd = open(device2, O_RDWR);
+
+         if(clcd<0){
+           perror("open error\n");
+           exit(1);
+         }
+
+         strcpy(clcd_buf, "   Game Start!  ");
+         len = strlen(clcd_buf);
+         clcd_buf[len-1] = '\0';
+
+    write(clcd, clcd_buf, sizeof(clcd_buf));
+     sleep(1);
+         memset(clcd_buf,0,sizeof(clcd_buf));
+         write(clcd, clcd_buf, sizeof(clcd_buf));
+
+         memset(clcd_buf,0,sizeof(clcd_buf));
+
+         strcpy(clcd_buf, "   1P-black        2P-white     ");
+         len = strlen(clcd_buf);
+         clcd_buf[len-1] = '\0';
+
+    write(clcd, clcd_buf, sizeof(clcd_buf));
+     sleep(1);
+         memset(clcd_buf,0,sizeof(clcd_buf));
+         write(clcd, clcd_buf, sizeof(clcd_buf));
+
+ //////////////////////////////////////////////////////////////////
+
+         key = open(device1, O_RDWR);
+
+         if(key<0){
+           perror("open error\n");
+           exit(1);
+         }
+
+         strcpy(clcd_buf, "    1P GO!Go!   ");
+         len = strlen(clcd_buf);
+         clcd_buf[len-1] = '\0';
+
+    write(clcd, clcd_buf, sizeof(clcd_buf));
+         memset(clcd_buf,0,sizeof(clcd_buf));
+
+
+ while(1){
+           int x, y, k;
+                 int check=0;
+
+
+           read(key, &key_buf, 1);       //device driver에서 read할때 마다 안누르면 data=0으로 초기화 시킴
+
+                        if(cnt == 16){                                                                                  //돌 꽉차면 종료
+                                strcpy(clcd_buf, "   Game over!   ");
+                                 len = strlen(clcd_buf);
+                                 clcd_buf[len-1] = '\0';
+                            write(clcd, clcd_buf, sizeof(clcd_buf));
+                         break;
+                         }
+
+ //key를 받아온다
+        if(key_buf)
+         {
+                 for(k=0; k<cnt; k++){                   //중복검사
+                        if(key_buf == pre_key[k])
+                           check = 1;
+                   }
+
+                 if(!check)                                                      //중복x => 만족
+                {
+                         pre_key[cnt] = key_buf;         //이전 버튼 저장
+
+                        switch(key_buf){
+
+                         case 1: x = 0; y = 0;break;
+                         case 2: x = 1; y = 0;break;
+                         case 3: x = 2; y = 0;break;
+                         case 4: x = 3; y = 0;break;
+                         case 5: x = 0; y = 1;break;
+                         case 6: x = 1; y = 1;break;
+                         case 7: x = 2; y = 1;break;
+                         case 8: x = 3; y = 1;break;
+                         case 9: x = 0; y = 2;break;
+                         case 10: x = 1; y = 2;break;
+                         case 11: x = 2; y = 2;break;
+                         case 12: x = 3; y = 2;break;
+                         case 13: x = 0; y = 3;break;
+                         case 14: x = 1; y = 3;break;
+                         case 15: x = 2; y = 3;break;
+                         case 16: x = 3; y = 3;break;
+                         }//switch end
+
+                         if(play_flag == 1){
+                                 Player1[key_buf]=1;
+                                 printf("Player1 stone's space ");
+                                 for(k=1; k<17; k++){
+                                         printf("[%d]",Player1[k]);
+                                 }
+                         }
+                         else {
+                                 Player2[key_buf]=1;
+                                 printf("Player2 stone's space ");
+                                 for(k=1; k<17; k++){
+                                         printf("[%d]",Player2[k]);
+                                 }
+                         }
+
+
+                         stone(play_flag, x, y);
+                 printf("%d PUSH\n",key_buf);
+
+                         if(play_flag){
+                                 play_flag = 0;
+                                         strcpy(clcd_buf, "    2P GO!Go!   ");
+                                         len = strlen(clcd_buf);
+                                         clcd_buf[len-1] = '\0';
+
+                                    write(clcd, clcd_buf, sizeof(clcd_buf));
+                                         memset(clcd_buf,0,sizeof(clcd_buf));
+                                 }
+
+                         else{
+                                 play_flag = 1;
+                                         strcpy(clcd_buf, "    1P GO!Go!   ");
+                                         len = strlen(clcd_buf);
+                                         clcd_buf[len-1] = '\0';
+
+                                    write(clcd, clcd_buf, sizeof(clcd_buf));
+                                         memset(clcd_buf,0,sizeof(clcd_buf));
+                                        }
+
+                         cnt++;
+                 }//if(check) end
+
+                         else{
+                                 strcpy(clcd_buf, "    Again Go!   ");
+                                 len = strlen(clcd_buf);
+                                 clcd_buf[len-1] = '\0';
+
+                            write(clcd, clcd_buf, sizeof(clcd_buf));
+                                 memset(clcd_buf,0,sizeof(clcd_buf));
+                                 //다시 누르세요
+                                }
+
+
+            }//keybuf비교 if
+
+
+
+
+ //승리 판별
+
+check_victory = victory();
+
+  if(check_victory == 1){
+         strcpy(clcd_buf, " 1P VICTORY! ");
+         len = strlen(clcd_buf);
+         clcd_buf[len-1] = '\0';
+         write(clcd, clcd_buf, sizeof(clcd_buf));
+         memset(clcd_buf,0,sizeof(clcd_buf));
+         break;
+         }
+
+  else if(check_victory == 2){
+         strcpy(clcd_buf, " 2P VICTORY! ");
+         len = strlen(clcd_buf);
+         clcd_buf[len-1] = '\0';
+         write(clcd, clcd_buf, sizeof(clcd_buf));
+         memset(clcd_buf,0,sizeof(clcd_buf));
+         break;
+         }
+
+         sleep(1);
+
+
+ }//while end
+
+ close(key);
+ close(clcd);
+ close(fbfd);
+  return 0;
+ }
+
+
+
+ //삼목알  그리기
+void stone(int player, int x, int y)
+ {
+         switch(player){
+
+ // 1P
+ case 1:
+
+
+  /*   검은돌       */
+ //세로줄 그리기
+for(i=0; i<31; i++){
+   for(j=0; j<31; j++){
+     offset = (y_point[y]-15+j)*fbvar.xres*(16/8)+(x_point[x]-15+i)*(16/8);              //세로
++ 가로
+    if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(0,0,0); /* white pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+ }
+
+ //가로줄 그리기
+for(i=0; i<31; i++){
+   for(j=0; j<31; j++){
+     offset = (y_point[y]-15+i)*fbvar.xres*(16/8)+(x_point[x]-15+j)*(16/8);
+     if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(0,0,0); /* white pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+ }
+ break;
+
+
+
+
+ // 2P
+ case 0:
+
+ /*   흰색돌        */
+ //세로줄 그리기
+for(i=0; i<31; i++){
+   for(j=0; j<31; j++){
+     offset = (y_point[y]-15+j)*fbvar.xres*(16/8)+(x_point[x]-15+i)*(16/8);              //세로
++ 가로
+    if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(255,255,255); /* white pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+ }
+
+ //가로줄 그리기
+for(i=0; i<31; i++){
+   for(j=0; j<31; j++){
+     offset = (y_point[y]-15+i)*fbvar.xres*(16/8)+(x_point[x]-15+j)*(16/8);
+     if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(255,255,255); /* white pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+ }
+
+ break;
+
+
+ }
+
+ }
+
+
+ int victory(void)
+ {
+         int v=1;
+         int count=0;
+ printf("checking...\n");
+ /////////////////////////////////////////////////////////////////////// 가로
+while(v<15)
+ {
+         if(count==2)
+                 v=5;
+         else if(count==4)
+                 v=9;
+         else if(count==6)
+                 v=13;
+   if( (Player1[v]==1)&&(Player1[v+1]==1)&&(Player1[v+2]==1) )
+                                 {return 1;}
+   if( (Player2[v]==1)&&(Player2[v+1]==1)&&(Player2[v+2]==1) )
+                                 {return 2;}
+         v++;
+         count++;
+ }       //가로 while end//승리 판별
+/////////////////////////////////////////////////////////////////////// 세로
+v=1;
+ count=0;
+
+ while(v<9)
+ {
+   if( (Player1[v]==1)&&(Player1[v+4]==1)&&(Player1[v+8]==1) )
+                                 {return 1;}
+   if( (Player2[v]==1)&&(Player2[v+4]==1)&&(Player2[v+8]==1) )
+                                 {return 2;}
+         v++;
+         count++;
+ }
+ ///////////////////////////////////////////////////////////////////////
+대각선 (오른쪽 아래방향)
+v=1;
+ count=0;
+
+ while(v<7)
+ {
+   if(count==2)
+          v=5;
+   if( (Player1[v]==1)&&(Player1[v+5]==1)&&(Player1[v+10]==1) )
+                                 {return 1;}
+   if( (Player2[v]==1)&&(Player2[v+5]==1)&&(Player2[v+10]==1) )
+                                 {return 2;}
+         v++;
+         count++;
+ }
+ ///////////////////////////////////////////////////////////////////////
+대각선 (왼쪽 아래방향)
+v=3;
+ count=0;
+
+ while(v<9)
+ {
+   if(count==2)
+          v=7;
+   if( (Player1[v]==1)&&(Player1[v+3]==1)&&(Player1[v+6]==1) )
+                                 {return 1;}
+   if( (Player2[v]==1)&&(Player2[v+3]==1)&&(Player2[v+6]==1) )
+                                 {return 2;}
+         v++;
+         count++;
+ }
+ return 0;
+ }

@@ -1,0 +1,452 @@
+RTOS		- 실시간용 (선점형 커널) - 자기보다 우선순위가 높은 TASK가 있으면 비켜줌 (시간이 딱딱 맞아떨어짐) 
+		- 의료기기(인공심장 같은), 항공 등등
+		- 프로세서 성능 좋아야함(고가)
+
+비 RTOS 	- 시간성(중요X), 게임기, 핸드폰 등
+
+
+* Embedded System 정의
+마이크로프로세서 혹은 마이크로컨트롤러를 내장(Embedded)하여 원래 제작자가
+지정한 기능만을 수행하는 장치이다. 만일 한 시스템에서 사용자가 프로그램을 바
+꿔가면서 그에 따라 여러 가지 기능들을 수행할 수 있다면, 그 시스템은 대부분의
+사람들이 임베디드 시스템이라고 분류하지 않는다.
+
+대부분 ROM과 RAM에 저장됨
+
+3)커널
+  (1) 스케줄러
+    - 어느 TASK가 어느순간에 실행을 해야할지 결정해줌
+
+ (2) critical section
+    베타적접근
+    - 세마포어, 뮤텍스
+
+
+=============== vmware 셋팅
+
+하드웨어창 add
+시리얼 포트 하나 추가 ( 시리얼 통신(미니컴==하이퍼터미널)을 위해 ) => 장비에선 모니터가 없어서 부팅하는걸 못봐
+
+리눅스 실행 => 처음 설치한거
+
+
+=============== 크로스 컴파일러 설치
+
+1. 압축파일(임베디드 포팅) 리눅스로 옮긴다
+	/usr/local
+
+2. 해제 후 Toolchain 안에 크로스 컴파일러 설치 방법 있다.
+
+3. 설치방법대로 진행(크로스컴파일러 설치)
+
+  PC          ----            보드
+
+ intel		  	      ARM
+
+4. vi ~/.bash_profile 에 경로 추가 => /usr/local/arm-linux/bin
+ - 크로스 컴파일 설치된 폴더 안에 ARM용으로 컴파일 해주는 gcc가 있어서 경로를 등록해줘야한다.
+
+
+5. source ~/.bash_profile
+
+6. cd ~ 홈 경로로 온뒤 arm-linux-gcc --version 을 쳐보면 버전이 나옴 (안나오면 제대로 경로에 등록 안된것)
+
+7. 테스트.c 파일 만들어서
+
+8. arm-linux-gcc -o test test.c 로 컴파일을 한다
+
+9. 컴에선 실행해도 실행할 수 없다  ==>  보드에서 실행해야한다.
+
+=============== 미니컴 설치(보드에서의 모니터라고 보면 됨)
+
+1. yum install minicom
+
+2. minicom -s
+
+3. serial port setup
+
+4. a -> dev/ttyS0		(시리얼-USB이면 ttyUSB0)
+   b -> 지움
+   f -> NO
+
+5. s나와서 Save setup as dfl
+
+=============== 터미널은 두개 열어서 작업 minicom(보드용) & PC용
+
+nfs 서버 (LAN선)으로 연결시켜서 서버를 통해 다른 컴퓨터의 하드디스크를 자기꺼 처럼 끌어다 씀
+
+실행 파일(ARM용)으로 컴파일된것을 nfs를 통해 보내면 바로 보드에서 사용 가능!!
+
+minicom에서 보드 연결되면 
+
+1. rz -> ctrl + a + s  ->  zmodem  ->  space로 선택 -> space bar + enter ->  ./helloARM 하면 실행!!
+
+
+=============== NFS 구성 (p.143)
+
+* VMware -> 설정 -> network -> Bridged 로 바꾸고 -> LAN선 꼽기 (컴퓨터랑 연결)
+
+
+- vi /etc/exports
+
+==> IP주소 설정
+PC : 192.168.0.1
+보드: 192.168.0.2
+
+1. /nfsroot 192.168.0.2(rw)  => 쓰고 저장
+
+2. mkdir /nfsroot
+
+3. cp ~/test/helloARM /nfsroot
+
+4. cd /nfsroot
+
+5. ls 확인
+
+6. 리눅스에서 방화박 해체
+
+7. SELinux -> 시스템 디폴트 비활성
+
+8.ifconfig eth0 192.168.0.1 (PC꺼)
+
+9. /etc/rc.d/init.d/nfs restart
+
+=============== 
+
+장비 연결된 minicom에서
+ifconfig eth0 192.168.0.2
+mkdir /mnt/nfs
+mount -t nfs 192.168.0.1:/nfsroot /mnt/nfs
+
+== 아무것도 안뜨면 잘 연결 된 것!
+
+
+=============== p.115
+
+mkdir ~/PXA255-pro
+mkdir ~/PXA255-pro/Kernel 만들고
+
+1. 거기다가 처음에 압축 푼 폴더(bsp)에서 kernel에 압축파일 있음(linux-2.4.19-pro3_usb20_v32.tar)
+
+2. 압축해제한 디렉토리로 이동
+(linux-2.4.19-pro3_usb20 디렉토리가 커널 소스이다)
+
+3. make dep
+
+4. make zImage 
+
+5. cd arch/arm/boot
+
+6. ls
+
+7. zImage 생성되있나 확인(보드에서 OS Image)  ==>  이제 보드에 올려야됨
+   (OS실행파일)
+
+8. 보드메모리에 올려야됨 TFTP(익명 파일서버)를 이용해
+
+9. mkdir /tftpboot
+
+10. cp zImage /tftpboot
+
+11. cd /tftpboot
+
+12. ls 옮겨졌는지 확인
+
+=============== TFTP 설치하기 (p.132)
+
+1. yum install tftp*    		(네트워크 NAT으로 바꿈)
+
+2. vi /etc/xinetd.d/tftp
+
+3. PDF파일이랑 똑같이 수정한다.
+
+4. vi /etc/xinetd.d/
+
+5.setup
+
+6.시스템 서비스
+
+7. tftp 별표 되어있나 확인 하고 나옴 (tab키)
+
+8. /etc/init.d/xinetd restart 
+
+9. cd /tftpboot/ => zImage 있나 확인
+
+
+
+=============== OS 올리기
+
+10. (네트워크 브릿지로 다시 바꿈)
+
+11. ifconfig eth0 192.186.0.1 로 바꾸기
+
+12. 보드 연결 => 리셋 누르자마자 마구 엔터 치기 => 부트로 들어가져야됨
+
+13. (p.131) status 로 상태 보기
+
+14. 	타겟 : 보드  	=>   	IP주소 바꿔주기 
+	서버 : PC
+
+15. set ip_addr
+  Newhostip：192.168.0.1	(PC)
+  Newtargetip：192.168.0.2	(보드)
+
+16. p.136 => tftp zImage kernel  =>  zImage실행파일을 RAM에다 복사를 해준다
+
+17. flash kernel ==> RAM은 지워지니까 flash 메모리에 올려야한다!!!!
+
+18. 정상적으로 되면 재부팅 하면 올린 리눅스OS가 시작한다.
+
+
+
+============================== 보드용 시스템 콜 함수 만들기 ==============================
+
+<시스템 콜 함수 구현> 
+ - 뉴 콜함수 만들어서 보드에 올린다.
+
+20. cd ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/kernel
+
+  	=> vi newcall.c
+
+#include<linux/kernel.h>
+
+asmlinkage int sys_newcall(){		
+  printk("hello, kernel\n");
+  return 21;
+}
+
+저장 
+
+
+<시스템 콜 번호 추가>
+20. cd ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/include/asm-arm 
+
+21. vi unistd.h    ==> [ calls.S 에서 추가할 때 번호랑 동일하게 해야한다!!!! ]
+
+22. #define __NR_newcall ( .............제일마지막번호)   *#endif 아래다 추가
+
+
+<시스템 콜 함수 등록>
+23. cd ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/arch/arm/kernel
+
+24. vi calls.S	   ==> [ unistd.h 에서 추가할 때 번호랑 동일하게 해야한다!!!! ]
+
+25. 제일 마지막 번호에 추가 .long SYMBOL_NAME(sys_newcall)
+
+
+<Makefile 수정>
+26. cd ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/kernel
+
+27. vi Makefile
+
+28. obj-y 끝에 newcall.o 추가
+
+29. cd ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/
+
+30. make zImage
+
+31. 실행시킬 어플리케이션 개발 
+
+nfsroot>#vi newcall.c
+
+#include<stdio.h>
+#include<linux/unistd.h>
+_syscall0(int, newcall);
+        
+	//226으로 등록했음
+void main(){
+  int i;
+  printf("app start\n");
+  i=newcall();
+  printf("app i=%d\n", i);
+}
+
+#arm-linux-gcc -I /root/PXA255-pro/kernel/linux-2.4.19-pro3_usb20/include newcall_app.c -o newcall_app
+
+실행파일
+=> nfsroot에 넣기
+
+================================================================================================
+
+<커널 컴파일한 zImage tftp로 옮겨서 보드에 올리기>
+
+
+32. cd ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/arch/arm/boot 에 있는 zImage를 /tftpboot 옮기기
+
+33. cd arch/arm/boot
+
+34. ls
+
+35. zImage 생성되있나 확인(보드에서 OS Image)  ==>  이제 보드에 올려야됨
+   (OS실행파일)
+
+36. 보드메모리에 올려야됨 TFTP(익명 파일서버)를 이용해
+
+37. mkdir /tftpboot
+
+38. cp zImage /tftpboot
+
+39. cd /tftpboot
+
+40. ls 옮겨졌는지 확인
+
+41. ~/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/arch/arm/boot 에 있는 zImage를 /tftpboot 옮기기
+
+42. 보드 연결 => boot로 진입
+
+43. tftp zImage kernel  =>  zImage실행파일을 RAM에다 복사를 해준다
+
+44. flash kernel ==> RAM은 지워지니까 flash 메모리에 올려야한다!!!!
+
+45. 정상적으로 되면 재부팅 하면 올린 리눅스OS가 시작한다.
+
+
+===== PC 에서 == 
+46.ifconfig eth0 192.168.0.1 (PC꺼)
+
+47. /etc/rc.d/init.d/nfs restart
+
+
+48. =============== =============== =============== 
+
+장비 연결된 minicom에서
+ifconfig eth0 192.168.0.2
+mkdir /mnt/nfs
+mount -t nfs 192.168.0.1:/nfsroot /mnt/nfs
+
+== 아무것도 안뜨면 잘 연결 된 것!
+
+    =============== =============== =============== 
+
+
+
+nfs 서버 (LAN선)으로 연결시켜서 서버를 통해 다른 컴퓨터의 하드디스크를 자기꺼 처럼 끌어다 씀
+
+실행 파일(ARM용)으로 컴파일된것을 nfs를 통해 보내면 바로 보드에서 사용 가능!!
+
+minicom에서 보드 연결되면 
+
+1. rz -> ctrl + a + s  ->  zmodem  ->  .. -> nfsroot ->  파일 선택 ->  ./app이름 실행!!
+
+
+ =============== =============== ===============     =============== =============== =============== 
+
+<드라이버 모듈프로그래밍 올리기>
+==> 드라이버Makefile
+ 
+1. virtual_device.c    ,    virtual_device_app.c 파일 pxmodule1 디렉토리로 옮긴다.
+
+2. Makefile 작성
+
+3. make
+
+4. virtual_device.o, virtual_device_app 를 /nfsroot 로 복사해서 옮기기
+
+46.ifconfig eth0 192.168.0.1 (PC꺼)
+
+47. /etc/rc.d/init.d/nfs restart
+
+
+5. 장비 연결된 minicom에서
+ifconfig eth0 192.168.0.2
+mkdir /mnt/nfs
+mount -t nfs 192.168.0.1:/nfsroot /mnt/nfs
+
+
+==insmod 하기전에 					c는 장치종류(캐릭터 디바이스 드라이버), 주번호, 부번호(똑같은 장치가 여러개일때 233-1, 233-2 이런식)
+mknod /dev/virtual_device c 253 0	//virtual_device없으니까 먼저 추가를해줌
+ls -l /dev/virtual_device	//virtual_device에 대한 상세한 정보 확인
+
+insmod virtual_device.o
+(mismatch 라고 뜨면 Makefile에서 include경로를 잘못 입력 한것!!!!
+
+./virtual_device_app
+rmmod virtual_device
+
+rm /dev/virtual_device (장치등록 잘못했을때 장치 삭세)
+
+
+
+보드용 커널 (arm-linux-gcc)컴파일 -> zImage(OS실행파일 / 이미지) -> yum install tftp
+-s /tftpboot   ==>  서버를 tftpboot라고 설정한 것!  -> 이미지파일은 /tftpboot에 넣어야함
+
+==> 보드에서 tftp 명령을 때리면 PC(tftpboot)부터 찾는것임
+==>blob(부트로더) 프로그램에 파워를 키자마자 enter => boot명령으로 들어가짐
+==>어드레스 설정 
+==> tftp zImage => 서버로 설정한 tftpboot에 신호를 보내서 RAM에 복사함
+==> flash kernel => 지워지지 않는 flash에 복사함(파워를 꺼도 남아있게끔)
+*********보드에 컴파일한 커널 OS를 올린것!
+
+<nfs를 하는 이유>
+매번 Zmodem으로 다운로드를 해가며 실행하기 번거롭기때문에
+PC와 하드디스크를 접근 가능하게 해서 nfs디렉토리에서 바로 실행해 볼수 있게끔 !!!
+
+=============== =============== =============== =============== =============== ===============
+
+<커널 자체에 드라이버 올려서 zImage만들기>  p.319(PDF)
+
+
+/root/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/drivers/char	(캐릭터 디바이스만 들어있음)
+
+보면 led_gpio.c 드라이버도 있고 내가 만든 드라이버를 복사해서 넣어도 된다.
+=> 커널에 포함을 시켜버리는것!!!!!
+
+
+1. menu config에 먼저 추가 시키기
+  - vi Config.in
+  - 6번째 줄에 bool 'LED GPIO' CONFIG_L 쓰기
+ 
+2. /root/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20 에서
+  - make menuconfig 쳐서 확인해보기
+  - character device 가서 새로 추가한 LED GPIO 체크(위에있는것만)하고 save하고 나오기
+
+3. 동일한 디렉토리에서 vi .config열기 => Character device에서  CONFIG_L = y 확인하고 나오기
+
+4.cd /root/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20/drivers/char
+  - vi Makefile 열기
+  - /LED 치면 나옴 (원래껀 #으로 주석 처리 하고) 복사하나 만들고
+   => $(CONFIG_L) += 파일명.o 로 바꾸기 (내가 넣은 파일명) 추가하기
+
+5. cd /root/PXA255-pro/Kernel/linux-2.4.19-pro3_usb20 에
+   => make zImage (커널 컴파일)
+
+
+<커널 컴파일한 zImage tftp로 옮겨서 보드에 올리기>
+
+6. (네트워크 브릿지로 다시 바꿈)
+
+7. ifconfig eth0 192.186.0.1 로 바꾸기
+
+8. 보드 연결 => 리셋 누르자마자 마구 엔터 치기 => 부트로 들어가져야됨
+
+9. (p.131) status 로 상태 보기
+
+10. 	타겟 : 보드  	=>   	IP주소 바꿔주기 
+	서버 : PC
+
+11. set ip_addr
+  Newhostip：192.168.0.1	(PC)
+  Newtargetip：192.168.0.2	(보드)
+
+12. p.136 => tftp zImage kernel  =>  zImage실행파일을 RAM에다 복사를 해준다
+
+13. flash kernel ==> RAM은 지워지니까 flash 메모리에 올려야한다!!!!
+
+14. 정상적으로 되면 재부팅 하면 올린 리눅스OS가 시작한다.
+
+===> mknod 장치 추가 ==> 바로 ./app 실행하면 됩니다. (insmod 안해도댐) 
+						      == 이미 커널에 올려져있음
+
+
+
+
+
+
+
+
+
+
+
+
+
+

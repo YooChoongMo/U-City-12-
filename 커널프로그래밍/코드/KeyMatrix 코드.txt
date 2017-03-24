@@ -1,0 +1,31 @@
+#include    <stdio.h>
+ #include    <stdlib.h>
+ #include    <fcntl.h>
+ #include    <string.h>
+
+ #define device "/dev/KEY"
+
+ int main(){
+
+   int dev;
+   char buf;
+
+         //memset(buf_clear,0,sizeof(buf_clear));
+
+         dev = open(device, O_RDWR);
+
+         if(dev<0){
+           perror("open error\n");
+           exit(1);
+         }
+
+         while(1){
+           usleep(500000);
+           read(dev, &buf, 1);   //device driver에서 read할때 마다 안누르면 data=0으로 초기화 시킴
+
+          if(buf)
+             printf("%d PUSH\n",buf);
+         }
+ close(dev);
+  return 0;
+ }

@@ -1,0 +1,303 @@
+virtual_device_interLCD_app.c
+
+  #include <stdio.h>
+  #include <stdlib.h> /* for exit */
+  #include <unistd.h> /* for open/close .. */
+  #include <fcntl.h> /* for O_RDONLY */
+  #include <sys/ioctl.h> /* for ioctl */
+  #include <sys/types.h>
+  #include <linux/fb.h> /* for fb_var_screeninfo, FBIOGET_VSCREENINFO */
+
+
+  #define KEYPADDEVFILE "/dev/virtual_device"
+  #define FBDEVFILE "/dev/fb"
+
+ static int x =320, y=240;
+ typedef unsigned char ubyte;
+
+  unsigned short makepixel(ubyte r, ubyte g, ubyte b)
+  {
+  return (unsigned short)(((r>>3)<<11)|((g>>2)<<5)|(b>>3));
+  }
+
+ //480X640
+ //칸당 80X80
+  int main()
+  {
+   int dev;
+   char buf;
+
+ //pixel
+  int fbfd;
+  int ret;
+  struct fb_var_screeninfo fbvar;
+  unsigned short pixel;
+  int offset;
+  int i, j;
+
+  fbfd = open(FBDEVFILE, O_RDWR);                                //pixel deriver open
+  if(fbfd < 0)
+  {
+  perror("fbdev open");
+  exit(1);
+  }
+
+  dev = open(KEYPADDEVFILE, O_RDONLY);           //keypad driver open
+   printf("dev:%d open success!\n", dev);
+
+   if(dev<0){
+         printf("device open error\n");
+         return -1;
+         }
+
+
+  ret = ioctl(fbfd, FBIOGET_VSCREENINFO, &fbvar);
+  if(ret < 0)
+  {
+  perror("fbdev ioctl");
+  exit(1);
+  }
+
+  if(fbvar.bits_per_pixel != 16)
+  {
+  fprintf(stderr, "bpp is not 16n");
+  exit(1);
+  }
+
+
+ //white background
+ /* white pixel @ (100,100) */
+ for(i=0; i<680; i++){
+   for(j=0; j<480; j++){                                                 //세로부터
+        offset = j*fbvar.xres*(16/8)+i*(16/8);  //세로+가로
+   if(lseek(fbfd, offset, SEEK_SET) < 0)
+         {
+      perror("fbdev lseek");
+      exit(1);
+         }
+    pixel = makepixel(255,255,255); /* white pixel */
+    write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+     }
+ }
+
+
+ for(;;){
+
+                 read(dev, &buf, 1);
+                 printf("%d key !!!!!!!! right\n",buf);
+
+
+   if( buf == 4){                                        //up
+                 printf("up key !!!!!!!!\n");
+
+ //세로줄 그리기 up
+     for(j=1; j<40; j++){
+       offset = (y-j)*fbvar.xres*2+(x*2);
+       if(lseek(fbfd, offset, SEEK_SET) < 0)
+                {
+         perror("fbdev lseek");
+         exit(1);
+                 }
+       pixel = makepixel(0,0,255); /* blue pixel */
+       write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+          }
+                 y = y-40;
+    }
+
+
+         else if( buf == 6){                     //down
+                 printf("down key !!!!!!!!\n");
+ //세로줄 그리기 down
+     for(j=1; j<40; j++){
+       offset = (y+j)*fbvar.xres*2+(x*2);
+       if(lseek(fbfd, offset, SEEK_SET) < 0)
+                {
+         perror("fbdev lseek");
+         exit(1);
+                 }
+       pixel = makepixel(0,0,255); /* blue pixel */
+       write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+          }
+                 y = y+40;
+         }
+
+
+         else if( buf == 1){                     //right
+                 printf("right key !!!!!!!!\n");
+ //가로줄 그리기 right
+   for(j=1; j<40; j++){
+                 offset = y*fbvar.xres*2+(x+j)*2;
+     if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(0,0,255); /* blue pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+                 x = x + 40;
+         }
+
+         else if( buf == 9){                     //lfet
+                 printf("left key !!!!!!!!\n");
+ //가로줄 그리기 left
+   for(j=1; j<40; j++){
+                 offset = y*fbvar.xres*2+(x-j)*2;
+     if(lseek(fbfd, offset, SEEK_SET) < 0)
+              {
+       perror("fbdev lseek");
+       exit(1);
+               }
+     pixel = makepixel(0,0,255); /* blue pixel */
+     write(fbfd, &pixel, 2); /* write 2byte(16bit) */
+      }
+                 x = x - 40;
+         }
+
+   }//for end
+
+   close(dev);
+  close(fbfd);
+  return 0;
+ }
+
+ ==========================================
+ virtual_device_interLCD.c
+ /*키패드 드라이버*/
+
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/fs.h>
+ #include <asm/uaccess.h>
+ #include <linux/slab.h>
+
+ #include <asm/arch/pxa-regs.h> //pin register header
+ #include <linux/ioport.h> //pin register header
+ #include <asm/hardware.h> //pin register header
+ #include <asm/irq.h> //pin register header
+ #include <linux/interrupt.h> //pin register header
+ #include <asm/io.h> //pin register header
+ #include <linux/delay.h> //pin register header
+
+
+ #define KEY_BASE     0x14000000         //물리 주소라서 직접으로 사용 x
+                         //현재 키패드에 눌린 결과 보관
+
+unsigned long *keyport;
+ static unsigned char key_buf = 0;
+ void key_handler(int irq, void *dev_id, struct pt_regs *regs);
+
+ static char *buffer = NULL;
+
+ static DECLARE_WAIT_QUEUE_HEAD(wq);
+ //read를 만나면 인터럽트 신호가 올때까지 기다린다.
+
+
+void key_handler(int irq, void *dev_id, struct pt_regs *regs)
+ {
+     unsigned char key_value;
+
+     keyport = (unsigned long *) ioremap_nocache(KEY_BASE, 0x10);
+                                                 //물리 주소라서 직접으로 사용 x => ioremap으로 다시 할당 받는다
+    key_value = (*(keyport))&0xf;
+     printk("KEY INPUT : [%d] input!!!!!\n", key_value);
+     key_buf = key_value;
+     iounmap(keyport);
+
+          wake_up_interruptible(&wq);    //대기큐에 들어간  blocking을 깨워줌!
+
+ }
+
+
+int virtual_device_open(struct inode *inode, struct file *filp)
+ {
+   printk(KERN_ALERT "virtual_device open\n");
+
+   return 0;
+ }
+
+
+ int virtual_device_release(struct inode *inode, struct file *filp)
+ {
+   printk(KERN_ALERT "virtual_device release\n");
+   return 0;
+ }
+
+
+ ssize_t virtual_device_write(struct file *filp, const char *buf,
+ size_t count, loff_t *f_pos)
+ {
+   printk(KERN_ALERT "virtual_device write\n");
+   strcpy(buffer, buf);
+
+
+   return count;
+ }
+
+
+ ssize_t virtual_device_read(struct file *filp, const char *buf, size_t
+ count, loff_t *f_pos)
+ {
+   printk(KERN_ALERT "virtual_device read\n");
+
+    interruptible_sleep_on(&wq); //read함수를 쓰면 바로 잠들게 된다!!!
+                                                                                         //버튼 누르면 핸들러 동작!=>핸들러내에서 wake up으로 깨움
+                                                                                        //깨운다음 이 밑에 user에게 key_buf값 전달.
+         //*buf = key_buf;
+
+   copy_to_user(buf, &key_buf, 1);
+
+   return 0;
+ }
+
+ static struct file_operations vd_fops=
+ {
+   .read = virtual_device_read,          //읽기모드 호출하면 얘를 사용
+  .write = virtual_device_write,        //쓰기모드 호출하면 얘를 사용
+  .open = virtual_device_open,          //오픈모드 호출하면 얘를 사용
+  .release = virtual_device_release
+ };
+
+ int __init virtual_device_init(void)
+ {
+   int return_val;
+ GPDR0 &= ~(1 << 0);
+ GAFR0_L &= ~(0x3);
+     set_GPIO_IRQ_edge(0, GPIO_RISING_EDGE);
+
+     return_val = request_irq(IRQ_GPIO(0), key_handler, SA_INTERRUPT,
+ "KEY PAD INT", NULL);
+     if(return_val < 0)
+     {
+  printk(KERN_ERR "pxa255_pro_key_init() : Can't request irq %#010x\n",
+ IRQ_GPIO(0));
+
+     }
+
+ if(register_chrdev(253, "virtual_device", &vd_fops)<0)
+     printk(KERN_ALERT "driver init failed\n");
+
+   else
+         printk(KERN_ALERT "driver init successful\n");
+
+   buffer = (char*)kmalloc(1024, GFP_KERNEL);
+
+   if(buffer!=NULL)
+     memset(buffer, 0, 1024);
+
+ return 0;
+ }
+
+ void __exit virtual_device_exit(void)
+ {
+         free_irq(IRQ_GPIO(0), NULL);                            //switch
+
+   unregister_chrdev(253, "virtual_device");
+   kfree(buffer);
+   printk(KERN_ALERT "driver exit successful\n");
+ }
+
+ module_init(virtual_device_init);
+ module_exit(virtual_device_exit);
+ MODULE_LICENSE("GPL");
