@@ -1,0 +1,40 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+namespace WindowsFormsApplication5
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+           String[] dirs = Directory.GetDirectories(@textBox1.Text); //C#은 경로앞에 @를 붙임
+
+            if (@textBox1.Text != "")
+            {
+                foreach (string s in dirs)
+                {
+                    ListViewItem item = new ListViewItem(s);
+                    listView1.Items.Add(item);
+                }
+            }
+        }
+
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBox1.Text = listView1.FocusedItem.Text;
+        }
+    }
+}

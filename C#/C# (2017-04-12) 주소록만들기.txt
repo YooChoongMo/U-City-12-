@@ -1,0 +1,252 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1
+{
+    class Person
+    {
+        private string name;
+        private string tel;
+        private string address;
+
+        public Person() { } //디폴트 생성자
+        public Person(string name, string tel, string address)
+        {
+            this.name = name;
+            this.tel = tel;
+            this.address = address;
+        }
+
+        public void setName(string name)
+        {
+            this.name = name;
+        }
+        public string getName()
+        {
+            return name;
+        }
+        public void setTel(string tel)
+        {
+            this.tel = tel;
+        }
+        public string getTel()
+        {
+            return tel;
+        }
+        public void setAddress(string address)
+        {
+            this.address = address;
+        }
+        public string getAddress()
+        {
+            return address;
+        }
+
+        public override string ToString()
+        {
+            return "name:" + name + ", tel:" + tel + ", address:" + address;
+        }
+    }
+    //Database Access object(어떤 기능을 제공할 떄 DB파트만 담당==Dao)
+    //지금은 DB없어서 배열로 사용
+    class Dao
+    {
+        private Person[] datas;
+        private int cnt;    //=> 0으로 초기화 됨
+        public Dao()
+        {
+            datas = new Person[30];
+        }
+        public void insert(Person p)
+        {
+            datas[cnt++] = p;
+        }
+        public int select(string name)
+        {
+            for (int i = 0; i < cnt; i++)
+            {
+                //객체 비교Equals()
+                if (name.Equals(datas[i].getName()))
+                {
+                    return i;
+                }
+            }
+            return -1;  //못찾았을 경우
+        }
+        public void update(Person p)
+        {
+            int idx = select(p.getName());
+            if (idx < 0)
+            {
+                Console.WriteLine("없는 데이터\n");
+                return;
+            }
+            datas[idx].setTel(p.getTel());
+            datas[idx].setAddress(p.getAddress());
+            Console.WriteLine("수정완료\n");
+            Console.WriteLine(datas[idx]);
+        }
+
+        public void delete(string name)
+        {
+            int idx = select(name);
+            if (idx < 0)
+            {
+                Console.WriteLine("없는 데이터\n");
+                return;
+            }
+            for (int i = idx; i < cnt - 1; i++)
+            {
+                datas[i] = datas[i + 1];
+
+            }
+            cnt--;
+        }
+        public Person[] selectAll()
+        {
+            return datas;
+        }
+
+        public int getCnt()
+        {
+            return cnt;
+        }
+    }
+
+
+
+    class Service
+    {
+        private Dao dao;
+        public Service()
+        {
+            dao = new Dao();
+        }
+
+        public void addPerson()
+        {
+            string tel = "", address = "", name = "";
+
+            while (true)
+            {
+                Console.WriteLine("name:");
+                    name = Console.ReadLine();
+                if (dao.select(name) < 0)
+                    break;
+            }
+            Console.Write("tel:");
+            tel = Console.ReadLine();
+            Console.Write("address:");
+            address = Console.ReadLine();
+            dao.insert(new Person(name, tel, address));
+        }
+
+        public void printAll()
+        {
+            Person[] a = dao.selectAll();
+            int cnt = dao.getCnt();
+            for (int i = 0; i < cnt; i++)
+            {
+                Console.WriteLine(a[i]);
+            }
+        }
+
+        public void printPerson()
+        {
+            int idx = 0;
+            string name = "";
+            Person[] a = dao.selectAll();
+            Console.WriteLine("검색할 사람의 이름:");
+            name = Console.ReadLine();
+            idx = dao.select(name);
+
+            if(idx >= 0)
+            {
+                Console.WriteLine(a[idx]);
+            }
+            else
+            {
+                Console.WriteLine("not found");
+            }
+        }
+
+
+        public void Modify()
+        {
+            int idx = 0;
+            string tel = "", address = "", name = "";
+            Person[] a = dao.selectAll();
+            Console.WriteLine("수정할 사람의 이름:");
+            name = Console.ReadLine();
+            idx = dao.select(name);
+
+            if (idx >= 0)
+            {
+                Console.WriteLine("수정할 name 입력:");
+                name = Console.ReadLine();
+                a[idx].setName(name);
+
+                Console.WriteLine("수정할 tel 입력:");
+                tel = Console.ReadLine();
+                a[idx].setTel(tel);
+
+                Console.WriteLine("수정할 address 입력:");
+                address = Console.ReadLine();
+                a[idx].setAddress(address);
+
+                Console.WriteLine("수정완료");
+                Console.WriteLine(a[idx]);
+            }
+        }
+
+        public void delete()
+        {
+            int idx = 0;
+            string name = "";
+            Person[] a = dao.selectAll();
+            Console.WriteLine("삭제할 사람의 이름:");
+            name = Console.ReadLine();
+            idx = dao.select(name);
+
+            int count = dao.getCnt();
+
+            if (idx < 0)
+            {
+                Console.WriteLine("없는 데이터\n");
+                return;
+            }
+
+            dao.delete(name);
+        }
+
+
+    }
+
+
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            Service service = new Service();
+            service.addPerson();
+            service.addPerson();
+            //service.addPerson();
+            service.printAll();
+            service.printPerson();
+            service.Modify();
+            service.delete();
+            service.printAll();
+
+        }
+    }
+    //Person객체 3개를 배열에 넣는 코드 작성
+
+
+
+
+}

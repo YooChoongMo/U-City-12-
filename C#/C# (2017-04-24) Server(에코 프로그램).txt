@@ -1,0 +1,45 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+
+using System.Net;
+using System.Net.Sockets;
+using System.IO;
+
+
+namespace Classwork_170424_4
+{
+    class Program
+    {            
+        static void Main(string[] args)
+        {
+            byte[] buffer =  new byte[255];
+            IPAddress addr = new IPAddress(0);
+
+            try
+            {            
+                TcpListener listener = new TcpListener(addr, 4444);
+                listener.Start();
+                Console.WriteLine("server 시작");
+
+                TcpClient client = listener.AcceptTcpClient();
+                Console.WriteLine("client 접속");
+
+                NetworkStream stream = client.GetStream();
+
+                int bytes = stream.Read(buffer, 0, buffer.Length);
+                string msg = Encoding.Unicode.GetString(buffer, 0, bytes);
+                Console.WriteLine("client:{0}", msg);
+                stream.Write(buffer, 0, buffer.Length);
+                stream.Flush(); //buffer 강제 출력
+                client.Close();
+                listener.Stop();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+}

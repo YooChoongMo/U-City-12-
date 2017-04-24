@@ -1,0 +1,369 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1
+{
+
+    abstract class PocketMon
+    {
+        protected int hp;
+        protected int exp;
+        protected int level;
+
+        public virtual void 밥먹기()
+        {
+            Console.WriteLine("밥 먹는다");
+        }
+        public virtual void 잠자기()
+        {
+            Console.WriteLine("잠 잔다");
+        }
+        public virtual bool 놀기()
+        {
+            Console.WriteLine("논다");
+            return false;
+        }
+        public virtual bool 운동하기()
+        {
+            Console.WriteLine("운동 한다");
+            return false;
+        }
+
+        public abstract void levelUP();
+
+        public void printinfo()
+        {
+            Console.WriteLine("hp:{0}", hp);
+            Console.WriteLine("exp:{0}", exp);
+            Console.WriteLine("level:{0}", level);
+        }
+    }
+
+    class 피카츄 : PocketMon
+    {
+        
+        public 피카츄()
+        {
+            hp = 30;
+            exp = 0;
+            level = 1;
+        }
+
+        public override void 밥먹기()
+        {
+            base.밥먹기();
+            hp += 5;
+            if (hp > 50)
+            {
+                Console.WriteLine("HP가 가득 찼습니다.");
+                hp = 50;
+            }
+        }
+
+        public override void 잠자기()
+        {
+            base.잠자기();
+            hp += 10;
+            if(hp > 50)
+            {
+                Console.WriteLine("HP가 가득 찼습니다.");
+                hp = 50;
+            }
+
+        }
+        public override bool 놀기()
+        {
+            base.놀기();
+            hp -= 3;
+            exp += 5;
+            if (hp <= 0)
+            {
+                Console.WriteLine("사망하셨습니다...");
+                return false;
+            }
+            else
+            {
+                levelUP();
+                return true;
+            }
+        }
+
+        public override bool 운동하기()
+        {
+            base.운동하기();
+            hp -= 5;
+            exp += 10;
+
+            if (hp <= 0)
+            {
+                Console.WriteLine("사망하셨습니다...");
+                return false;
+            }
+            else
+            {
+                levelUP();
+                return true;
+            }
+        }
+
+        public override void levelUP()
+        {
+            if (exp > 10)
+            {
+                Console.WriteLine("Level UP!!");
+                level++;
+                exp = 0;
+            }
+        }
+
+        public void 백만볼트()
+        {
+            Console.WriteLine("백만볼트!!!!!!!!!!");
+        }
+    }
+
+    class 꼬부기 : PocketMon
+    {
+
+        public 꼬부기()
+        {
+            hp = 25;
+            exp = 0;
+            level = 1;
+        }
+
+        public override void 밥먹기()
+        {
+            base.밥먹기();
+            hp += 4;
+            if (hp > 40)
+            {
+                Console.WriteLine("HP가 가득 찼습니다.");
+                hp = 40;
+            }
+        }
+
+        public override void 잠자기()
+        {
+            base.잠자기();
+            hp += 8;
+            if (hp > 40)
+            {
+                Console.WriteLine("HP가 가득 찼습니다.");
+                hp = 40;
+            }
+
+        }
+        public override bool 놀기()
+        {
+            base.놀기();
+            hp -= 3;
+            exp += 5;
+            if (hp <= 0)
+            {
+                Console.WriteLine("사망하셨습니다...");
+                return false;
+            }
+            else
+            {
+                levelUP();
+                return true;
+            }
+        }
+
+        public override bool 운동하기()
+        {
+            base.운동하기();
+            hp -= 5;
+            exp += 10;
+
+            if (hp <= 0)
+            {
+                Console.WriteLine("사망하셨습니다...");
+                return false;
+            }
+            else
+            {
+                levelUP();
+                return true;
+            }
+        }
+
+        public override void levelUP()
+        {
+            if (exp > 9)
+            {
+                Console.WriteLine("Level UP!!");
+                level++;
+                exp = 0;
+            }
+        }
+        public void 물대포()
+        {
+            Console.WriteLine("물대포!!!!!!!!!!");
+        }
+    }
+
+    class 이상해씨 : PocketMon
+    {
+
+        public 이상해씨()
+        {
+            hp = 33;
+            exp = 0;
+            level = 1;
+        }
+
+        public override void 밥먹기()
+        {
+            base.밥먹기();
+            hp += 5;
+            if (hp > 55)
+            {
+                Console.WriteLine("HP가 가득 찼습니다.");
+                hp = 55;
+            }
+        }
+
+        public override void 잠자기()
+        {
+            base.잠자기();
+            hp += 10;
+            if (hp > 55)
+            {
+                Console.WriteLine("HP가 가득 찼습니다.");
+                hp = 55;
+            }
+
+        }
+        public override bool 놀기()
+        {
+            base.놀기();
+            hp -= 5;
+            exp += 5;
+            if (hp <= 0)
+            {
+                Console.WriteLine("사망하셨습니다...");
+                return false;
+            }
+            else
+            {
+                levelUP();
+                return true;
+            }
+        }
+
+        public override bool 운동하기()
+        {
+            base.운동하기();
+            hp -= 8;
+            exp += 10;
+            if (hp <= 0)
+            {
+                Console.WriteLine("사망하셨습니다...");
+                return false;
+            }
+            else
+            {
+                levelUP();
+                return true;
+            }
+        }
+
+        public override void levelUP()
+        {
+            if (exp > 10)
+            {
+                Console.WriteLine("Level UP!!");
+                level++;
+                exp = 0;
+            }
+        }
+        public void 넝쿨채찍()
+        {
+            Console.WriteLine("넝쿨채찍!!!!!!!!!!");
+        }
+    }
+
+
+
+    class Program
+    {
+
+        static void Main(string[] args)
+        {
+            PocketMon p=null; 
+
+
+            Console.WriteLine("캐릭터를 고르시오:");
+            Console.WriteLine("1.피카츄  2.꼬부기  3.이상해씨");
+
+            int x = Int32.Parse(Console.ReadLine());//정수 입력 방법
+            switch(x)
+            {
+                case 1:
+                    p = new 피카츄();
+                    //Console.WriteLine("피카츄가 생성되었습니다.");                   
+                    break;
+
+                case 2:
+                    p = new 꼬부기();
+                    //Console.WriteLine("꼬부기가 생성되었습니다.");
+                    break;
+
+                case 3:
+                    p = new 이상해씨();
+                    //Console.WriteLine("이상해씨가 생성되었습니다.");
+                    break;
+            }
+
+            bool check = true;
+            Console.WriteLine("{0} 캐릭터로 게임 시작", p.GetType().Name);
+
+            p.printinfo();
+            while (check)
+            {
+                Console.WriteLine("1.밥먹기  2.잠자기  3.놀기  4.운동하기  5.종료  6.특기공격");
+                int n = Int32.Parse(Console.ReadLine());//정수 입력 방법
+                switch (n)
+                {
+                    case 1:
+                        p.밥먹기();
+                        break;
+
+                    case 2:
+                        p.잠자기();
+                        break;
+
+                    case 3:
+                        check = p.놀기();
+                        break;
+
+                    case 4:
+                        check = p.운동하기();
+                        break;
+
+                    case 5:
+                        return;
+
+                    case 6:
+                        if (p is 피카츄)
+                            ((피카츄)p).백만볼트();	//원래 타입으로 다운 캐스팅을 해야한다! 
+                        else if (p is 꼬부기)		//다운캐스팅은 상속받은 경우에만!
+                            ((꼬부기)p).물대포();
+                        else if (p is 이상해씨)
+                            ((이상해씨)p).넝쿨채찍();
+                        break;
+                }
+                if (!check)
+                    break;
+
+                p.printinfo();
+
+            }
+        }
+    }
+}

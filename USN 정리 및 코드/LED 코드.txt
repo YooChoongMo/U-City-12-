@@ -1,0 +1,192 @@
+Blink2 ==> 0~7까지 B,R,G LED 불켜기
+
+BlinkM.nc 파일에서 implementation 안에 변수 선언하고 event result_t Timer.fired()에서 코드구현
+
+module BlinkM {
+  provides {
+    interface StdControl;
+  }
+  uses {
+    interface Timer;
+    interface Leds;
+  }
+}
+implementation {
+
+int cnt=0;
+  /**
+   * Initialize the component.
+   * 
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  command result_t StdControl.init() {
+    call Leds.init(); 
+    return SUCCESS;
+  }
+
+
+  /**
+   * Start things up.  This just sets the rate for the clock component.
+   * 
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  command result_t StdControl.start() {
+    // Start a repeating timer that fires every 1000ms
+    return call Timer.start(TIMER_REPEAT, 1000);
+  }
+
+  /**
+   * Halt execution of the application.
+   * This just disables the clock component.
+   * 
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  command result_t StdControl.stop() {
+    return call Timer.stop();
+  }
+
+
+  /**
+   * Toggle the red LED in response to the <code>Timer.fired</code> event.  
+   *
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  event result_t Timer.fired()
+  {
+
+	if(cnt == 0){
+ 	 call Leds.blueOff();
+ 	 call Leds.redOff();
+	 call Leds.yellowOff();
+	 cnt++;
+}
+	else if(cnt == 1){
+ 	 call Leds.blueOn();
+ 	 call Leds.redOff();
+	 call Leds.yellowOff();
+	 cnt++;
+}
+	else if(cnt == 2){
+ 	 call Leds.blueOff();
+ 	 call Leds.redOn();
+	 call Leds.yellowOff();
+	 cnt++;
+}
+	else if(cnt == 3){
+ 	 call Leds.blueOn();
+ 	 call Leds.redOn();
+	 call Leds.yellowOff();
+	 cnt++;
+}
+	else if(cnt == 4){
+ 	 call Leds.blueOff();
+ 	 call Leds.redOff();
+	 call Leds.yellowOn();
+	 cnt++;
+}	
+	else if(cnt == 5){
+ 	 call Leds.blueOn();
+ 	 call Leds.redOff();
+	 call Leds.yellowOn();
+	 cnt++;
+}
+	else if(cnt == 6){
+ 	 call Leds.blueOn();
+ 	 call Leds.redOn();
+	 call Leds.yellowOff();
+	 cnt++;
+}
+	else if(cnt == 7){
+ 	 call Leds.blueOn();
+ 	 call Leds.redOn();
+	 call Leds.yellowOn();
+	 cnt=0;
+}
+	
+
+    return SUCCESS;
+  }
+}
+
+
+///////////////////////////////////////// 완전 간단하게 구현
+
+<Makefile>
+COMPONENT=Blink
+PFLAGS+=-I%T/lib/Counters 	// -대문자 I 아이
+include ../Makerules
+
+<Bllink>
+configuration Blink {
+}
+implementation {
+  components Main, Counter, TimerC, IntToLeds;
+
+  Main.StdControl -> IntToLeds.StdControl;
+  Main.StdControl -> Counter.StdControl;
+  Main.StdControl -> TimerC.StdControl;
+
+  Counter.Timer->TimerC.Timer[unique("Timer")];
+  IntToLeds<-Counter.IntOutput;
+}
+
+Tos 폴더 => lib => Counters
+Counter, IntToLed
+
+(1)Counter
+  provides {
+    interface StdControl;
+  }
+ => StdControl 를 만들어서 제공하겠다.
+
+
+interface폴더 => IntOutput 
+{
+  command result_t output(uint16_t value);		//command 내가 호출하는 것
+  event result_t outputComplete(result_t success);	//event 어떤 이벤트가 발생하면 핸들러가 동작
+	//밑에 애는 위에 output()가 정상적으로 끝나면 자동으로 호출됨
+}
+ => 둘다 구현을 해야한다!
+ => (uint16_t value) 카운터에서 인자값을 받아서 LED쪽으로 전달해주는 개념
+
+
+  uses {		//얘네를 끌어다 쓰겠다.
+    interface Timer;	
+    interface IntOutput;
+  }
+
+  command result_t StdControl.start()
+  {
+    return call Timer.start(TIMER_REPEAT, 250);	//0.25초 마다 event를 발생 시킴! => fired() 동작!!!!!
+  }
+
+
+
+
+<IntToLedsM>
+
+  task void outputDone() 		//task => 큐에 저장된 task가 없을때 짬짬히 동작
+  {
+    signal IntOutput.outputComplete(1);	//signal => 강제로 시그널 발생 시키기
+  }
+
+
+  task void outputDone()
+  {
+    signal IntOutput.outputComplete(1);
+  }
+
+  command result_t IntOutput.output(uint16_t value)
+  {
+    if (value & 1) call Leds.greenOn();
+    else call Leds.greenOff();
+    if (value & 2) call Leds.redOn();
+    else call Leds.redOff();
+    if (value & 4) call Leds.yellowOn();
+    else call Leds.yellowOff();
+
+    post outputDone();		//post로 등록을 해야 task가 틈틈히 동작 한다!
+
+    return SUCCESS;
+  }
+}

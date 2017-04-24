@@ -1,0 +1,366 @@
+트라이 캣치 == 예외처리
+- 프로그램 실행 중 문제가 발생하면 발견하기 어려움
+=> 미리 예측을 해서 문제가 발생할 때 예외 처리해버림
+
+=> 예외가 발생했지만 끝까지 수행은 진행함!!
+
+
+        static void Main(string[] args)
+        {
+            int i;
+            int[] arr = new int[3];
+
+            try
+            {
+                for (i = 0; i < arr.Length + 1; i++)
+                {
+                    arr[i] = i + 1;
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+            Console.WriteLine("배열값 출력");
+
+            for (i = 0; i < arr.Length + 1; i++)
+            {
+                Console.WriteLine(arr[i]);
+            }
+        }
+
+/////////////////////////////////////////////////////////////////
+        static void Main(string[] args)
+        {
+            int i,x=4,y=5, z=0;
+            int[] arr = new int[3];
+            string str = null;
+
+            try
+            {
+                //모두 문제가 있는 코드
+                //문제가 있는 코드가 발견되면 바로 catch로 이동! (밑에 코드 실행 x)
+                //주석을 해가며 확인해야댄다.
+                
+                for (i = 0; i < arr.Length + 1; i++)    //IndexOutOfRangeException
+                {
+                    arr[i] = i + 1;
+                }
+                x = y / z;              //ArithmeticException
+                str.StartsWith("a");    //NullReferenceException
+            }
+          
+            catch (IndexOutOfRangeException e)
+            {
+                Console.WriteLine("1"+e);
+            }
+            catch (ArithmeticException e)
+            {
+                Console.WriteLine("2" + e);
+            }
+            catch (NullReferenceException e)
+            {
+                Console.WriteLine("3" + e);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("4" + e);
+            }
+
+
+
+            Console.WriteLine("배열값 출력");
+
+            for (i = 0; i < arr.Length + 1; i++)
+            {
+                Console.WriteLine(arr[i]);
+            }
+        }
+
+==============================================================================
+
+            //위에서 종료가 되도, finally는 실행하고 종료된다!!
+            try
+            {
+                return;
+            }
+          
+            catch (Exception e)
+            {
+                Console.WriteLine("4" + e);
+            }
+
+            finally
+            {
+                Console.WriteLine("finally 블럭");
+            }
+
+============================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+
+
+namespace ConsoleApplication1
+{
+ 
+    struct NameValue<T, V>
+    {
+        public T name;
+        public V value;
+        public override string ToString()
+        {
+            return "name:" + name + ", value:" + value;
+        }
+
+    }
+
+
+    class MyArray<T>
+    {
+        private T[] arr;
+        public MyArray(int size)
+        {
+            arr = new T[size];
+        }
+
+        public void setElement(int idx, T value)
+        {
+            arr[idx] = value;
+        }
+        public T getElement(int idx)
+        {
+            return arr[idx];
+        }
+        public void print()
+        {
+            foreach(T o in arr){
+                Console.WriteLine(o);
+            }
+        }
+    }
+
+     
+   class Program
+    {
+        static T[] getArray<T>(int size, T value)
+        {
+            T[] arr = new T[size];
+            for (int i = 0; i < size; i++)
+            {
+                arr[i] = value;
+            }
+            return arr;
+        }
+
+        static void Main(string[] args)
+        {
+            string[] arr = getArray<string>(5, "hello C#");
+            foreach (string s in arr)
+                Console.WriteLine(s);
+
+
+
+            MyArray<int> arr1 = new MyArray<int>(3);
+
+            arr1.setElement(0, 1);
+            arr1.setElement(1, 2);
+            arr1.setElement(2, 3);
+            Console.WriteLine("[1]:{0}", arr1.getElement(1));
+            arr1.print();
+
+
+            MyArray<string> arr2 = new MyArray<string>(3);
+
+            arr2.setElement(0, "aaa");
+            arr2.setElement(1, "bbb");
+            arr2.setElement(2, "ccc");
+            Console.WriteLine("[1]:{0}", arr2.getElement(1));
+            arr2.print();
+
+
+            MyArray<NameValue<string,int>> arr3 = new MyArray<NameValue<string, int>>(3);
+            NameValue<string, int> a, b, c;
+            a.name = "가나다";
+            a.value = 1234;
+            b.name = "라마";
+            b.value = 456;
+            c.name = "바사";
+            c.value = 678;
+
+            arr3.setElement(0, a);
+            arr3.setElement(1, b);
+            arr3.setElement(2, c);
+            Console.WriteLine("[1]:{0}", arr3.getElement(1));
+            arr3.print();
+
+
+        }
+    }
+}
+
+==============================================================================
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+
+
+namespace ConsoleApplication1
+{
+ 
+    struct NameValue<T, V>
+    {
+        public T name;
+        public V value;
+        public override string ToString()
+        {
+            return "name:" + name + ", value:" + value;
+        }
+
+    }
+
+
+    class MyArray<T>
+    {
+        private T[] arr;
+        public MyArray(int size)
+        {
+            arr = new T[size];
+        }
+
+        public void setElement(int idx, T value)
+        {
+            arr[idx] = value;
+        }
+        public T getElement(int idx)
+        {
+            return arr[idx];
+        }
+        public void print()
+        {
+            foreach(T o in arr){
+                Console.WriteLine(o);
+            }
+        }
+    }
+
+     
+   class Program
+    {
+        static T[] getArray<T>(int size, T value)
+        {
+            T[] arr = new T[size];
+            for (int i = 0; i < size; i++)
+            {
+                arr[i] = value;
+            }
+            return arr;
+        }
+
+        static void Main(string[] args)
+        {
+            List<string> list = new List<string>();
+            list.Add("aaa");
+            list.Add("bbb");
+            list.Add("ddd");
+            list.Insert(2, "ccc");
+
+            foreach (string s in list)
+                Console.WriteLine(s);
+
+            Console.WriteLine("총 개수 : {0}", list.Count);
+            Console.WriteLine("두번째 데이터: {0}", list[1]);
+
+            list.RemoveAt(0);
+
+            foreach (string s in list)
+                Console.WriteLine(s);
+
+            list.Clear();
+            Console.WriteLine("총 개수 : {0}", list.Count);
+            
+
+
+
+
+        }
+    }
+}
+=======================================================================
+static void Main(string[] args)
+        {
+
+            Dictionary<string, string> dic =
+                new Dictionary<string, string>();
+
+            dic.Add("name", "aaa");
+            dic.Add("tel", "111");
+            dic["address"] = "rtyuy";
+
+            foreach(KeyValuePair<string, string> k in dic)
+            {
+                Console.WriteLine(k);
+            }
+
+            dic.Remove("tel");
+
+            foreach (KeyValuePair<string, string> k in dic)
+            {
+                Console.WriteLine(k);
+            }
+            Console.WriteLine("address:{0}", dic["address"]);
+            dic.Clear();
+            Console.WriteLine("총 개수 : {0}", dic.Count);
+
+        }
+=============================================================================
+            Queue<int> q = new Queue<int>();
+            for(int i =0; i<5; i++)
+            {
+                q.Enqueue(i);
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                Console.WriteLine(q.Dequeue());
+                Console.WriteLine("남은 개수 :{0}",q.Count);
+
+            }
+
+=======================================================================
+class Program
+    {
+        static T[] getArray<T>(int size, T value)
+        {
+            T[] arr = new T[size];
+            for (int i = 0; i < size; i++)
+            {
+                arr[i] = value;
+            }
+            return arr;
+        }
+
+        static void Main(string[] args)
+        {
+
+            Stack<int> s = new Stack<int>();
+            for(int i =0; i<5; i++)
+            {
+                s.Push(i);
+            }
+
+            for (int i = 0; i < 5; i++)
+            {
+                Console.WriteLine(s.Pop());
+                Console.WriteLine("남은 개수 :{0}",s.Count);
+            }
+        }

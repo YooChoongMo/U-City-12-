@@ -1,0 +1,122 @@
+<PhotoSensorC>
+
+configuration PhotoSensorC
+{
+  provides interface ADC;
+  provides interface StdControl;
+}
+implementation
+{
+  components Photo as Sensor;
+
+  StdControl = Sensor;
+  ADC = Sensor;
+}
+
+
+
+<Hyper_Photo>
+
+configuration Hyper_Photo { 
+// this module does not provide any interface
+}
+implementation
+{
+  components Main, Hyper_PhotoM, LedsC, TimerC, PhotoSensorC as Sensor, HPLUARTC;
+
+  Main.StdControl -> Sensor;
+  Main.StdControl -> TimerC;
+  Main.StdControl -> Hyper_PhotoM;
+
+  Hyper_PhotoM.UART -> HPLUARTC;	//유아트 사용하기위해 끌어다 씀
+
+  Hyper_PhotoM.ADC -> Sensor;
+  Hyper_PhotoM.ADCControl -> Sensor;
+  Hyper_PhotoM.Leds -> LedsC;
+  Hyper_PhotoM.Timer -> TimerC.Timer[unique("Timer")];
+}
+
+
+<구현파일>
+Hyper_PhotoM
+
+module Hyper_PhotoM {
+  provides {
+    interface StdControl;
+  }
+  uses {
+    interface Timer;
+    interface ADC;
+    interface HPLUART as UART;
+    interface StdControl as ADCControl;
+    interface Leds;
+  }
+}
+
+implementation {
+
+uint16_t g_nHumidity_data = 0;
+uint16_t g_nPhoto_data = 0;
+
+//task 는 실행큐에 실행할게 없으면 틈틈히 실행 되는 것!
+ task void aa() {
+
+		atomic {
+			uint8_t i;
+			uint16_t dec, result, tmpdata;
+			tmpdata = g_nHumidity_data;
+			dec = 10000;
+			call UART.put('H');
+			TOSH_uwait(100);	//0.1초 슬립
+			
+			//char로 변환			
+			for(i = 0; i < 5; i++)	
+			{
+				result  = tmpdata/dec + '0';	// 문자로 만드는것
+				tmpdata = tmpdata % dec;
+
+				if(i == 4) result = ' ';	// 끝에다 공백 넣기
+				call UART.put(result);
+				TOSH_uwait(100);
+				dec = dec / 10;
+			}
+						
+		}
+		
+	}
+ 
+  command result_t StdControl.init() {	
+    call UART.init();
+    return call Leds.init();
+  }
+
+  command result_t StdControl.start() {
+    return call Timer.start(TIMER_REPEAT, 100);
+  }
+  
+ 
+  command result_t StdControl.stop() {
+    return call Timer.stop();
+  }
+
+ 
+  event result_t Timer.fired() {
+    return call ADC.getData();	//매번 0.1 마다 get 얻어온다 
+  }
+
+  async event result_t ADC.dataReady(uint16_t data) {
+    call Leds.greenToggle();
+    g_nHumidity_data = data;
+    post aa( );
+    return SUCCESS;
+  }
+
+  event async result_t UART.get(uint8_t data) {
+		return SUCCESS;
+	} 
+
+  
+  event async result_t UART.putDone() {
+		return SUCCESS;
+	}
+}

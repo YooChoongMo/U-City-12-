@@ -1,0 +1,124 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO;
+
+
+namespace WindowsFormsApplication4
+{
+
+    //openFileDialog , saveFileDialog
+    //필터(속성) => 텍스트파일(*.txt)|*.txt|모든파일(*.*)|*.*
+
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void 새로만들기NToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if(textBox1.Text!="")
+                {
+                    if (MessageBox.Show(this, "작업중인 문서가 있습니다. 저장하시겠습니까?", "note", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    //MessageBox -> yes or no Box 추가                                                                           사용자가 누른 버튼이 Yes이면
+                    {
+                        if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                           //저장할 때 나오는 다이얼로그 호출
+                        {
+                            saveDocument(saveFileDialog1.FileName);
+                            //파일 저장해주는 함수 호출(직접 만들것)
+                        }
+                    }
+
+                }
+            }
+            catch (Exception eee)
+            {
+                MessageBox.Show(this, "파일 저장 오류", "note", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                textBox1.Clear();
+            }
+        }
+
+        private void saveDocument(string fileName)
+        {
+            //파일 입출력을 하려면 스트림이 있어야한다. 
+            StreamWriter wr = new StreamWriter(fileName,false, System.Text.Encoding.Default);
+                                            //파일경로
+            wr.Write(textBox1.Text);
+            wr.Close();            
+        }
+
+        private void openDocument(string fileName)
+        {
+            StreamReader rd = new StreamReader(fileName, System.Text.Encoding.Default);
+            textBox1.Text = rd.ReadToEnd();
+                            //한방에 끝까지 읽고 싶을땐 End
+            rd.Close();
+        }
+
+
+        private void 열기OToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if(openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    openDocument(openFileDialog1.FileName);
+                }
+            }
+            catch
+            {
+                MessageBox.Show(this, "파일 오픈 에러", "note", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void 저장하기SToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if(textBox1.Text != "")
+                {
+                    if (MessageBox.Show(this, "저장하시겠습니까?", "note", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    {
+                        if(saveFileDialog1.ShowDialog() == DialogResult.OK)
+                        {
+                            saveDocument(saveFileDialog1.FileName);
+                        }
+                        textBox1.Text = "";
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show(this, "파일 저장 에러", "note", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void 끝내기XToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+    }
+}
+
+//StreamReader / StreamWriter : 지정한 인코딩의 바이트로 읽고 씀
+//StringReader / StringWriter : 위와 비슷 하지만 문자열 기반으로 읽고 씀
+//BinaryReader / BinaryWriter : 원시 데이터 읽고 씀
+//BufferedStream : 버퍼를 제공하는 보조스트림(버퍼를 제공하면 속도가 빨라짐, 단독으로는 못씀)
+//MemoryStream : 메모리에 읽고 씀 (= sprintf, scanf 와 비슷)
+//Directory : 디렉토리(클래스)
+//File : 파일
+//FIleStream : 파일 기반 읽고 쓰는 스트림

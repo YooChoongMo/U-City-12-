@@ -1,0 +1,104 @@
+* Moss.nc
+
+configuration Moss{
+}
+implementation {
+components Main, MossM, TimerC, LedsC;
+Main.StdControl → MossM;
+Main.StdControl → TimerC;
+MossM.Timer → TimerC.Timer[unique ("Timer")];
+MossM.Leds → LedsC;
+}
+
+
+* MossM.nc
+
+#define MORSE_WPM 12 //speed, in words per minute
+#define MORSE_UNIT (1200/ MORSE_WPM) // millisecond per uint
+module MossM{
+provides {
+interface StdControl;
+}
+uses {
+interface Timer;
+interface Leds;
+}
+}
+implementation {
+command result_t StdControl.init() {
+call Leds.init();
+call Leds.redOff();
+call Leds.yellowOff();
+call Leds.greenOff();
+return SUCCESS;
+}
+command result_t StdControl.start() {
+return call Timer.start(TIMER_ONE_SHOT, 1000);		//원샷은 1초뒤에 한번만 이벤트 발생시킴
+command result_t StdControl.stop() {
+return call Timer.stop();
+}
+
+event result_t Timer.fired() {
+// A nesC compiler bug prevent us from declaring static char
+// morse[ ], so we need static char *morse
+static char *morse = ".... . .-.. .-.. -- ";
+// The compiler won’t let us initialise a pointer to the start of the
+// array either, so we’ll have to do it run time
+static char *current;
+if(!current)
+current = morse;
+
+	switch(*current) {
+	  case ' ': //pause: yellowLED on/off for two units
+		if( !call Leds.get() ) {
+			call Leds.yellowOn();
+			call Timer.start(TIMER_ONE_SHOT,2*MORSE_UNIT);
+		} 
+		
+		else{
+			call Leds.yellowOff();
+			call Timer.start(TIMER_ONE_SHOT,2*MORSE_UNIT);
+			current++;
+		}
+			break;
+
+	  case '.': //dot: redLED on/off for one uints
+		if( !call Leds.get() ) {
+			call Leds.redOn();
+			call Timer.start(TIMER_ONE_SHOT, MORSE_UNIT);
+		}
+
+		else{
+			call Leds.redOff();
+			call Timer.start(TIMER_ONE_SHOT, MORSE_UNIT);
+			current++;
+			}
+			break;
+	
+	  case '-': //dash: redLED on for three units, off for one units
+		if ( !call Leds.get() ) {
+			call Leds.greenOn();
+			call Timer.start(TIMER_ONE_SHOT,3*MORSE_UNIT);
+		}
+
+		else{
+			call Leds.greenOff();
+			call Timer.start(TIMER_ONE_SHOT, 3* MORSE_UNIT);
+			current++;
+		}
+			break;
+	}
+
+	if(!*current)
+	  current=morse;
+
+  return SUCCESS;
+	}
+}
+
+
+
+$ vi Makefile
+COMPONENT=Moss
+PFLAGS +=-I%T/lib/Counters		==> PFLAGS 는 라이브러리 끌어다 쓸때 사용
+include ../Makerules

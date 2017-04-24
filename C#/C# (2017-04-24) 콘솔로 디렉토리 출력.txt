@@ -1,0 +1,36 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+
+namespace ConsoleApplication2
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            String[] dirs = Directory.GetDirectories(@"C:\"); //C#은 경로앞에 @를 붙임
+            foreach(string s in dirs)
+            {
+                Console.WriteLine("{0} : {1}",s,Directory.GetLastWriteTime(s));
+            }
+        }
+    }
+}
+
+//CreateDirecty() : 디렉토리 생성
+//Delete() : 디렉토리 삭제
+//Move() : 이동
+//Exists() : 존재여부
+//GetDirectories() : 하위 폴더 목록
+//GetFIles : 하위 파일 목록
+//GetDirectoryRoot() : 현재 경로의 루트 반환
+//GetCurrentDirectory() : 현재 경로
+
+//--File
+//Create() : 파일 생성
+//Delete() : 파일 삭제
+//Move() : 이동
+//Exists() : 존재여부

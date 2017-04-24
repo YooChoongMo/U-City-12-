@@ -1,0 +1,483 @@
+<상속>
+1. 코드 재사용
+2. 다형성
+
+* 업캐스팅 사용 => 상위 클래스 사용
+A c = new B();
+
+하위 클래스에 동일한 이름의 함수가 있을때(하위 클래스의 함수를 사용할 때)
+ public new void test()	=> new를 붙여줘야 한다!(warning 안뜸)
+ {}
+
+
+* 오버로딩(파라미터의 계수나 타입만 다르게)
+ - 똑같은 이름의 메소드를 여러개 사용하는것
+ add(int a)
+ add(char c)
+
+* 오버 라이딩(프로토 타입은 그대로 유지) override
+ - 함수 내용만 바꿈
+
+ => 오버라이딩을 하려면 부모 클래스의 함수가 virtual 이여야 한다!!!
+
+
+* base.test();
+하위 클래스에서 쓰면 => 부모 함수 실행, 자식 함수 실행 
+
+    class A
+    {
+        public virtual void test()
+        {
+            Console.WriteLine("A test()");
+        }
+    }
+    class B:A
+    {
+        public override void test()
+        {
+            base.test();
+            Console.WriteLine("B test()");
+        }
+    }
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            A a = new A();
+            A b = new B();		//업캐스팅(오버라이딩 안하면 A클래스(부모)꺼 함수 사용가능
+            B c = new B();
+
+            a.test();
+            b.test();
+            c.test();
+
+
+        }
+    }
+
+===============================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1
+{
+    class Car
+    {
+        public virtual void func()
+        {
+            Console.WriteLine("드라이브");
+        }
+    }
+
+    class 굴삭기 : Car
+    {
+        public override void func()
+        {
+            Console.WriteLine("땅을 판다");
+        }
+    }
+    
+    class 버스 : Car
+    {
+        public override void func()
+        {
+            Console.WriteLine("동네 한바퀴");
+        }
+     }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            Car a = new 굴삭기();
+            a.func();
+
+            Car b = new 버스();
+            b.func();
+
+            Car c = new Car();
+            c.func();
+
+
+
+        }
+    }
+    //Person객체 3개를 배열에 넣는 코드 작성
+
+}
+
+////////////////////////////////////////////////////////
+
+Car 클래스의 함수를 추상으로 하기 위해서는 abstract를 붙여줘야한다! (C++에서는 virtual ~ = 0)
+
+    abstract class Car
+    {
+        public abstract void func();
+
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            Car a = new 굴삭기();
+            a.func();
+
+            Car b = new 버스();
+            b.func();
+
+
+	//아무것도 없는 클래스는 객체를 생성할 수 있지만 (추상함수만 있는 객체는 불가!)
+	//추상 클래스이기 때문에 객체를 생성할 수 없다!
+
+         //   Car c = new Car();
+           // c.func();
+        }
+    }
+
+===========================================================
+//test1을 구현 했더라고 밑에 추상 메소드를 하나라도 선언해놓으면 
+	abstract class로 선언해야한다.
+
+// abstract 메소드가 2,3 두개 이므로 둘다 하위 클래스에서 정의를 해줘야한다!!
+
+    abstract class GrandParent	
+    {
+        public void test1()
+        {
+            Console.WriteLine("GrandParent test1");
+        }
+        public abstract void test2();
+        public abstract void test3();
+    }
+
+    class Parent : GrandParent
+    {
+        public override void test2()
+        {
+            Console.WriteLine("Parent test2");
+        }
+    }
+
+///////////////////////////////////////////////////////////////
+   abstract class GrandParent
+    {
+        public void test1()
+        {
+            Console.WriteLine("GrandParent test1");
+        }
+        public abstract void test2();
+        public abstract void test3();
+    }
+
+    abstract class Parent : GrandParent
+    {
+        public override void test2()
+        {
+            Console.WriteLine("Parent test2");
+        }
+ 
+    }
+
+    class Child : Parent
+    {
+        public override void test3()
+        {
+            Console.WriteLine("Child test3");
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            Child c = new Child();
+            c.test1();
+            c.test2();
+            c.test3();
+
+        }
+    }
+
+=============================================================================
+    abstract class Shape
+    {
+        public abstract void draw();
+    }
+
+    class Circle : Shape
+    {
+        public override void draw()
+        {
+            Console.WriteLine("원을 그린다");
+        }
+    }
+
+    class Triangle : Shape
+    {
+        public override void draw()
+        {
+            Console.WriteLine("삼각형을 그린다");
+        }
+    }
+    class Rectangle : Shape
+    {
+        public override void draw()
+        {
+            Console.WriteLine("사각형을 그린다");
+        }
+    }
+
+
+    class Program
+    {
+        static void print(Shape s)	//업캐스팅
+        {
+            s.draw();
+        }
+        static void Main(string[] args)
+        {
+            Shape[] arr = { new Circle(), new Triangle(), new Rectangle(), new Triangle() };
+
+            for(int i=0; i<arr.Length; i++)
+            {
+                arr[i].draw();
+                print(arr[i]);               
+            }
+
+        }
+    }
+
+///////////////////////////////////////////////////////////////////////////////
+
+자바, C# 에서는 다중 상속이 안된다!!
+
+C#은 객체를 new로 생성하기 때문에 heep영역에 올라간다.
+
+static 변수들은 static 영역에 올라간다.
+
+ class StaticTest
+    {
+        public int x;
+        public static int y;
+
+        public void add()
+        {
+            x++;
+            y++;
+        }
+    }
+
+    class Program
+    {
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("y={0}", StaticTest.y);	//객체를 생성하지 않아도 존재O
+
+            StaticTest s1 = new StaticTest();
+            s1.add();
+            Console.WriteLine("x={0}, y={1}", s1.x, StaticTest.y);
+            StaticTest s2 = new StaticTest();
+            s2.add();
+            Console.WriteLine("x={0}, y={1}", s2.x, StaticTest.y);
+            StaticTest s3 = new StaticTest();
+            s3.add();
+            Console.WriteLine("x={0}, y={1}", s3.x, StaticTest.y);
+
+        }
+    }
+
+<메모리 영역>
+
+Static
+y	=>  s1,s2,s3 객체가 공용으로 사용
+
+Heep
+s1.x
+s2.x
+s3.x
+
+Stack
+s1
+s2
+s3
+
+
+class StaticTest
+    {
+        public int x;
+        public static int y;
+
+        public void add()
+        {
+            x++;
+            y++;
+        }
+
+        public static void test()
+        {
+            add();
+            Console.WriteLine("x={0}, y={1}", x, y);
+        }
+    }
+
+==>  static 메소드에서 일반 메소드나 일반 멤버변수를 호출하는 것은 불가능하다!!!!!!
+	일반 메소드, 변수는 시작할 때 메모리에 올라가 있지 않기 때문에 사용 X
+
+==> 그 반대는 가능!!
+
+
+===================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1
+{
+    class Person
+    {
+        public int num;
+        public string name;
+        public static int cnt;
+
+        public Person()
+        {
+            num = ++cnt;
+            Console.WriteLine("객체 {0}개 생성", num);
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            int n=0;
+
+            while(n < 5)
+            {
+                Person a = new Person();
+                a.name = Console.ReadLine();
+                n = a.num;
+            }
+        }
+    }
+}
+
+** static 이나 Const 변수는 Main에서 접근할 때 클래스이름.~ 으로 한다!!!!!
+** static 이나 Const 변수는 Main에서 접근할 때 클래스이름.~ 으로 한다!!!!!
+
+======================================================================
+
+    class Test
+    {
+        public const int x = 0; //상수는 값이 결정되는 타임 = 컴파일시!
+        public readonly int y;  //readonly는 값이 결정되는 타임 = 런타임시!
+
+       public Test(int y)
+        {
+            this.y = y; //readonly는 수정 불가
+        }
+        
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("x={0}", Test.x);
+            Test t = new Test(20);
+            Console.WriteLine("x={0}, y={1}", Test.x, t.y);        
+        }
+    }
+
+
+===========================================================================
+
+//interface - 추상메서드로만 구성된 클래스. 다중상속 가능
+// class 대신 interface를 앞에 붙인다!!
+//  ==> 객체를 가질 수 없다!
+
+
+     interface A
+    {
+        void func1();
+        void func2();
+    }
+
+    abstract class B : A
+    {
+        public void func1()
+        {
+            Console.WriteLine("func1 구현");
+        }
+        public abstract void func2();
+       
+    }
+    class C :B
+{
+    public override void func2()
+        {
+            Console.WriteLine("func2 구현");
+        }
+}
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            C a = new C();
+            a.func1();
+            a.func2();
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

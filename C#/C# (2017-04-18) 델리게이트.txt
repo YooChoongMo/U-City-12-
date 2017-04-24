@@ -1,0 +1,147 @@
+델리게이트(대리자) == 함수포인터랑 비슷
+
+ public delegate void printOut(string s);    
+
+
+
+     
+   class Program
+    {
+        //객체 생성 안하고 사용하기 위해 static
+        static void test1(string s)
+        {
+            Console.WriteLine("test1 " + s);
+        }
+        static void test2(string s)
+        {
+            Console.WriteLine("test2 " + s);
+        }
+        static void test3(string s)
+        {
+            Console.WriteLine("test3 " + s);
+        }
+        static void test4(string s)
+        {
+            Console.WriteLine("test4 "+s);
+        }
+
+        static void Main(string[] args)
+        {
+            //델리게이트 객체를 생성하여 적용할 메서드 연결
+            printOut A = new printOut(test1);
+            printOut B = new printOut(test2);
+            printOut C = new printOut(test3);
+            printOut D = new printOut(test4);
+
+            //델리게이트로 메서드 호출
+            A("aaa");
+            B("bbb");
+            C("ccc");
+            D("ddd");
+
+            //합성도 가능!
+            printOut E = A + B + C;
+            E("plus");
+
+            printOut F = E - B;
+            F("FF");
+        }
+    }
+
+//델리게이트-대리자
+//선언
+//델리게이트 메서드 연결
+//호출
+
+/========================================================================
+3,6,9 마다 박수(이벤트)
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+
+
+namespace ConsoleApplication1
+{
+    //델리게이트 선언
+    public delegate void MyEventHandler(string message);    
+
+    class Publisher
+    {
+        //event를 붙여서 어떤 event가 발생할때 실행
+        public event MyEventHandler Active; //델리게이트 변수 
+
+        public void DoActive(int number)
+        {
+            // 1의 자리 판별
+            if ( (number % 10 == 3) || (number % 10 == 6) || (number % 10 == 9))
+            {
+                //10의 자리 판별
+                if (((number / 30 == 1) && (number % 30 < 10)) || ((number / 30 == 2) && (number % 30 < 10))
+                || ((number / 30 == 3) && (number % 30 < 10)))
+                {
+                    Active(number + "짝짝!");
+                    return;
+                }
+                Active(number + "짝!");
+            }
+            else
+                Console.WriteLine(number);
+        }
+    }
+
+     
+   class Program
+    {
+        static public void MyHandler(string s)
+        {
+            Console.WriteLine(s);
+        }
+
+
+        static void Main(string[] args)
+        {
+            //함수를 즉석에서 사용
+            //이름이 없기 때문에 1회용 (간단한 이벤트에서 한번만 실행하기 위해)
+            Publisher publisher = new Publisher();
+            publisher.Active += new MyEventHandler(MyHandler);
+                                                //적용할 함수
+
+            for(int i=0; i<100; i++)
+            {
+                publisher.DoActive(i);
+            }
+        }
+    }
+}
+
+
+===============================================================================
+        public void DoActive(int number)
+        {
+            string str = number + "";
+            int cnt = 0;
+            // 1의 자리 판별
+            if (str.Length == 2)
+            {
+                if (str.StartsWith("3") || str.StartsWith("6") || str.StartsWith("9"))
+                {
+                    Console.WriteLine( "짝");
+                    cnt++;
+                }
+            }
+
+            if (str.EndsWith("3") || str.EndsWith("6") || str.EndsWith("9"))
+            {
+                Console.WriteLine("짝");
+                cnt++;
+            }
+            if(cnt==0)
+                Console.WriteLine(number);
+            else
+                Console.WriteLine();
+            
+        }

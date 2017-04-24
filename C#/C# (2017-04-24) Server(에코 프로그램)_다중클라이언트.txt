@@ -1,0 +1,97 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
+
+using System.Net;
+using System.Net.Sockets;
+using System.IO;
+
+
+namespace ConsoleApplication5
+{
+    class Server_echo
+    {
+        private static NetworkStream[] stream = new NetworkStream[10];
+        private TcpClient[] client = new TcpClient[10];
+        private static IPAddress addr = new IPAddress(0);
+        private TcpListener listener = new TcpListener(addr, 4444);
+
+        private static int cnt = 0;
+        
+
+        public void echo()
+        {
+            int idx;
+            byte[] buffer = new byte[256];
+
+                Monitor.Enter(this);
+                idx = cnt - 1;
+                Monitor.Exit(this);
+
+            Console.WriteLine("idx = {0}", idx);
+
+            int bytes = 0;
+
+            while (true)
+            {
+                    bytes = stream[idx].Read(buffer, 0, buffer.Length);
+                    string msg = Encoding.Unicode.GetString(buffer, 0, bytes);
+
+                    if (msg.Equals("exit"))
+                    {
+                        break;
+                    }
+                    Console.WriteLine("client{0}:{1}", idx, msg);
+                    stream[idx].Write(buffer, 0, buffer.Length);
+                    stream[idx].Flush(); //buffer 강제 출력
+            }
+                client[idx].Close();
+        }
+
+         public void accept()
+        {           
+            try
+            {              
+                listener.Start();
+                Console.WriteLine("server 시작");
+
+                while (true)
+                {
+                    Console.WriteLine("client 접속 대기...", cnt);
+
+                    client[cnt] = listener.AcceptTcpClient();
+
+                    Thread t = new Thread(new ThreadStart(echo));
+                    stream[cnt] = client[cnt].GetStream();
+                    //NetworkStream stream = client.GetStream();
+                    t.Start();
+                    cnt++;
+                    Console.WriteLine("client{0} 접속", cnt);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            finally
+            {
+                listener.Stop();
+            }
+        }     
+    }
+
+    
+
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Server_echo s = new Server_echo();
+            s.accept();            
+        }
+    }
+}

@@ -1,0 +1,274 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Data.OleDb;
+
+namespace day_07_02_UI_
+{
+    class AddrVo
+    {
+        private string name;
+        private string tel;
+        private string address;
+
+        public AddrVo() { }
+        public AddrVo(string name, string tel, string address)
+        {
+            this.name = name;
+            this.tel = tel;
+            this.address = address;
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
+
+        public string Tel
+        {
+            get
+            {
+                return tel;
+            }
+            set
+            {
+                tel = value;
+            }
+        }
+
+        public string Address
+        {
+            get
+            {
+                return address;
+            }
+            set
+            {
+                address = value;
+            }
+        }
+    }
+
+    class DBConnect
+    {
+        public OleDbConnection conn(string id, string pwd,
+            string ds)
+        {
+            string sql = string.Format("Provider=MSDAORA.1;Password={0};User ID={1};Data Source={2};Persist Security Info=True",
+            pwd, id, ds);     //oracle 서버 연결
+
+            OleDbConnection conn = new OleDbConnection(sql);
+            return conn;
+        }
+    }
+    class Dao
+    {
+        private DBConnect db;
+        private OleDbConnection conn;
+
+        public Dao()
+        {
+            db = new DBConnect();
+            conn = db.conn("hr", "hr", "xe");
+        }
+        public void insert(AddrVo a)
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("insert into addr " +
+                    "values('{0}', '{1}', '{2}')", a.Name, a.Tel, a.Address);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                if (idx < 1)
+                {
+                    throw new Exception("add member exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제..");
+                }
+            }
+        }
+        public AddrVo select(string name)
+        {
+            AddrVo a = null;
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format(
+                    "select * from addr where name='{0}'", name);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                OleDbDataReader read = cmd.ExecuteReader();
+                if (read.Read())
+                {
+                    a = new AddrVo();
+                    a.Name = (string)read.GetValue(0);
+                    a.Tel = (string)read.GetValue(1);
+                    a.Address = (string)read.GetValue(2);
+                    
+                    //    int num = Convert.ToInt32(read.GetValue(0));
+                    Console.WriteLine(a);
+                }
+                read.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제..");
+                }
+            }
+            return a;
+        }
+
+        public bool update(AddrVo a)
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("update addr set tel='{0}', address='{1}' where name ='{2}'"
+                    , a.Tel, a.Address, a.Name);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                if (idx < 1)
+                {
+                    throw new Exception("add addr exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제..");
+                }
+            }
+            return true;
+        }
+        public bool delete(string name)
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("delete addr where name='{0}'", name);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                if (idx < 1)
+                {
+                    throw new Exception("add addr exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제..");
+                }
+            }
+            return true;
+        }
+
+        public List<AddrVo> selectAll()
+        {
+            List<AddrVo> list = new List<AddrVo>();
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = "select * from addr";
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                OleDbDataReader read = cmd.ExecuteReader();
+                while (read.Read())
+                {
+                    AddrVo a = new AddrVo();
+                    a.Name = (string)read.GetValue(0);
+                    a.Tel = (string)read.GetValue(1);
+                    a.Address = (string)read.GetValue(2);
+                    
+                  
+                    list.Add(a);
+                }
+                read.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제..");
+                }
+            }
+            return list;
+        }
+    }
+
+    class Service
+    {
+        private Dao dao;
+        public Service()
+        {
+            dao = new Dao();
+        }
+        public void addAddr(AddrVo a)
+        {
+            dao.insert(a);
+        }
+        public AddrVo getAddr(string name)
+        {
+            return dao.select(name);
+        }
+        public List<AddrVo> getAll()
+        {
+            return dao.selectAll();
+        }
+        public bool editAddr(AddrVo a)
+        {
+            return dao.update(a);
+        }
+        public bool delAddr(string name)
+        {
+            return dao.delete(name);
+        }
+    }
+}

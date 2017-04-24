@@ -1,0 +1,96 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+
+namespace Classwork_170424_4
+{
+    class Program
+    {
+        public static void func1()
+        {
+            for (int index = 0; index < 26; index++)
+            {
+                Console.Write(index + "\t"); 
+                Thread.Sleep(1);
+            }
+        }
+
+        public static void func2()
+        {
+            for (char ch = 'a'; ch <= 'z'; ch++)
+            {
+                Console.Write(ch + "\t");
+                Thread.Sleep(1);
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            Thread t1 = new Thread(new ThreadStart(func1));
+            Thread t2 = new Thread(new ThreadStart(func2));
+            t1.Start();
+            t2.Start();
+        }
+    }
+}
+
+=======================================================================
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+
+namespace Classwork_170424_4
+{
+    class Test
+    {
+        private int cnt = 0;
+        public void add()
+        {
+
+            for (int i = 0; i < 10; i++)
+            {
+                //cnt++;
+                //Interlocked.Increment(ref cnt);                
+                Interlocked.CompareExchange(ref cnt, 1, 0);
+                //이작없을 할 동안만 동기화 처리가 됨
+
+                Interlocked.Exchange(ref cnt,cnt+ 1);
+                Console.WriteLine("add:{0}",cnt);
+                Thread.Sleep(1);                
+            }
+        }
+        public void sub()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                //cnt--;
+                //Interlocked.Decrement(ref cnt);
+                Interlocked.CompareExchange(ref cnt, 0, 1);
+                Interlocked.Exchange(ref cnt, cnt - 1);
+                Console.WriteLine("sub:{0}", cnt);
+                Thread.Sleep(1);
+            }
+        }
+        public void testRun()
+        {
+            //쓰레드 2개 생성 및 실행
+            Thread t1 = new Thread(new ThreadStart(add));
+            Thread t2 = new Thread(new ThreadStart(sub));
+            t1.Start();
+            t2.Start();
+        }
+
+    }
+
+    class Program
+    {        
+        static void Main(string[] args)
+        {
+            Test t = new Test();
+            t.testRun();
+        }
+    }
+}
+==============================================================================

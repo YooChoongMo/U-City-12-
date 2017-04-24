@@ -1,0 +1,88 @@
+add는 40을 넘을수 없고
+sub는 20보다 작을수 없어
+0.001초마다 각각 증가, 감소 시킴(무한 루프)
+
+start숫자는 0
+
+
+Monitor.Pulse 는 같은 공유자원을 쓰는애를 깨워줌
+
+
+Monitor.Enter() : 인자로 넘긴 객체를 잠금
+Monitor.Exit() : 인자로 넘긴 객체를 잠금에서 해제
+Monitor.Wait() : 다른 쓰레드가 객체를 사용할 수 있도록 잠겨져 있는 객체를 해제
+Monitor.Pulse() : 다음 쓰레드가 현재 객체를 잠그도록 신호를 본매
+
+============================================using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+
+namespace Classwork_170424_4
+{
+    class Test
+    {
+        private int cnt = 0;
+        public void add()
+        {
+
+            while (true)
+            {
+                lock (this)
+                {
+                    Monitor.Enter(this);                    
+                        cnt++;                        
+                    
+                    if (cnt >= 40)
+                    {
+                        Monitor.Pulse(this);                        
+                        Monitor.Wait(this);
+                    }
+                    
+                    Thread.Sleep(100);
+                    Console.WriteLine("add:{0}", cnt);
+                    Monitor.Exit(this);                                     
+                }
+            }                            
+        }
+        public void sub()
+        {
+            while (true)
+            {
+                lock (this)
+                {
+                    Monitor.Enter(this);
+                    cnt--;
+
+                    if (cnt <= 20)
+                    {
+                        Monitor.Pulse(this);
+                        Monitor.Wait(this);
+                    }
+
+                    Thread.Sleep(100);
+                    Console.WriteLine("sub:{0}", cnt);
+                    Monitor.Exit(this);
+                }
+            }
+        }
+        public void testRun()
+        {
+            //쓰레드 2개 생성 및 실행
+            Thread t1 = new Thread(new ThreadStart(add));
+            Thread t2 = new Thread(new ThreadStart(sub));
+            t1.Start();
+            t2.Start();
+        }
+
+    }
+
+    class Program
+    {        
+        static void Main(string[] args)
+        {
+            Test t = new Test();
+            t.testRun();
+        }
+    }
+}===========

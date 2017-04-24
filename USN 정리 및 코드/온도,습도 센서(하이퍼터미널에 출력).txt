@@ -1,0 +1,140 @@
+<Sense.nc>
+
+configuration Sense { 
+// this module does not provide any interface
+}
+implementation
+{
+  components Main, SenseM, LedsC, TimerC,HPLUARTC,ADCC,HumidityC;
+
+  Main.StdControl -> TimerC;
+  Main.StdControl -> SenseM;
+ 
+  SenseM.Humidity -> ADCC.ADC[unique("ADCPort")];
+  SenseM.ADCControl -> ADCC;
+
+  SenseM.Leds -> LedsC;
+  SenseM.Timer -> TimerC.Timer[unique("Timer")];
+  SenseM.UART -> HPLUARTC;
+
+  SenseM.HumidControl -> HumidityC.SplitControl;
+  SenseM.Humidity -> HumidityC.Humidity;
+}
+
+
+
+
+<SenseM.nc>
+
+
+module SenseM {
+  provides {
+    interface StdControl;
+  }
+  uses {
+    interface Timer;
+    interface Leds;
+    interface HPLUART as UART;
+    interface ADC as Humidity;
+	interface ADCControl;
+    interface SplitControl as HumidControl;
+  }
+  
+
+  
+}
+
+implementation {
+
+uint16_t data_universe = 0;
+enum
+{
+  TOS_ADC_INTERNAL_VOLTAGE_PORT = unique("ADCPort"),
+  TOSH_ACTUAL_ADC_INTERNAL_VOLTAGE_PORT = ASSOCIATE_ADC_CHANNEL( 
+           INPUT_CHANNEL_A4, 
+           0, 
+           REFVOLT_LEVEL_1_5), 
+};
+
+
+ task void aa() 
+ {
+		atomic {
+			uint8_t i;
+			uint16_t dec, result, tmpdata;
+			tmpdata = data_universe;
+			dec = 10000;
+			for(i = 0; i < 5; i++)
+			{
+				result  = tmpdata/dec + '0';
+				tmpdata = tmpdata % dec;
+				if(i == 4) result = ' ';
+				call UART.put(result);
+				dec = dec / 10;
+			}
+		}
+ }
+ 
+  command result_t StdControl.init() {
+  
+	call UART.init(); 
+	call HumidControl.init();  
+    return call Leds.init();
+  }
+ 
+  command result_t StdControl.start() {
+  
+  	call HumidControl.start();
+    return call Timer.start(TIMER_REPEAT, 100);
+  }
+  
+ 
+  command result_t StdControl.stop() {
+  	call HumidControl.stop();
+    return call Timer.stop();
+  }
+
+ 
+  event result_t Timer.fired() {
+    call Humidity.getData();
+	call Leds.greenToggle();
+
+    return SUCCESS;
+  }
+
+ 
+  async event result_t Humidity.dataReady(uint16_t data) {
+
+   	call Leds.redToggle();	
+
+  	data_universe = data;
+      post aa( );
+  	return SUCCESS;
+}
+
+  
+  event async result_t UART.get(uint8_t data) {
+		return SUCCESS;
+	} 
+  
+  event async result_t UART.putDone() {
+		return SUCCESS;
+	}
+	
+	 event result_t HumidControl.initDone()
+	  {
+	  	return SUCCESS;
+	}
+
+	 event result_t HumidControl.startDone()
+	  {
+	  	return SUCCESS;
+	}
+
+	 event result_t HumidControl.stopDone()
+	  {
+	  	return SUCCESS;
+	}
+	
+
+}

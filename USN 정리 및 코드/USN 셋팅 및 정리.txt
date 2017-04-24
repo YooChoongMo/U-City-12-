@@ -1,0 +1,216 @@
+UNS
+
+==VMware (window XP)
+
+TinyOS 설치
+1. tiny OS 파일 설치(설치파일)
+
+2. tinyos-1.1.13May2005cvs-1.cygwin.noarch.rpm => C:\Program Files\UCB\cygwin\opt
+
+3. Cygwin 실행 -> 윈도우에서 리눅스 흉내내는것
+RPM Update  => rpm -Uvh tinyos-1.1.13May2005cvs-1.cygwin.noarch.rpm
+
+4.mspgcc Install
+
+내컴퓨터 우클릭-> properties -> Advanced(탭) -> Environment Variables 
+-> 아래 Path -> 경로에서 mspgcc경로 삭제
+
+5. /opt에서 
+ - vi ~/.bashrc
+
+6. 마지막에
+export PATH=$PATH:/cygdrive/c/mspgcc/bin 추가
+
+7. source ~/.bashrc
+
+8. msp430-jtag.exe 를 실행하여 버전이 2.0인지 확인한다
+mspgcc에 대한 설정이 완료되었다
+
+9. [PATCH]hybus-tinyos-1.1.13-20070119 폴더에 있는 폴더 세개 (apps, tools, tos)
+	=>  C:\Program Files\UCB\cygwin\opt\tinyos-1.x 안에 덮어쓰기로 복붙
+
+10.C:\Program Files\UCB\cygwin\opt\tinyos-1.x/apps
+=> cd Blink	(led깜빡하는거)
+
+11. Blink.nc -> c파일이랑 같음
+
+12. 컴파일 => make hybus
+
+* make install hybus => 컴파일하고 바로 장치에 넣음
+
+
+* Interface 
+=> 레고처럼 연결고리 개념
+ - 쉽게 조립하고 해체 할 수 있다.
+ - 코드를 조각조각 쪼개서 합치게 끔
+
+ex) DB 회사가 많다 => 자바에서 드라이버만 제공(관문만 제공) => 유지보수 용이
+드라이버에 함수 선언문만 쫙 써놓는다. => 추상함수로만!! => 구현은 너네 회사가 알아서 해라
+
+
+TinyOS는 nesC라는 언어를 사용하여 개발되었다
+
+nesC => 인터페이스 기반
+
+인터페이스(interface) => 내용을 어떻게 어떻게 하겠다 == 구현(implementation)
+
+* 인터페이스를 끌어다 쓸 때!
+ - 사용 안하는 함수들도 {}만이라도 해서 구현을 해야한다!
+
+인터페이스와 관련된 컴포넌트 동작규정: 인터페이스는 컴포넌트에 의해서 제공되므로 
+				       컴포넌트 간의 상관관계를 표현한다.
+(Use 끌어다 쓰는 건지 or Provide 제공을 해주는 건지)
+
+양방성을 가진 인터페이스: 1. 함수를 호출하는 방법  2. event callback
+
+
+ nesC에서 동시병행 모델은 수행하고 달성하는 task들을 각각 인터럽트할 수 
+ 있는 인터럽트 핸들러를 기반으로 한다. 
+(task를 처리하지 않는 동안 짬짬히 계속 처리를 하면서 동시에 진행되고 있는 듯한 느낌)
+
+
+* Components (Configuration과 Module)
+
+interface endpoint1 → interface endpoint2
+ - endpoint2에서 구현되어 제공하는 함수를 endpoint1이 요구해서 사용
+
+interface endpoint1 ← interface endpoint2
+ - endpoint1에서 구현되어 제공하는 함수를 endpoint2가 요구해서 사용
+
+interface endpoint1 = interface endpoint2
+ - 두 interface가 동일함
+
+==화살표에 반대에서 사용한다로 이해해
+
+<Blink.nc>
+configuration Blink {
+}
+implementation {
+  components Main, BlinkM, SingleTimer, LedsC;
+  Main.StdControl -> SingleTimer.StdControl;	//StdControl => 이닛,시작,끝이 동작
+//메인이 끌어다 쓴다.
+  Main.StdControl -> BlinkM.StdControl;
+  BlinkM.Timer -> SingleTimer.Timer;
+  BlinkM.Leds -> LedsC;
+//블링크M이 끌어다 쓴다.
+}
+
+
+module BlinkM {
+  provides {
+    interface StdControl;	//구현할거다
+  }
+  uses {
+    interface Timer;		//얘네를 사용할거다
+    interface Leds;
+  }
+}
+
+  command result_t StdControl.init() {
+    call Leds.init(); 			//call => 함수호출
+    return SUCCESS;
+}
+
+  /**
+   * Start things up.  This just sets the rate for the clock component.
+   * 
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  command result_t StdControl.start() {
+    // Start a repeating timer that fires every 1000ms
+    return call Timer.start(TIMER_REPEAT, 1000);	//1초 마다
+  }
+
+  /**
+   * Halt execution of the application.
+   * This just disables the clock component.
+   * 
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  command result_t StdControl.stop() {
+    return call Timer.stop();
+  }
+
+
+  /**
+   * Toggle the red LED in response to the <code>Timer.fired</code> event.  
+   *
+   * @return Always returns <code>SUCCESS</code>
+   **/
+  event result_t Timer.fired()
+  {
+    call Leds.redToggle();
+    return SUCCESS;
+  }
+}
+
+
+makefile
+==> COMPONENT = Blink(이름 동일하게configration Blink)
+
+/////////////////////////////////////////////////////
+
+<LedsC>
+module LedsC {
+  provides interface Leds;		//Leds 를 제공해준다
+}
+implementation
+{
+  uint8_t ledsOn;
+
+  enum {
+    RED_BIT = 1,
+    GREEN_BIT = 2,
+    YELLOW_BIT = 4
+  };
+
+
+* interface => Leds 는 함수 선언으로만 되어있음.
+  async command result_t redOn();
+
+* LedsC에서 내용 작성
+
+  async command result_t Leds.redOn() {
+    dbg(DBG_LED, "LEDS: Red on.\n");
+    atomic {			//atomic  => 셋트로 쪼개지지 않게 둘다 동작하거나 둘다 안되거나
+      TOSH_CLR_RED_LED_PIN();
+      ledsOn |= RED_BIT;
+    }
+    return SUCCESS;
+  }
+
+<Single Timer>
+configuration SingleTimer {
+  provides interface Timer;
+  provides interface StdControl;
+}
+
+implementation {
+  components TimerC;
+  
+  Timer = TimerC.Timer[unique("Timer")];
+  StdControl = TimerC;
+}
+
+
+<TimerC>
+configuration TimerC {
+  provides interface Timer[uint8_t id];	      //  []안에는 문자열로 씨드값을 넣어주면 ID같이 
+					      //  유일하게 그놈만 쓸 수 있다.(시계를 고유안하려면)
+  provides interface StdControl;
+}
+
+implementation {
+  components TimerM, ClockC, NoLeds, HPLPowerManagementM;
+
+  TimerM.Leds -> NoLeds;		//NoLeds를 가져다가 TimerM.Leds에서 쓴다.
+  TimerM.Clock -> ClockC;
+  TimerM.PowerManagement -> HPLPowerManagementM;
+
+  StdControl = TimerM;
+  Timer = TimerM;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+

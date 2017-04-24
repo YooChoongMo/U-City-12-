@@ -1,0 +1,121 @@
+신호 보내는 것  => 브로드 캐스트는 전체에게 쏘는것
+
+PDF파일 61페이지
+특정 그룹으로 보내는것 
+모든 응용 프로그램에서 그룹 ID를 정하기 위해 Makedefaults 파일을 이용하
+여 사용한다. (경로: /opt/tinyos-1.x/tools/make/Makedefaults)
+
+DEFAULT_LOCAL_GROUP = 0x0a	//이 16bit 수를 바꾸고
+0x0a면 => 10
+make hybus install.10	=> make할때 송신하고, 수신 코드 둘 다 install.<주소>로 한다!!!!
+
+
+
+송신측
+=> 카운터 숫자를 증가하며 송신한다.
+
+configuration CntToRfm {
+}
+implementation {
+  components Main, Counter, IntToRfm, TimerC;
+
+  Main.StdControl -> Counter.StdControl;
+  Main.StdControl -> IntToRfm.StdControl;
+  Counter.Timer -> TimerC.Timer[unique("Timer")];
+  Counter.IntOutput -> IntToRfm.IntOutput;
+}
+
+
+
+
+
+<IntToRfm>
+
+includes IntMsg;
+
+configuration IntToRfm
+{
+  provides {
+    interface IntOutput;
+    interface StdControl;
+  }
+}
+implementation
+{
+  components IntToRfmM, GenericComm as Comm;
+
+  IntOutput = IntToRfmM;
+  StdControl = IntToRfmM;
+
+  IntToRfmM.Send -> Comm.SendMsg[AM_INTMSG];
+  IntToRfmM.SubControl -> Comm;
+}
+
+<IntToRfmM>
+
+includes IntMsg;
+
+module IntToRfmM 
+{
+  uses {
+    interface StdControl as SubControl;
+    interface SendMsg as Send;
+  }
+  provides {
+    interface IntOutput;
+    interface StdControl;
+  }
+}
+implementation
+{
+  bool pending;
+  TOS_Msg data;
+
+  command result_t StdControl.init() {
+    pending = FALSE;
+    return call SubControl.init();
+  }
+
+  command result_t StdControl.start() 
+  {
+    return call SubControl.start();
+  }
+
+
+    command result_t StdControl.stop() 
+  {
+    return call SubControl.stop();
+  }
+
+  command result_t IntOutput.output(uint16_t value)	//1,2,3,4...만들어지는 숫자 받음
+  {
+    IntMsg *message = (IntMsg *)data.data;	//구조체 안 주소, 데이터 등등 있기때문에 그중 data
+
+    if (!pending) 
+      {
+	pending = TRUE;
+
+	message->val = value;	//Rfm통신을 하기 위해 메세지를 만들어야함(그 안에 카운터 번호를 입력)
+	atomic {
+	  message->src = TOS_LOCAL_ADDRESS;
+	}
+	if (call Send.send(TOS_BCAST_ADDR, sizeof(IntMsg), &data))
+			  //근처 모트에게 다 보내기!(BroadCast)
+	  return SUCCESS;
+
+	pending = FALSE;
+      }
+    return FAIL;
+  }
+
+//메세지 다 보내면 자동으로 호출
+  event result_t Send.sendDone(TOS_MsgPtr msg, result_t success)
+  {
+    if (pending && msg == &data)
+      {
+	pending = FALSE;
+	signal IntOutput.outputComplete(success);
+      }
+    return SUCCESS;
+  }
+}

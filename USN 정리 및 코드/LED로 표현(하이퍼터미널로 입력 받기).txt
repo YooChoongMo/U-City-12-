@@ -1,0 +1,104 @@
+#define MORSE_WPM 12
+#define MORSE_UNIT (1200/ MORSE_WPM)
+module MossM{
+provides {
+interface StdControl;
+}
+uses {
+interface Timer;
+interface Leds;
+interface HPLUART as UART;	
+}
+}
+
+implementation {
+int state;
+
+command result_t StdControl.init() {
+state=0;
+call UART.init();
+  call Leds.redOff();
+  call Leds.yellowOff();
+  call Leds.greenOff();
+  return SUCCESS;
+}
+
+command result_t StdControl.start(){
+  return call Timer.start(TIMER_ONE_SHOT,1000);
+}
+command result_t StdControl.stop(){
+  return call Timer.stop();
+}
+
+event result_t Timer.fired() {
+
+
+switch(state) {
+case 0:
+ 	 call Leds.blueOff();
+ 	 call Leds.redOff();
+	 call Leds.yellowOff();
+	 
+		break;
+
+case 1:
+ 	 call Leds.blueOn();
+ 	 call Leds.redOff();
+	 call Leds.yellowOff();
+		break;
+
+case 2:
+ 	 call Leds.blueOff();
+ 	 call Leds.redOn();
+	 call Leds.yellowOff();
+	break;
+
+case 3:
+ 	 call Leds.blueOn();
+ 	 call Leds.redOn();
+	 call Leds.yellowOff();
+	break;
+
+case 4:
+ 	 call Leds.blueOff();
+ 	 call Leds.redOff();
+	 call Leds.yellowOn();
+	break;	
+	
+case 5:
+ 	 call Leds.blueOn();
+ 	 call Leds.redOff();
+	 call Leds.yellowOn();
+	break;	
+
+case 6:
+ 	 call Leds.blueOn();
+ 	 call Leds.redOn();
+	 call Leds.yellowOff();
+	break;	
+	
+case 7:
+ 	 call Leds.blueOn();
+ 	 call Leds.redOn();
+	 call Leds.yellowOn();
+	break;	
+}
+
+
+return SUCCESS;
+}
+
+event async result_t UART.get(uint8_t data) {		
+
+state = data;
+  call Timer.start(TIMER_ONE_SHOT,1000);
+
+return SUCCESS;
+}
+
+
+event async result_t UART.putDone() {
+return SUCCESS;
+}
+
+}

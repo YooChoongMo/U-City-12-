@@ -1,0 +1,917 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Data;
+using System.Data.OleDb;
+
+namespace join2
+{
+    //계정에 접속하기 위한 클래스 (conn hr/hr과 같은 기능)
+    class DBConnect
+    {
+        public OleDbConnection conn(string id, string pwd, string ds)
+        {
+            string sql = string.Format("Provider = MSDAORA.1;Password={0};User ID={1};Data Source={2};Persist Security Info=True", pwd, id, ds);
+
+            OleDbConnection conn = new OleDbConnection(sql);
+            //sql문장을 db에 보내는것
+            //얘가 없으면 db작업을 할 수가 없음
+            return conn;
+        }
+    }
+
+    interface MemberDao
+    {
+        void insert(Member m);
+        Member select(string id);
+        void update(Member m);
+        void delete(string id);
+    }
+
+    class MemberDaoImpl : MemberDao
+    {
+        private DBConnect db;
+        private OleDbConnection conn;
+
+        public MemberDaoImpl()
+        {
+            db = new DBConnect();
+            conn = db.conn("hr", "hr", "xe");
+        }
+        public void insert(Member m)
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("insert into member values('{0}','{1}','{2}','{3}')", m.Id, m.Pwd, m.Name, m.Email);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                //커맨트 명령으로 실행 시키기(쓰기 동작(insert,delete, update..))
+                
+                if (idx < 1)
+                {
+                    throw new Exception("add member exception");
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if(conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+        }
+                
+        public Member select(string id) {
+
+            Member m = null;
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("select * from member where id='{0}'", id);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                OleDbDataReader read = cmd.ExecuteReader();
+                //읽기 스트림 객체 
+                
+                if (read.Read())
+                  //한줄 읽어드리는 애(전체검색하려면 while)
+                {
+                    m = new Member();
+                    m.Id = (string)read.GetValue(0);    //컬럼의 인덱스 0,1,2,3
+                    m.Pwd = (string)read.GetValue(1);
+                    m.Name = (string)read.GetValue(2);
+                    m.Email = (string)read.GetValue(3);
+                    Console.WriteLine(m);
+                }
+                read.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+            return m;
+             }
+
+        public void update(Member m)    //비밀번호 , 이메일
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+
+                Console.Write("pwd:");
+                m.Pwd = Console.ReadLine();
+
+                Console.Write("email:");
+                m.Email = Console.ReadLine();
+
+                sql = string.Format("update member set pwd='{0}',email='{1}' where id={2}", m.Pwd, m.Email, m.Id);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                //커맨트 명령으로 실행 시키기(쓰기 동작(insert,delete, update..))
+
+                if (idx < 1)
+                {
+                    throw new Exception("update member exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+        }
+        
+        //delete from emp where empno = 100
+        public void delete(string id) {
+
+            string sql;
+            try
+            {
+                conn.Open();
+
+                sql = string.Format("delete from member where id='{0}'", id);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                //커맨트 명령으로 실행 시키기(쓰기 동작(insert,delete, update..))
+
+                if (idx < 1)
+                {
+                    throw new Exception("delete member exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+        }
+    }
+
+    interface MemberService
+    {
+        void join();
+        void login();
+        void logout();
+        void memberOut();
+        void editInfo();
+    }
+
+    class MemberServiceImpl : MemberService
+    {
+        private MemberDao dao;
+        public static string loginId = "";
+        public MemberServiceImpl(MemberDao dao)
+        {
+            this.dao = dao;
+        }
+
+        public void join()
+        {
+            Member m = new Member();
+            Console.Write("id:");
+            m.Id = Console.ReadLine();
+
+            Console.Write("pwd:");
+            m.Pwd = Console.ReadLine();
+
+            Console.Write("name:");
+            m.Name = Console.ReadLine();
+
+            Console.Write("email:");
+            m.Email = Console.ReadLine();
+
+            dao.insert(m);
+        }
+        public void login() {
+
+            Console.Write("id:");
+            string id = Console.ReadLine();
+
+            Console.Write("pwd:");
+            string pwd = Console.ReadLine();
+
+            Member m = dao.select(id);
+            if (m == null)
+            {
+                Console.Write("아이디 불일치");
+                return;
+            }
+            if (pwd.Equals(m.Pwd))
+            {
+                Console.Write("로그인 일치");
+                loginId = id;
+            }
+            else
+            {
+                Console.Write("패스워드 불일치");
+            }
+        }
+
+        public void logout()
+        {
+            if (loginId.Equals(""))
+            {
+                Console.WriteLine("로그인 먼저");
+            }
+            else
+            {
+                loginId = "";
+            }
+        }
+        public void memberOut()
+        {
+            if (loginId.Equals(""))
+            {
+                Console.WriteLine("로그인 먼저");
+            }
+            else
+            {
+                dao.delete(loginId);
+                loginId = "";
+            }
+        }
+        public void editInfo()
+        {
+            if (loginId.Equals(""))
+            {
+                Console.WriteLine("로그인 먼저");
+            }
+            else
+            {
+                Member m = new Member();
+                m.Id = loginId;
+
+                Console.WriteLine("new pwd:");
+                m.Pwd = Console.ReadLine();
+
+                Console.WriteLine("new emaoil:");
+                m.Email = Console.ReadLine();
+                dao.update(m);
+            }
+        }
+    }
+
+
+
+    class Article
+    {
+        private int num;
+        private string writer;
+        private string title;
+        private string content;
+        public Article() { }
+        public Article(int num, string writer, string title, string content)
+        {
+            this.num = num;
+            this.writer = writer;
+            this.title = title;
+            this.content = content;
+        }
+
+        public int Num
+        {
+            get
+            {
+                return num;
+            }
+            set
+            {
+                num = value;
+            }
+        }
+
+        public string Writer
+        {
+            get
+            {
+                return writer;
+            }
+            set
+            {
+                writer = value;
+            }
+        }
+
+        public string Title
+        {
+            get
+            {
+                return title;
+            }
+            set
+            {
+                title = value;
+            }
+        }
+        public string Content
+        {
+            get
+            {
+                return content;
+            }
+            set
+            {
+                content = value;
+            }
+        }
+       
+        public override string ToString()
+        {
+            return "num:" + num + ", writer:" + writer + ", title:" + title +
+                ", content:" + content;
+        }
+    }
+
+    interface ArticleDao
+    {
+        void insert(Article a);
+        Article selectByNum(int num);
+        List<Article> selectByWriter(string writer);
+        List<Article> selectAll();
+        void update(Article a);
+        void delete(int num);
+    }
+    class ArticleDaoImpl : ArticleDao
+    {
+        private DBConnect db;
+        private OleDbConnection conn;
+
+        public ArticleDaoImpl()
+        {
+            db = new DBConnect();
+            conn = db.conn("hr", "hr", "xe");
+        }
+        
+        private int cnt;
+        private int cnt_article;
+
+
+        public int getCnt()
+        {
+            return cnt;
+        }
+
+        public void insert(Article a) {
+            string sql;           
+            try
+            {
+                conn.Open();
+
+                sql = string.Format("insert into board values(seq_board.nextval,'{0}','{1}','{2}')",a.Writer,a.Title,a.Content );
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                //커맨트 명령으로 실행 시키기(쓰기 동작(insert,delete, update..))
+
+                if (idx < 1)
+                {
+                    throw new Exception("add board exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+        }
+
+        public Article selectByNum(int num) {
+
+            Article a = null;
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("select * from board where num='{0}'", num);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                OleDbDataReader read = cmd.ExecuteReader();
+                //읽기 스트림 객체 
+
+                if (read.Read())
+                //한줄 읽어드리는 애(전체검색하려면 while)
+                {
+                    a = new Article();
+                    a.Num = Convert.ToInt32(read.GetValue(0));
+                    a.Writer = (string)read.GetValue(1);
+                    a.Title = (string)read.GetValue(2);
+                    a.Content = (string)read.GetValue(3);
+                    Console.WriteLine(a);
+                }
+                read.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+            return a;
+        }
+
+
+        public List<Article> selectByWriter(string writer)
+        {
+            List<Article> list = new List<Article>();
+            string sql;
+            try
+            {
+                conn.Open();
+                sql = string.Format("select * from board where={0}",writer);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                OleDbDataReader read = cmd.ExecuteReader();
+                //읽기 스트림 객체 
+
+                while (read.Read())
+                //전체검색
+                {
+                    Article a = new Article();
+                    a.Num = Convert.ToInt32(read.GetValue(0));
+                    a.Writer = (string)read.GetValue(1);
+                    a.Title = (string)read.GetValue(2);
+                    a.Content = (string)read.GetValue(3);
+                    list.Add(a);                    
+                }
+                read.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+            return list;
+        }
+
+
+
+        public List<Article> selectAll() {
+
+        List<Article> list = new List<Article>();
+        string sql;
+        try
+        {
+            conn.Open();
+            sql = "select * from board";
+            OleDbCommand cmd = new OleDbCommand(sql, conn);
+            OleDbDataReader read = cmd.ExecuteReader();
+                //읽기 스트림 객체 
+
+                while (read.Read())
+                //전체검색
+                {
+                    Article a = new Article();
+                    a.Num = Convert.ToInt32(read.GetValue(0));
+                    a.Writer = (string)read.GetValue(1);
+                    a.Title = (string)read.GetValue(2);
+                    a.Content = (string)read.GetValue(3);
+                    list.Add(a);
+                }
+                read.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+            return list;
+        }
+
+
+        public void update(Article a)
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+
+                Console.Write("title:");
+                a.Title = Console.ReadLine();
+
+                Console.Write("content:");
+                a.Content = Console.ReadLine();
+
+                sql = string.Format("update board set title='{0}',content='{1}' where num={2}", a.Title, a.Content, a.Num);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                //커맨트 명령으로 실행 시키기(쓰기 동작(insert,delete, update..))
+
+                if (idx < 1)
+                {
+                    throw new Exception("update board exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+        }
+
+        public void delete(int num)
+        {
+            string sql;
+            try
+            {
+                conn.Open();
+
+                sql = string.Format("delete from board where num='{0}'", num);
+                OleDbCommand cmd = new OleDbCommand(sql, conn);
+                int idx = cmd.ExecuteNonQuery();
+                //커맨트 명령으로 실행 시키기(쓰기 동작(insert,delete, update..))
+
+                if (idx < 1)
+                {
+                    throw new Exception("delete board exception");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("에러발생:{0}", ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                    Console.WriteLine("데이터베이스 연결 해제...");
+                }
+            }
+        }
+    }
+
+    interface BoardService
+    {
+        void addArticle();
+        void getArticleByNum();
+        void getArticleByWriter();
+        void getAll();
+        void editArticle();
+        void delArticle();
+        
+    }
+
+
+    class BoardServiceImpl : BoardService
+    {
+        private ArticleDao dao;
+
+        public BoardServiceImpl(ArticleDao dao)
+        {
+            this.dao = dao;
+        }
+
+        public void addArticle()
+        {
+            if (MemberServiceImpl.loginId.Equals(""))
+            {
+                Console.WriteLine("로그인먼저");
+            }
+            else
+            {
+                Article a = new Article();
+                a.Writer = MemberServiceImpl.loginId;
+
+                Console.Write("title:");
+                a.Title = (Console.ReadLine());
+
+                Console.Write("content:");
+                a.Content = (Console.ReadLine());
+                                
+                dao.insert(a);
+            }
+        }
+        public void getArticleByNum()
+        {            
+            Console.Write("num:");
+            int num = Int32.Parse(Console.ReadLine());
+            Article a = dao.selectByNum(num);
+            if (a == null)
+                Console.WriteLine("검색된 글이 없다");
+            else
+                Console.WriteLine(a);
+        }
+
+        public void getArticleByWriter()
+        {
+            Console.WriteLine("writer:");
+            string writer = (Console.ReadLine());
+            List<Article> list = dao.selectByWriter(writer);
+
+            if(list.Count==0)
+                Console.WriteLine("검색된 글이 없다");
+            else
+            {
+                for(int i=0; i<list.Count; i++)
+                {
+                    Console.WriteLine(list[i]);
+                }
+            }
+        }
+
+        public void getAll()
+        {
+            List<Article> list = dao.selectAll();
+
+            if (list.Count == 0)
+                Console.WriteLine("작성된 글이 없다");
+            else
+            {
+                for (int i = 0; i < list.Count; i++)
+                {
+                    Console.WriteLine(list[i]);
+                }
+            }
+        }
+
+        public void editArticle()
+        {
+            if (MemberServiceImpl.loginId.Equals(""))
+            {
+                Console.WriteLine("로그인먼저");
+            }
+            else
+            {
+                Console.WriteLine("num:");
+                int num = Int32.Parse(Console.ReadLine());
+
+                Article a = dao.selectByNum(num);
+                if (a == null)
+                {
+                    Console.WriteLine("없는 글번호");
+                    return;
+                }
+                if (MemberServiceImpl.loginId.Equals(a.Writer))
+                {
+                    Console.Write("title:");
+                    a.Title = (Console.ReadLine());
+
+                    Console.Write("content:");
+                    a.Content = (Console.ReadLine());
+                    dao.update(a);                    
+                }
+                else
+                {
+                    Console.WriteLine("본인 글이 아니면 수정 불가");
+                }
+            }
+        }
+        public void delArticle()
+        {
+            if (MemberServiceImpl.loginId.Equals(""))
+            {
+                Console.WriteLine("로그인먼저");
+            }
+            else
+            {
+                Console.WriteLine("num:");
+                int num = Int32.Parse(Console.ReadLine());
+
+                Article a = dao.selectByNum(num);
+                if (a == null)
+                {
+                    Console.WriteLine("없는 글번호");
+                    return;
+                }
+                if (MemberServiceImpl.loginId.Equals(a.Writer))
+                {
+                    dao.delete(num);
+                }
+                else
+                {
+                    Console.WriteLine("본인 글이 아니면 삭제 불가");
+                }
+            }
+        }  
+    }
+
+
+    class Member
+    {
+        private string id;
+        private string pwd;
+        private string name;
+        private string email;
+        public Member() { }
+        public Member(string id, string pwd, string name,
+            string email)
+        {
+            this.id = id;
+            this.pwd = pwd;
+            this.name = name;
+            this.email = email;
+        }
+        public string Id
+        {
+            get
+            {
+                return id;
+            }
+            set
+            {
+                id = value;
+            }
+        }
+
+        public string Pwd
+        {
+            get
+            {
+                return pwd;
+            }
+            set
+            {
+                pwd = value;
+            }
+        }
+
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
+        public string Email
+        {
+            get
+            {
+                return email;
+            }
+            set
+            {
+                email = value;
+            }
+        }
+        public override string ToString()
+        {
+            return "id:" + id + ", pwd:" + pwd + ", name:" + name + ", email:" + email;
+
+        }
+    }
+
+    class Program
+    {
+        static void func1(MemberService service)
+        {
+            bool flag = true;
+            int menu;
+            while (flag)
+            {
+                Console.WriteLine("1.회원가입 2.로그인 3.내정보수정 4.로그아웃 5.탈퇴 6.종료");
+                menu = Int32.Parse(Console.ReadLine());
+                switch (menu)
+                {
+                    case 1:
+                        service.join();
+                        break;
+                    case 2:
+                        service.login();
+                        break;
+                    case 3:
+                        service.editInfo();
+                        break;
+                    case 4:
+                        service.logout();
+                        break;
+                    case 5:
+                        service.memberOut();
+                        break;
+                    case 6:
+                        flag = false;
+                        break;
+                }
+            }
+
+        }
+        
+        static void func2(BoardService service)
+        {
+            bool flag = true;
+            int menu;
+            while (flag)
+            {
+                Console.WriteLine("1.글쓰기 2.글번호로 검색 3.글작성자로 검색  4.글수정 5.글삭제 6.글목록 7.종료");
+                menu = Int32.Parse(Console.ReadLine());
+                switch (menu)
+                {
+                    case 1:
+                        service.addArticle();
+                        break;
+                    case 2:
+                        service.getArticleByNum();
+                        break;
+                    case 3:
+                        service.getArticleByWriter();
+                        break;
+                    case 4:
+                        service.editArticle();
+                        break;
+                    case 5:
+                        service.delArticle();
+                        break;
+                    case 6:
+                        service.getAll();
+                        break;
+                    case 7:
+                        flag = false;
+                        break;
+                }
+            }
+        }
+
+        static void Main(string[] args)
+        {
+            MemberService memService = new MemberServiceImpl(new MemberDaoImpl());
+            BoardService boardservice = new BoardServiceImpl(new ArticleDaoImpl());
+
+            bool flag = true;
+            int menu;
+            while (flag)
+            {
+                Console.WriteLine("1.회원관리 2.게시판 3.종료");
+                menu = Int32.Parse(Console.ReadLine());
+                switch (menu)
+                {
+                    case 1:
+                        func1(memService);
+                        break;
+                    case 2:
+                        func2(boardservice);
+                        break;
+                    case 3:
+                        flag = false;
+                        break;
+                }
+            }
+        }
+    }
+    }
+

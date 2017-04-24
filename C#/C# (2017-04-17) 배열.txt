@@ -1,0 +1,457 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1
+{
+     
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            //이런식으로 배열 생성 가능
+            /*
+            int[] arr = new int[5] { 1, 2, 3, 4, 5 };   
+            int[] arr2 = new int[] { 1, 2, 3, 4, 5 };
+            int[] arr3 = { 1, 2, 3, 4, 5 };
+            int[,] arr4 = new int[2, 3] { { 1, 2, 3 }, { 1, 2, 3 } };
+            int[,] arr5 = new int[,] { { 1, 2, 3 }, { 1, 2, 3 } };
+            int[,] arr6 = { { 1, 2, 3 }, { 1, 2, 3 } };
+            */
+            int i, j;
+            int[,] arr = new int[2, 3];
+
+            Array.Clear(arr, 0, arr.Length);
+
+            //GetLength(0) ==> 행 수
+            //GetLength(1) ==> 열 수
+            for (i =0; i<arr.GetLength(0); i++)
+            {
+                for (j = 0; j < arr.GetLength(1); j++)
+                {
+                    arr[i, j] = Int32.Parse(Console.ReadLine());
+                }
+            }
+
+            for (i = 0; i < arr.GetLength(0); i++)
+            {
+                for (j = 0; j < arr.GetLength(1); j++)
+                {
+                    Console.WriteLine("arr[{0},{1}] = {2}\t", i, j, arr[i, j]);
+                }
+                Console.WriteLine();
+            }
+
+
+        }
+    }
+}
+
+
+===========================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+
+
+namespace ConsoleApplication1
+{
+     
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            ArrayList list = new ArrayList();
+            list.Add("aaaaaaa");
+            list.Add("bbb");
+            list.Add("ccc");
+            Console.WriteLine("length: {0}", list.Count);
+            Console.WriteLine("Capacity: {0}", list.Capacity);
+            foreach (object o in list)
+            {
+                Console.WriteLine(o);
+            }
+            list.RemoveAt(1);
+            foreach (object o in list)
+            {
+                Console.WriteLine(o);
+            }
+
+            if (list.Contains("ccc"))
+            {
+                int idx = list.IndexOf("ccc");
+                Console.WriteLine("{0}번째 방에 있다", idx);
+            }
+            else
+                Console.WriteLine("없다");
+
+
+        }
+    }
+}
+
+
+============================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Collections;
+
+
+namespace ConsoleApplication1
+{
+    class Member
+    {
+        public string name;
+        public string tel;
+        public string address;
+
+        public Member() { }
+        public Member(string name, string tel, string address)
+        {
+            this.name = name;
+            this.tel = tel;
+            this.address = address;
+        }
+
+
+
+        public override bool Equals(object obj)
+        {
+
+            if(obj != null && obj is Member)
+            {
+                if (name.Equals(((Member)obj).name))
+                {
+                    return true;
+                }
+            }
+
+
+            return false;
+        }
+
+    }
+
+    //~ is Type ~가 이 타입이 맞냐
+     
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            ArrayList list = new ArrayList();
+
+            list.Add(new Member("aaa","111","asdf"));
+            list.Add(new Member("bbb", "222", "qwer"));
+            list.Add(new Member("ccc", "333", "1234"));
+
+            //전체출력
+            Console.WriteLine("전체출력");
+            foreach (Member m in list)
+            {                
+                Console.WriteLine(m.name);
+                Console.WriteLine(m.tel);
+                Console.WriteLine(m.address);
+                Console.WriteLine("");
+            }
+
+            //bbb 검색하여 출력
+            Console.WriteLine("bbb검색하여 출력");
+
+            Member mm = new Member("bbb", "", "");      //비교용으로 생성한 것
+            Member mmm = null;
+
+            if (list.Contains(mm))      //Equals로 비교하여 있는지 찾는다
+            {
+                int idx = list.IndexOf(mm);
+                mmm = (Member)list[idx];
+                Console.WriteLine("name:{0}  tel:{1}  address:{2}",mmm.name, mmm.tel, mmm.address);
+                Console.WriteLine("");
+
+            }
+
+
+            //ccc의 전화번호 444로 수정
+            Console.WriteLine("ccc 전화번호 444 수정");
+            Member nn = new Member("ccc", "", "");
+            
+            if (list.Contains(nn))
+            {
+                int idx = list.IndexOf(nn);
+                mmm = (Member)list[idx];
+                mmm.tel = "444";
+                Console.WriteLine("name:{0}  tel:{1}  address:{2}", mmm.name, mmm.tel, mmm.address);
+                Console.WriteLine("");
+            }
+
+            //aaa 삭제
+            Console.WriteLine("aaa 삭제");
+            Member bb = new Member("aaa", "", "");
+
+            if (list.Contains(bb))
+            {
+                int idx = list.IndexOf(bb);
+                mmm = (Member)list[idx];
+                list.RemoveAt(idx);
+
+                //전체출력
+                foreach (Member m in list)
+                {
+                    Console.WriteLine(m.name);
+                    Console.WriteLine(m.tel);
+                    Console.WriteLine(m.address);
+                    Console.WriteLine("");
+                }
+            }
+
+
+            /*
+
+
+            Console.WriteLine("length: {0}", list.Count);
+            Console.WriteLine("Capacity: {0}", list.Capacity);
+            foreach (object o in list)
+            {
+                Console.WriteLine(o);
+            }
+            list.RemoveAt(1);
+            foreach (object o in list)
+            {
+                Console.WriteLine(o);
+            }
+
+            if (list.Contains("ccc"))
+            {
+                int idx = list.IndexOf("ccc");
+                Console.WriteLine("{0}번째 방에 있다", idx);
+            }
+            else
+                Console.WriteLine("없다");
+
+    */
+
+        }
+    }
+}
+
+==================================================================
+배열 탐색(빠른검색 할때 이용)
+
+Key값이 0이냐 1이냐
+
+
+        static void Main(string[] args)
+        {
+            Hashtable ht = new Hashtable();
+            ht["name"] = "aaa";
+            //   키       값
+            ht["tel"] = "111";
+            ht["address"] = "asdfg";
+
+            //검색할때 키를 이용한다
+            Console.WriteLine("name:{0}", ht["name"]);
+            Console.WriteLine("tel:{0}", ht["tel"]);
+            Console.WriteLine("address:{0}", ht["address"]);
+
+            //객체를 집어넣어 버리기
+            ht[1] = new Member("aaa", "111","asdf");
+            ht[2] = new Member("bbb", "222", "ggg");
+            ht[3] = new Member("ccc", "333", "asdf");
+            Member m = (Member)ht[1];
+
+            Console.WriteLine("name:{0}  tel:{1}  address:{2}", ((Member)ht[1]).name, ((Member)ht[1]).tel, ((Member)ht[1]).address);
+            Console.WriteLine("name:{0}  tel:{1}  address:{2}", ((Member)ht[2]).name, ((Member)ht[2]).tel, ((Member)ht[2]).address);
+            Console.WriteLine("name:{0}  tel:{1}  address:{2}", ((Member)ht[3]).name, ((Member)ht[3]).tel, ((Member)ht[3]).address);
+        }
+
+
+
+
+==================================================================
+class Test
+    {
+        Hashtable ht = new Hashtable();
+        public Test()
+        {
+            ht[1] = "aaa";
+            ht[2] = "bbb";
+            ht[3] = "ccc";
+
+
+        }
+        
+        public System.Collections.IEnumerator GetEnumerator()
+        {
+
+            for(int i=0; i<4; i++)
+            {
+                yield return ht[i];
+                //현재 루프가 끝날때 까지 값을 반복적으로 반환해 주는것(yield)
+                //C#에만 있음
+            }
+        }
+    }
+
+    
+     
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            /*
+            Test t = new Test();
+
+            foreach(string s in t)
+            {
+                Console.WriteLine(s);
+            }
+            */
+            Hashtable h = new Hashtable();
+            h["name"] = "aaa";
+            h["tel"] = "111";
+            h["address"] = "asdf";
+
+            foreach (string s in h.Keys)
+            {
+                Console.WriteLine(s);
+            }
+
+            foreach (string s in h.Values)
+            {
+                Console.WriteLine(s);
+            }
+            foreach (string s in h.Keys)
+            {
+                Console.WriteLine("h[{0}] = {1}",s,h[s]);
+            }
+
+        }
+    }
+
+================================================================
+속성  사용하기!!!!!!!!!!
+class Member
+    {
+        private string name;
+        private string tel;
+        private string address;
+
+        //밑에 setName,getName을 불편하게 쓰지 않아도된다.
+        public string Name
+        {
+            get
+            {
+                return name;
+            }
+            set
+            {
+                name = value;
+            }
+        }
+        public string Tel
+        {
+            get
+            {
+                return tel;
+            }
+            set
+            {
+                tel = value;
+            }
+        }
+        public string Address
+        {
+            get
+            {
+                return address;
+            }
+            set
+            {
+                address = value;
+            }
+        }
+
+
+        public void setName(string name)
+        {
+            this.name = name;
+        }
+        public string getName()
+        {
+            return name;
+        }
+        
+    }
+
+     
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            Member m = new Member();
+
+            m.Name = "yyy";
+            m.Tel = "111";
+            m.Address = "qwer";
+
+            Console.WriteLine("name:{0}  tel:{1}  address:{2}",m.Name,m.Tel,m.Address );
+
+        }
+    }
+
+=======================================================================
+인덱서
+
+ class Test
+    {
+        private string[] arr;
+
+        public Test(int i)
+        {
+            arr = new string[i];
+        }
+        public string this[int idx]
+        {
+            get
+            {
+                if (arr[idx] == null)
+                    return "값이없다";
+                else
+                    return arr[idx];
+            }
+            set
+            {
+                if (value == null)
+                    Console.WriteLine("null 지정은 안됨");
+                else
+                    arr[idx] = value;
+            }
+        }
+    }
+     
+   class Program
+    {
+        static void Main(string[] args)
+        {
+            Test t = new Test(5);
+
+
+            t[0] = "yyy";
+            t[1] = "111";
+            t[3] = "qwer";
+
+            for(int i=0; i<5; i++)
+            {
+                Console.WriteLine(t[i]);
+            }
+            
+
+        }
+    }

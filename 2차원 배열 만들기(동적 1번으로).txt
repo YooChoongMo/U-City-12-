@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+int main(void) {
+	int (*arr)[3];	//사이즈가 3인 배열의 주소 (배열포인터)
+	
+	int N;
+	int i,j;
+
+	scanf("%d", &N);
+
+	arr = (int(*)[3])malloc(sizeof(int) * N * 3);
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < 3; j++) {
+			arr[i][j] = 3*i+1+j;
+		}
+	}
+
+	for (i = 0; i < N; i++) {
+		for (j = 0; j < 3; j++) {
+			printf("arr[%d][%d] = %d\n", i, j, arr[i][j]);
+		}
+	}
+	return 0;
+}
+
+======================================================================
+
+#include <stdio.h>
+#include <stdlib.h>
+
+void main()
+{
+#if 0
+   int (*arr)[3];
+   int size, i, j;
+
+   printf("Table size? >> ");
+   scanf("%d", &size);
+   arr = (int(*)[3])malloc(sizeof(int) * 3 * size);
+
+   for(i = 0; i < 3; i++)
+   {
+      for(j = 0; j < size; j++)
+      {
+         arr[i][j] = 3 * i + 1 + j;
+      }
+   }
+
+   for(i = 0; i < 3; i++)
+   {
+      for(j = 0; j < size; j++)
+      {
+         printf("arr[%d][%d] = %d ", i, j, arr[i][j]);
+      }
+      printf("\n");
+   }
+#endif
+   int arr[][3] = {{1, 2, 3}, {4, 5, 6}};
+   int *p = arr[0];   
+   // p = &arr[0][0];
+   int (*ptr)[3]= arr;
+   int i, j;
+
+   for(i = 0; i < 6; i++)
+      printf("ptr[%d] = %d\n", i, *p++);
+   printf("\n");
+   
+
+   for(i = 0; i < 2; i++)
+   {
+      for(j = 0; j < 3; j++)
+      {
+         printf("ptr[%d][%d] = %d ", i, j, ptr[i][j]);
+      }
+      printf("\n");
+   }
+   printf("\n");
+}
